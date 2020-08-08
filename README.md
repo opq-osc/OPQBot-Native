@@ -1,5 +1,5 @@
 # OPQBot-Native
-OPQBot 酷Q插件 兼容框架，借用了[Native.FrameWork](https://github.com/Jie2GG/Native.Framework)的CQ码处理函数
+[OPQBot](https://github.com/OPQBOT/OPQ) 酷Q插件 兼容框架，借用了[Native.FrameWork](https://github.com/Jie2GG/Native.Framework)的CQ码处理函数
 ## 写在前面
 这是一个非常粗糙的程序，目前这个框架只能应付不是特别复杂的应用，大部分的事件与函数都没有经过深入的测试，也没有长时间的挂机稳定性测试，感觉会出很多的问题。希望得到大家对于代码层面上的支援。项目将会持续维护，多多包涵！<br>
 此框架仅可以运行编译得到的dll与json，不支持**cpk**以及从**cpk导出的dll**
