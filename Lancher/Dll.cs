@@ -16,7 +16,7 @@ namespace Lancher
         private extern static IntPtr GetProcAddress(IntPtr lib, String funcName);
 
         [DllImport("kernel32.dll")]
-        private extern static int GetLastError();
+        public extern static int GetLastError();
 
         [DllImport("kernel32.dll")]
         private extern static bool FreeLibrary(IntPtr lib);

@@ -10,6 +10,7 @@ using SocketIOClient.Messages;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -28,7 +29,7 @@ namespace Lancher
             try
             {
                 Save.curentQQ = ini.Object["Config"]["QQ"].GetValueOrDefault((long)0);
-                Save.url = ini.Object["Config"]["url"].GetValueOrDefault("http://127.0.0.1:8888");
+                Save.url = ini.Object["Config"]["url"].GetValueOrDefault("http://127.0.0.1:8888/");
             }
             catch
             {
@@ -45,7 +46,9 @@ namespace Lancher
                 }
                 Save.curentQQ = qq;
                 Console.Write("请输入用于连接服务端的url:");
-                Save.url = Console.ReadLine();
+                string url = Console.ReadLine();
+                if (url.Reverse().First() != '/')
+                    url += '/';
                 ini.Object["Config"]["QQ"] = new IValue(qq);
                 ini.Object["Config"]["url"] = new IValue(Save.url);
                 ini.Save();
@@ -61,6 +64,7 @@ namespace Lancher
             pluginManagment.Load();
             LogHelper.WriteLine("遍历启动事件……");
             pluginManagment.CallFunction("StartUp");
+            pluginManagment.CallFunction("Enable");
             LogHelper.WriteLine("插件载入完成，开始连接服务器");
             socket.Connect();
             // register for 'connect' event with io server
