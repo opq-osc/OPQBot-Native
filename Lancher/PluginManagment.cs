@@ -35,33 +35,34 @@ namespace Lancher
             int count = 0;
             foreach (var item in directoryInfo.GetFiles().Where(x => x.Extension == ".dll"))
             {
-                    if (!File.Exists(item.FullName.Replace(".dll", ".json")))
-                    {
-                        LogHelper.WriteLine(CQLogLevel.Error, "插件载入", $"插件 {item.Name} 加载失败,原因:缺少json文件");
-                        continue;
-                    }
-                    JsonLoadSettings loadsetting = new JsonLoadSettings
-                    {
-                        CommentHandling = CommentHandling.Ignore
-                    };
-                    JObject jObject = JObject.Parse(File.ReadAllText(item.FullName.Replace(".dll", ".json")), loadsetting);
-                    int authcode = new Random().Next();
-                    Dll dll = new Dll();
-                    IntPtr iLib = dll.Load(item.FullName, jObject);
-                    if (iLib == (IntPtr)0)
-                    {
-                        LogHelper.WriteLine(CQLogLevel.Error, "插件载入", $"插件 {item.Name} 加载失败,返回句柄为空,GetLastError={Dll.GetLastError()}");
-                        continue ;
-                    }
-                    dll.DoInitialize(authcode);
-                    KeyValuePair<int, string> appInfotext = dll.GetAppInfo();
-                    AppInfo appInfo = new AppInfo(appInfotext.Value, 0, appInfotext.Key
-                        , jObject["name"].ToString(), jObject["version"].ToString(), Convert.ToInt32(jObject["version_id"].ToString())
-                        , jObject["author"].ToString(), jObject["description"].ToString(), authcode);
-                    Plugins.Add(new Plugin(iLib, appInfo, jObject, dll));
-                    LogHelper.WriteLine(CQLogLevel.InfoSuccess, "插件载入", $"插件 {appInfo.Name} 加载成功");
-                    cq_start(Marshal.StringToHGlobalAnsi(item.FullName), authcode);
-                    count++;
+                if (!File.Exists(item.FullName.Replace(".dll", ".json")))
+                {
+                    LogHelper.WriteLine(CQLogLevel.Error, "插件载入", $"插件 {item.Name} 加载失败,原因:缺少json文件");
+                    continue;
+                }
+                JsonLoadSettings loadsetting = new JsonLoadSettings
+                {
+                    CommentHandling = CommentHandling.Ignore
+                };
+                JObject json = JObject.Parse(File.ReadAllText(item.FullName.Replace(".dll", ".json")), loadsetting);
+                int authcode = new Random().Next();
+                Dll dll = new Dll();
+                IntPtr iLib = dll.Load(item.FullName, json);
+                if (iLib == (IntPtr)0)
+                {
+                    LogHelper.WriteLine(CQLogLevel.Error, "插件载入", $"插件 {item.Name} 加载失败,返回句柄为空,GetLastError={Dll.GetLastError()}");
+                    continue;
+                }
+                dll.DoInitialize(authcode);
+                KeyValuePair<int, string> appInfotext = dll.GetAppInfo();
+                AppInfo appInfo = new AppInfo(appInfotext.Value, 0, appInfotext.Key
+                    , json["name"].ToString(), json["version"].ToString(), Convert.ToInt32(json["version_id"].ToString())
+                    , json["author"].ToString(), json["description"].ToString(), authcode);
+                Plugins.Add(new Plugin(iLib, appInfo, json, dll));
+                LogHelper.WriteLine(CQLogLevel.InfoSuccess, "插件载入", $"插件 {appInfo.Name} 加载成功");
+                cq_start(Marshal.StringToHGlobalAnsi(item.FullName), authcode);
+                NotifyIconHelper.Init(json);
+                count++;
             }
             LogHelper.WriteLine(CQLogLevel.Info, "插件载入", $"一共加载了{count}个插件");
         }

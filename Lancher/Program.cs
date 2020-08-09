@@ -1,5 +1,4 @@
 ﻿using Deserizition;
-using Lancher.Sdk.Cqp;
 using Lancher.Sdk.Cqp.Enum;
 using Native.Tool.IniConfig;
 using Native.Tool.IniConfig.Linq;
@@ -9,19 +8,18 @@ using SocketIOClient;
 using SocketIOClient.Messages;
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using ErrorEventArgs = SocketIOClient.ErrorEventArgs;
 
 namespace Lancher
 {
-    class Program
+    public static class Program
     {
         public static Client socket;
-
+        public static PluginManagment pluginManagment = new PluginManagment();
         static void Main(string[] args)
         {
             IniConfig ini = new IniConfig("Config.ini");
@@ -60,11 +58,11 @@ namespace Lancher
             socket.SocketConnectionClosed += SocketConnectionClosed;
             socket.Error += SocketError;
             string QQ = Save.curentQQ.ToString();//框架在线的QQ号
-            PluginManagment pluginManagment = new PluginManagment();
             pluginManagment.Load();
             LogHelper.WriteLine("遍历启动事件……");
             pluginManagment.CallFunction("StartUp");
             pluginManagment.CallFunction("Enable");
+            NotifyIconHelper.ShowNotifyIcon();
             LogHelper.WriteLine("插件载入完成，开始连接服务器");
             socket.Connect();
             // register for 'connect' event with io server
@@ -247,7 +245,7 @@ namespace Lancher
             // make the socket.io connection
             while (true)
             {
-                Console.ReadLine();
+                Application.DoEvents();                
             }
         }
         public static long GetTimeStamp()

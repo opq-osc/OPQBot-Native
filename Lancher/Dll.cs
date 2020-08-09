@@ -177,7 +177,7 @@ namespace Lancher
             return false;
         }
         //将要执行的函数转换为委托
-        public Delegate Invoke(String APIName, Type t)
+        public Delegate Invoke(string APIName, Type t)
         {
             IntPtr api = GetProcAddress(hLib, APIName);
             if (api == (IntPtr)0)
