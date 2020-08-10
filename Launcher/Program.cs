@@ -246,7 +246,7 @@ namespace Launcher
             // make the socket.io connection
             while (true)
             {
-                Thread.Sleep(500);
+                Thread.Sleep(100);
                 Application.DoEvents();                
             }
         }

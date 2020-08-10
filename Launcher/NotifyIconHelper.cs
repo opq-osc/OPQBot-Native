@@ -22,6 +22,8 @@ namespace Launcher
             {
                 Text = json["name"].ToString()
             };
+            if (!json.ContainsKey("menu"))
+                return;
             foreach (var item in JArray.Parse(json["menu"].ToString()))
             {
                 MenuItem childmenu = new MenuItem
