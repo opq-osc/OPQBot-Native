@@ -6,14 +6,14 @@ using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
-using Lancher.Sdk.Cqp.Core;
-using Lancher.Sdk.Cqp.Enum;
-using Lancher.Sdk.Cqp.Expand;
-using Lancher.Sdk.Cqp.Model;
-using Lancher.Sdk.Cqp.Interface;
+using Launcher.Sdk.Cqp.Core;
+using Launcher.Sdk.Cqp.Enum;
+using Launcher.Sdk.Cqp.Expand;
+using Launcher.Sdk.Cqp.Model;
+using Launcher.Sdk.Cqp.Interface;
 using Deserizition;
 
-namespace Lancher.Sdk.Cqp
+namespace Launcher.Sdk.Cqp
 {
 	/// <summary>
 	/// 表示 酷Q接口 的封装类

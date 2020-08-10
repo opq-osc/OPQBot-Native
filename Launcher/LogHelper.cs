@@ -1,8 +1,8 @@
-﻿using Lancher.Sdk.Cqp.Enum;
+﻿using Launcher.Sdk.Cqp.Enum;
 using System;
 using System.Runtime.InteropServices;
 
-namespace Lancher
+namespace Launcher
 {
     public static class LogHelper
     {

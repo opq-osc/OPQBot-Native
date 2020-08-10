@@ -1,15 +1,17 @@
 ﻿using Deserizition;
 using Newtonsoft.Json;
 using System.Linq;
-using Lancher.Sdk.Cqp.Core;
-using Lancher.Sdk.Cqp;
+using Launcher.Sdk.Cqp.Core;
+using Launcher.Sdk.Cqp;
 using Native.Tool.IniConfig;
 using System.IO;
 using Native.Tool.IniConfig.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using Newtonsoft.Json.Linq;
+using System.Text.RegularExpressions;
 
-namespace Lancher
+namespace Launcher
 {
     public static class ProgressMessage
     {
@@ -68,7 +70,26 @@ namespace Lancher
                         }
                         break;
                     }
+                case "VoiceMsg":
+                    {
+                        if (!Directory.Exists("data\\record\\"))
+                            Directory.CreateDirectory("data\\record\\");
+                        JObject json = JObject.Parse(msg);
+                        string url = json["Url"].ToString();
+                        string MD5 = GenerateMD5(url);
+                        string path = "data\\record\\" + MD5 + ".silk";
+                        if (!File.Exists(path))
+                        {
+                            IniConfig ini = new IniConfig(path);
+                            ini.Object.Add(new ISection("record"));
+                            ini.Object["record"]["url"] = url;
+                            ini.Save();
+                        }
+                        result = CQApi.CQCode_Record(MD5+".silk").ToString();
+                        break;
+                    }
             }
+            result = Regex.Replace(result, "\\[表情(\\d*)\\]", "[CQ:face,id=$1]");
             return result;
         }
         /// <summary>

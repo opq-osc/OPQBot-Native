@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30309.148
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lancher", "Lancher\Lancher.csproj", "{886E8CB4-32DE-4CF2-A6BB-A145FF4B303E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Launcher", "Launcher\Launcher.csproj", "{886E8CB4-32DE-4CF2-A6BB-A145FF4B303E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketIOClient", "SocketIO\SocketIOClient.csproj", "{352C9BC1-F74C-4741-A09D-7227BC60C057}"
 EndProject

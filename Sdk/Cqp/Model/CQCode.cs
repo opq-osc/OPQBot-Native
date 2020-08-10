@@ -1,13 +1,13 @@
-﻿using Lancher.Sdk.Cqp.Enum;
-using Lancher.Sdk.Cqp.Expand;
-using Lancher.Sdk.Cqp.Interface;
+﻿using Launcher.Sdk.Cqp.Enum;
+using Launcher.Sdk.Cqp.Expand;
+using Launcher.Sdk.Cqp.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Lancher.Sdk.Cqp.Model
+namespace Launcher.Sdk.Cqp.Model
 {
 	/// <summary>
 	/// 表示 CQ码 的类

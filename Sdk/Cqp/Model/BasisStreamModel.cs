@@ -1,4 +1,4 @@
-﻿using Lancher.Sdk.Cqp.Interface;
+﻿using Launcher.Sdk.Cqp.Interface;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lancher.Sdk.Cqp.Model
+namespace Launcher.Sdk.Cqp.Model
 {
 	/// <summary>
 	/// 描述酷Q需要解析数据流模型的基础类, 该类是抽象的

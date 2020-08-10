@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lancher.Sdk.Cqp.Model
+namespace Launcher.Sdk.Cqp.Model
 {
 	/// <summary>
 	/// 表示当前插件的一些基本信息的类

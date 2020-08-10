@@ -1,5 +1,5 @@
-﻿using Lancher.Sdk.Cqp.Enum;
-using Lancher.Sdk.Cqp.Model;
+﻿using Launcher.Sdk.Cqp.Enum;
+using Launcher.Sdk.Cqp.Model;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace Lancher
+namespace Launcher
 {
     public class PluginManagment
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Lancher.Sdk.Cqp.Core
+namespace Launcher.Sdk.Cqp.Core
 {
     internal static class CQP
     {

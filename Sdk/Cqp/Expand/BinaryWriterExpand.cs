@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace Lancher.Sdk.Cqp.Expand
+namespace Launcher.Sdk.Cqp.Expand
 {
 	/// <summary>
 	/// <see cref="BinaryReader"/> 类的扩展方法集

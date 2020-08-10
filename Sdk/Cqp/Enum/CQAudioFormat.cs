@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
-namespace Lancher.Sdk.Cqp.Enum
+namespace Launcher.Sdk.Cqp.Enum
 {
 	/// <summary>
 	/// 指示酷Q接收语音时的转换格式

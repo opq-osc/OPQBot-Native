@@ -9,8 +9,8 @@
     <ProjectGuid>{886E8CB4-32DE-4CF2-A6BB-A145FF4B303E}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Lancher</RootNamespace>
-    <AssemblyName>Lancher</AssemblyName>
+    <RootNamespace>Launcher</RootNamespace>
+    <AssemblyName>Launcher</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />

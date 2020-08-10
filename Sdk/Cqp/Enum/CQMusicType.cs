@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lancher.Sdk.Cqp.Enum
+namespace Launcher.Sdk.Cqp.Enum
 {
     /// <summary>
     /// 指示点歌时使用的音乐来源

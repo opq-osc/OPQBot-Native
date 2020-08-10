@@ -8,7 +8,7 @@
 2. 运行[OPQBot](https://github.com/OPQBOT/OPQ)服务端并[登录](https://github.com/OPQBOT/OPQ/wiki/%E5%AE%89%E8%A3%85%E6%8C%87%E5%8D%97#%E7%99%BB%E5%BD%95)
 3. 将要运行的酷Q插件的dll以及json放到plugins文件夹内
 4. 如果插件有数据配置，可以直接复制到data文件夹下
-5. 运行解压后的Lancher.exe
+5. 运行解压后的Launcher.exe
 6. 按照配置输入相关配置即可
 ## 事件实现进度
 - [ ] id: 1 私聊消息处理
@@ -30,10 +30,10 @@
 ## CQ码解析进度
 - [x] 图片(CQ:image)
 - [x] at(CQ:at)
-- [ ] 音频(CQ:record)
+- [x] 音频(CQ:record)(仅限amr格式(很糊的那种……),silk格式似乎被取消了)
 - [ ] 地图(CQ:loaction)
 - [ ] xml消息(CQ:rich)
-- [ ] 表情(CQ:face)
+- [x] 表情(CQ:face)
 - [ ] emoji(CQ:emoji)
 - [ ] 原创表情(CQ:bface)
 - [ ] 红包(CQ:hb)

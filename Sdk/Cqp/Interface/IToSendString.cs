@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lancher.Sdk.Cqp.Interface
+namespace Launcher.Sdk.Cqp.Interface
 {
 	/// <summary>
 	/// 转换发送字符串的接口

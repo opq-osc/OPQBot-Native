@@ -5,10 +5,10 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
-using Lancher.Sdk.Cqp.Core;
-using Lancher.Sdk.Cqp.Interface;
+using Launcher.Sdk.Cqp.Core;
+using Launcher.Sdk.Cqp.Interface;
 
-namespace Lancher.Sdk.Cqp.Expand
+namespace Launcher.Sdk.Cqp.Expand
 {
 	/// <summary>
 	/// 其它类扩展方法集

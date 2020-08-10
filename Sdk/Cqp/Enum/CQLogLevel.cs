@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lancher.Sdk.Cqp.Enum
+namespace Launcher.Sdk.Cqp.Enum
 {
 	/// <summary>
 	/// 表示酷Q日志中的类型等级

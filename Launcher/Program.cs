@@ -1,5 +1,5 @@
 ﻿using Deserizition;
-using Lancher.Sdk.Cqp.Enum;
+using Launcher.Sdk.Cqp.Enum;
 using Native.Tool.IniConfig;
 using Native.Tool.IniConfig.Linq;
 using Newtonsoft.Json;
@@ -10,11 +10,12 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ErrorEventArgs = SocketIOClient.ErrorEventArgs;
 
-namespace Lancher
+namespace Launcher
 {
     public static class Program
     {
@@ -171,7 +172,7 @@ namespace Lancher
                             GroupJoin_JoinUserName = GroupJoin_data["UserName"].ToString();
                             GroupJoin_InviteUin = Convert.ToInt64(GroupJoin_data["InviteUin"].ToString());
                             if(GroupJoin_JoinUin!=Save.curentQQ)
-                                pluginManagment.CallFunction("GroupMemberIncrease", 1, GetTimeStamp(), GroupJoin_JoinGroup, 0, GroupJoin_JoinUin);
+                                pluginManagment.CallFunction("GroupMemberIncrease", 1, GetTimeStamp(), GroupJoin_JoinGroup, 10000, GroupJoin_JoinUin);
                             LogHelper.WriteLine($"入群事件 群{GroupJoin_JoinGroup}加入{GroupJoin_JoinUserName}({GroupJoin_JoinUin})");
                             break;
                         case "ON_EVENT_GROUP_EXIT"://退群事件 _eventSystem_GroupMemberDecrease id=6
@@ -179,7 +180,7 @@ namespace Lancher
                             JToken GroupExit_data = events["CurrentPacket"]["Data"];
                             GroupExit_FromUin = Convert.ToInt64(GroupExit_data["EventMsg"]["FromUin"].ToString());
                             GroupExit_UserID = Convert.ToInt64(GroupExit_data["EventData"]["UserID"].ToString());
-                            pluginManagment.CallFunction("GroupMemberDecrease", 1, GetTimeStamp(), GroupExit_FromUin, 0, GroupExit_UserID);
+                            pluginManagment.CallFunction("GroupMemberDecrease", 1, GetTimeStamp(), GroupExit_FromUin, 10000, GroupExit_UserID);
                             LogHelper.WriteLine($"退群事件 {GroupExit_UserID}退出群{GroupExit_FromUin} ");
                             break;
                         case "ON_EVENT_GROUP_ADMIN"://群管变动事件 _eventSystem_GroupAdmin id=5
@@ -245,6 +246,7 @@ namespace Lancher
             // make the socket.io connection
             while (true)
             {
+                Thread.Sleep(500);
                 Application.DoEvents();                
             }
         }

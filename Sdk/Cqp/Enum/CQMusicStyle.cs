@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lancher.Sdk.Cqp.Enum
+namespace Launcher.Sdk.Cqp.Enum
 {
     /// <summary>
     /// 指示分享音乐时使用的分享卡片样式

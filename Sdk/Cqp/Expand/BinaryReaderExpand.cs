@@ -6,7 +6,7 @@ using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
 
-namespace Lancher.Sdk.Cqp.Expand
+namespace Launcher.Sdk.Cqp.Expand
 {
 	/// <summary>
 	/// <see cref="BinaryReader"/> 类的扩展方法集

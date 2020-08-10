@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lancher.Sdk.Cqp.Core
+namespace Launcher.Sdk.Cqp.Core
 {
 	internal class Kernel32
 	{

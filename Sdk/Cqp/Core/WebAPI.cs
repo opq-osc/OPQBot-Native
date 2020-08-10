@@ -1,7 +1,7 @@
 ﻿using Deserizition;
-using Lancher.Sdk.Cqp.Enum;
-using Lancher.Sdk.Cqp.Expand;
-using Lancher.Sdk.Cqp.Model;
+using Launcher.Sdk.Cqp.Enum;
+using Launcher.Sdk.Cqp.Expand;
+using Launcher.Sdk.Cqp.Model;
 using Native.Tool.Http;
 using Native.Tool.IniConfig;
 using Newtonsoft.Json.Linq;
@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Lancher.Sdk.Cqp.Core
+namespace Launcher.Sdk.Cqp.Core
 {
     public static class WebAPI
     {
