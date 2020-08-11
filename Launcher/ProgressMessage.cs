@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
+using System;
 
 namespace Launcher
 {
@@ -90,6 +91,20 @@ namespace Launcher
                     }
             }
             result = Regex.Replace(result, "\\[表情(\\d*)\\]", "[CQ:face,id=$1]");
+            foreach (var a in result)
+            {
+                if (a=='\ud83d'&&result.IndexOf(a)!=result.Length-1)
+                {
+                    string str = a.ToString() + result[result.IndexOf(a) + 1].ToString();
+                    string text = "";
+                    foreach(var item in Encoding.UTF32.GetBytes(str))
+                    {
+                        text += item.ToString("x");
+                    }
+                    result = result.Replace(str, CQApi.CQCode_Emoji(Convert.ToInt32(text, 16)).ToString());
+                    break;
+                }
+            }
             return result;
         }
         /// <summary>
