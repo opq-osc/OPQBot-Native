@@ -1,5 +1,6 @@
 ﻿using Deserizition;
 using Launcher.Sdk.Cqp.Enum;
+using Launcher.Sdk.Cqp.Expand;
 using Native.Tool.IniConfig;
 using Native.Tool.IniConfig.Linq;
 using Newtonsoft.Json;
@@ -8,6 +9,7 @@ using SocketIOClient;
 using SocketIOClient.Messages;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -122,17 +124,29 @@ namespace Launcher
 
         private static void GroupMessageHandler(IMessage fn)
         {
-            //群文件合并到此事件
-            //{"FileID":"/9d784a08-d918-11ea-a715-5452007bdaa4","FileName":"Log.lua","FileSize":1159,"Tips":"[群文件]"}
-            //语音消息
-            //{"Tips":"[语音]","Url":"http://grouptalk.c2c.qq.com/?ver=0\u0026rkey=3062020101045b30590201010201010204b40f1411042439306a33504b526d42394567685178716f6f464c4c67676639234e5f4a42535a7734764202045f2e03de041f0000000866696c6574797065000000013100000005636f64656300000001310400\u0026filetype=1\u0026voice_codec=1"}
             Task task = new Task(() =>
             {
+                string msg = ((JSONMessage)fn).MessageText;
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
-                ReceiveMessage groupMessage = JsonConvert.DeserializeObject<ReceiveMessage>(((JSONMessage)fn).MessageText);
-                string message = ProgressMessage.Start(groupMessage);
+                ReceiveMessage groupMessage = JsonConvert.DeserializeObject<ReceiveMessage>(msg);
                 ReceiveMessage.Data data = groupMessage.CurrentPacket.Data;
+                if (groupMessage.CurrentPacket.Data.MsgType == "GroupFileMsg")//群文件事件
+                {
+                    JObject fileupload = JObject.Parse(data.Content);
+                    MemoryStream stream = new MemoryStream();
+                    BinaryWriter binaryWriter = new BinaryWriter(stream);
+                    BinaryWriterExpand.Write_Ex(binaryWriter, fileupload["FileID"].ToString());
+                    BinaryWriterExpand.Write_Ex(binaryWriter, fileupload["FileName"].ToString());
+                    BinaryWriterExpand.Write_Ex(binaryWriter, Convert.ToInt64(fileupload["FileSize"].ToString()));
+                    BinaryWriterExpand.Write_Ex(binaryWriter, 0);
+                    pluginManagment.CallFunction("Upload", 1, GetTimeStamp(),
+      data.FromGroupId, data.FromUserId, Convert.ToBase64String(stream.ToArray()));
+                    LogHelper.WriteLine(CQLogLevel.InfoReceive, "文件上传", $"来源群:{data.FromGroupId}({data.FromGroupName}) 来源QQ:{data.FromUserId}({data.FromNickName}) " +
+                        $"文件名:{fileupload["FileName"]} 大小:{Convert.ToDouble(fileupload["FileSize"]) / 1000}KB FileID:{fileupload["FileID"]}");
+                    return;
+                }
+                string message = ProgressMessage.Start(groupMessage);
                 if (groupMessage.CurrentPacket.Data.FromUserId == Save.curentQQ)
                 {
                     Dll.AddMsgToSave(new Deserizition.Message(Save.MsgList.Count + 1, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message));

@@ -26,6 +26,11 @@ namespace Deserizition
             public object RedBaginfo { get; set; }
             public long FromUin { get; set; }
             public long ToUin { get; set; }
+            public long GroupId { get; set; }
+            public long GroupUserQQ { get; set; }
+            public string Groupname { get; set; }
+            public string GroupUsername { get; set; }
+
         }
     }
 }
