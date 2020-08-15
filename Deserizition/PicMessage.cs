@@ -10,6 +10,7 @@ namespace Deserizition
     {
         public string Content { get; set; }
         public Grouppic[] GroupPic { get; set; }
+        public Friendpic[] FriendPic { get; set; }
         public string Tips { get; set; }
         public long[] UserID { get; set; }
 
@@ -22,5 +23,13 @@ namespace Deserizition
             public int ForwordField { get; set; }
             public string Url { get; set; }
         }
+        public class Friendpic
+        {
+            public string FileMd5 { get; set; }
+            public int FileSize { get; set; }
+            public string Path { get; set; }
+            public string Url { get; set; }
+        }
+
     }
 }

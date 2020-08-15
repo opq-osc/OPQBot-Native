@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 
 namespace Launcher
@@ -95,6 +96,7 @@ namespace Launcher
                 return false;
             }
         }
+        [HandleProcessCorruptedStateExceptions]
         public void CallFunction(string ApiName, params object[] args)
         {
             foreach (var item in Plugins)

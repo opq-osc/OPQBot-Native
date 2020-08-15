@@ -11,7 +11,7 @@
 5. 运行解压后的Launcher.exe
 6. 按照配置输入相关配置即可
 ## 事件实现进度
-- [ ] id: 1 私聊消息处理
+- [x] id: 1 私聊消息处理
 - [x] id: 2 群消息处理
 - [ ] id: 3 讨论组消息处理(讨论组不存在,将不会实现)
 - [ ] id: 4 群文件上传事件处理
@@ -34,7 +34,7 @@
 - [ ] 地图(CQ:loaction)
 - [ ] xml消息(CQ:rich)
 - [x] 表情(CQ:face)
-- [ ] emoji(CQ:emoji)
+- [x] emoji(CQ:emoji)
 - [ ] 原创表情(CQ:bface)
 - [ ] 红包(CQ:hb)
 - [ ] 签到(CQ:sign)

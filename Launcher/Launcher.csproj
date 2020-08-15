@@ -153,7 +153,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Deserizition\Deserizition.csproj">
-      <Project>{18CC2E4A-E049-4A31-8A52-0000371A558B}</Project>
+      <Project>{18cc2e4a-e049-4a31-8a52-0000371a558b}</Project>
       <Name>Deserizition</Name>
     </ProjectReference>
     <ProjectReference Include="..\Native.Tool\Native.Tool.csproj">

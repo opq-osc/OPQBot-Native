@@ -40,7 +40,7 @@ namespace Launcher
                                 if (string.IsNullOrEmpty(pro.GetValue(mem).ToString()))
                                     pro.SetValue(mem, null);
                             }
-                            string originStr = "@" +(mem.AutoRemark ?? mem.GroupCard ?? mem.NickName);
+                            string originStr = "@" + (mem.AutoRemark ?? mem.GroupCard ?? mem.NickName);
                             result = result.Replace(originStr, CQApi.CQCode_At(item).ToSendString());
                         }
                         break;
@@ -54,20 +54,41 @@ namespace Launcher
                         if (!Directory.Exists("data\\image"))
                             Directory.CreateDirectory("data\\image");
                         result = picMessage.Content;
-                        foreach (var item in picMessage.GroupPic)
+                        if (picMessage.GroupPic != null)
                         {
-                            string md5 = GenerateMD5(item.FileMd5).ToUpper();
-                            string path = $"data\\image\\{md5}.cqimg";
-                            if (!File.Exists(path))
+                            foreach (var item in picMessage.GroupPic)
                             {
-                                IniConfig ini = new IniConfig(path);
-                                ini.Object.Add(new ISection("image"));
-                                ini.Object["image"]["md5"] = item.FileMd5;
-                                ini.Object["image"]["size"] = item.FileSize;
-                                ini.Object["image"]["url"] = item.Url;
-                                ini.Save();
+                                string md5 = GenerateMD5(item.FileMd5).ToUpper();
+                                string path = $"data\\image\\{md5}.cqimg";
+                                if (!File.Exists(path))
+                                {
+                                    IniConfig ini = new IniConfig(path);
+                                    ini.Object.Add(new ISection("image"));
+                                    ini.Object["image"]["md5"] = item.FileMd5;
+                                    ini.Object["image"]["size"] = item.FileSize;
+                                    ini.Object["image"]["url"] = item.Url;
+                                    ini.Save();
+                                }
+                                result += CQApi.CQCode_Image(md5);
                             }
-                            result += CQApi.CQCode_Image(md5);
+                        }
+                        else
+                        {
+                            foreach (var item in picMessage.FriendPic)
+                            {
+                                string md5 = GenerateMD5(item.FileMd5).ToUpper();
+                                string path = $"data\\image\\{md5}.cqimg";
+                                if (!File.Exists(path))
+                                {
+                                    IniConfig ini = new IniConfig(path);
+                                    ini.Object.Add(new ISection("image"));
+                                    ini.Object["image"]["md5"] = item.FileMd5;
+                                    ini.Object["image"]["size"] = item.FileSize;
+                                    ini.Object["image"]["url"] = item.Url;
+                                    ini.Save();
+                                }
+                                result += CQApi.CQCode_Image(md5);
+                            }                            
                         }
                         break;
                     }
@@ -86,22 +107,19 @@ namespace Launcher
                             ini.Object["record"]["url"] = url;
                             ini.Save();
                         }
-                        result = CQApi.CQCode_Record(MD5+".silk").ToString();
+                        result = CQApi.CQCode_Record(MD5 + ".silk").ToString();
                         break;
                     }
             }
             result = Regex.Replace(result, "\\[表情(\\d*)\\]", "[CQ:face,id=$1]");
             foreach (var a in result)
             {
-                if (a=='\ud83d'&&result.IndexOf(a)!=result.Length-1)
+                if (a == '\ud83d' && result.IndexOf(a) != result.Length - 1)
                 {
                     string str = a.ToString() + result[result.IndexOf(a) + 1].ToString();
-                    string text = "";
-                    foreach(var item in Encoding.UTF32.GetBytes(str))
-                    {
-                        text += item.ToString("x");
-                    }
-                    result = result.Replace(str, CQApi.CQCode_Emoji(Convert.ToInt32(text, 16)).ToString());
+                    UTF32Encoding enc = new UTF32Encoding(true, false);
+                    byte[] bytes = enc.GetBytes(str);
+                    result = result.Replace(str, CQApi.CQCode_Emoji(Convert.ToInt32(BitConverter.ToString(bytes).Replace("-", ""), 16)).ToString());
                     break;
                 }
             }

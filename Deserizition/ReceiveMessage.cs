@@ -24,6 +24,8 @@ namespace Deserizition
             public int MsgSeq { get; set; }
             public long MsgRandom { get; set; }
             public object RedBaginfo { get; set; }
+            public long FromUin { get; set; }
+            public long ToUin { get; set; }
         }
     }
 }
