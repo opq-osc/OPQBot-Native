@@ -160,7 +160,6 @@ namespace Launcher
                 stopwatch.Stop();
                 LogHelper.WriteLine($"耗时 {stopwatch.ElapsedMilliseconds} ms");
             }); task.Start();
-            // new Event_GroupMessage().GroupMessage(new object(), e);
         }
 
         private static void OnEventsHandler(IMessage fn)
