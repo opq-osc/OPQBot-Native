@@ -96,7 +96,7 @@ namespace Launcher
                 Plugin item = Plugins[0];
                 UnLoad(item);                
             }
-            //Load();
+            Load();
         }
         [DllImport("CQP.dll", EntryPoint = "cq_start")]
         private static extern bool cq_start(IntPtr path, int authcode);
