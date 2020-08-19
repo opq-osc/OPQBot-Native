@@ -288,6 +288,7 @@ namespace Launcher
         private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
             pluginManagment.CallFunction("Exit");
+            NotifyIconHelper.HideNotifyIcon();
         }
 
         public static long GetTimeStamp()

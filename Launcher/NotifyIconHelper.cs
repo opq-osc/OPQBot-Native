@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace Launcher
@@ -10,16 +12,30 @@ namespace Launcher
     {
         static NotifyIcon _NotifyIcon = new NotifyIcon
         {
-            Icon = new Icon(@"E:\FFOutput\45e961f6ec64b0f340cb1d1870f95515.ico"),//图标
+            Icon = new Icon(Assembly.GetEntryAssembly().GetManifestResourceStream("Launcher.Resources.Icon.ico")),//图标
             Visible = false,
             Text = "OPQBot 酷Q兼容框架",//鼠标移上去的提示文本
             ContextMenu = new ContextMenu()
         };
-        public static void Init(JObject json)//初始化,遍历json的menu节点
+        public static void Init()
         {
             ContextMenu menu = _NotifyIcon.ContextMenu;
+            menu.MenuItems.Add(new MenuItem() { Text = "插件菜单", Name = "PluginMenu" });
+            menu.MenuItems.Add("-");
+            menu.MenuItems.Add(new MenuItem() { Text = "重载应用", Tag = "ReLoad" });
+            menu.MenuItems.Add(new MenuItem() { Text = "退出", Tag = "Quit" });
+            for (int i = 2; i < 4; i++)
+            {
+                MenuItem item = menu.MenuItems[i];
+                item.Click += MenuItem_Click;
+            }
+        }
+        public static void LoadMenu(JObject json)//初始化,遍历json的menu节点
+        {
+            MenuItem menu = _NotifyIcon.ContextMenu.MenuItems.Find("PluginMenu", false).First();
             MenuItem menuItem = new MenuItem//一级菜单,插件的名称
             {
+                Name = json["name"].ToString(),
                 Text = json["name"].ToString()
             };
             if (!json.ContainsKey("menu"))
@@ -27,7 +43,7 @@ namespace Launcher
             foreach (var item in JArray.Parse(json["menu"].ToString()))
             {
                 MenuItem childmenu = new MenuItem//二级菜单,窗口的名称
-                {
+                {                    
                     Text = item["name"].ToString(),
                     Tag = new KeyValuePair<string, string>(json["name"].ToString(), item["name"].ToString())//插件名称与窗口函数名称,保存于这个菜单的tag中
                 };
@@ -35,7 +51,6 @@ namespace Launcher
                 childmenu.Click += MenuItem_Click;
             }
             menu.MenuItems.Add(menuItem);//加入一级子菜单
-            _NotifyIcon.ContextMenu = menu;//覆盖托盘菜单
         }
 
         private delegate int Type_Menu();//窗口事件均为无参数
@@ -43,6 +58,15 @@ namespace Launcher
 
         private static void MenuItem_Click(object sender, EventArgs e)
         {
+            switch ((sender as MenuItem).Tag)
+            {
+                case "Quit":
+                    Quit();
+                    return;
+                case "ReLoad":
+                    ReLoad();
+                    return;
+            }
             KeyValuePair<string, string> pair = (KeyValuePair<string, string>)(sender as MenuItem).Tag;
             var c = Program.pluginManagment.Plugins.Find(x => x.appinfo.Name == pair.Key);//从已加载的插件寻找这个名称的插件
             string menuname = string.Empty;
@@ -62,6 +86,21 @@ namespace Launcher
         public static void HideNotifyIcon()
         {
             _NotifyIcon.Visible = false;
+        }
+        public static void RemoveMenu(string pluginName)
+        {
+            var item = _NotifyIcon.ContextMenu.MenuItems.Find(pluginName, true).First();
+            _NotifyIcon.ContextMenu.MenuItems[0].MenuItems.Remove(item);
+        }
+        public static void Quit()
+        {
+            Program.pluginManagment.CallFunction("Exit");
+            NotifyIconHelper.HideNotifyIcon();
+            Environment.Exit(0);
+        }
+        public static void ReLoad()
+        {
+            Program.pluginManagment.ReLoad();
         }
     }
 }

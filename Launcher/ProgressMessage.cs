@@ -114,11 +114,14 @@ namespace Launcher
             result = Regex.Replace(result, "\\[表情(\\d*)\\]", "[CQ:face,id=$1]");
             foreach (var a in result)
             {
+                //UTF-8下，大部分的emoji都是以\ud83d开头
                 if (a == '\ud83d' && result.IndexOf(a) != result.Length - 1)
                 {
+                    //取这个emoji
                     string str = a.ToString() + result[result.IndexOf(a) + 1].ToString();
                     UTF32Encoding enc = new UTF32Encoding(true, false);
-                    byte[] bytes = enc.GetBytes(str);
+                    byte[] bytes = enc.GetBytes(str);//转换字节数组
+                    //使用BitConvert将字节数组转换为16进制，之后转换为10进制即可
                     result = result.Replace(str, CQApi.CQCode_Emoji(Convert.ToInt32(BitConverter.ToString(bytes).Replace("-", ""), 16)).ToString());
                     break;
                 }

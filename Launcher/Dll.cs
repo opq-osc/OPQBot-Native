@@ -129,6 +129,10 @@ namespace Launcher
             }
             return (IntPtr)0;
         }
+        public bool UnLoad()
+        {
+            return FreeLibrary(hLib);
+        }
         public bool HasFunction(string ApiName, JObject json)
         {
             JToken events = json["event"];
@@ -189,15 +193,6 @@ namespace Launcher
         public int DoInitialize(int authcode)
         {
             Initialize(authcode);
-            return 0;
-        }
-        public int CallMenuA()
-        {
-            Thread t = new Thread(() =>
-            {
-            });
-            t.SetApartmentState(ApartmentState.STA);
-            t.Start();
             return 0;
         }
         public KeyValuePair<int, string> GetAppInfo()
