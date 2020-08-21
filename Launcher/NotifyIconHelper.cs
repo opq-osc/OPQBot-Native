@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
@@ -19,6 +20,7 @@ namespace Launcher
         };
         public static void Init()
         {
+            _NotifyIcon.ContextMenu = new ContextMenu();
             ContextMenu menu = _NotifyIcon.ContextMenu;
             menu.MenuItems.Add(new MenuItem() { Text = "插件菜单", Name = "PluginMenu" });
             menu.MenuItems.Add("-");
@@ -43,7 +45,7 @@ namespace Launcher
             foreach (var item in JArray.Parse(json["menu"].ToString()))
             {
                 MenuItem childmenu = new MenuItem//二级菜单,窗口的名称
-                {                    
+                {
                     Text = item["name"].ToString(),
                     Tag = new KeyValuePair<string, string>(json["name"].ToString(), item["name"].ToString())//插件名称与窗口函数名称,保存于这个菜单的tag中
                 };
@@ -100,7 +102,12 @@ namespace Launcher
         }
         public static void ReLoad()
         {
-            Program.pluginManagment.ReLoad();
+            Program.pluginManagment.UnLoad();
+            HideNotifyIcon();
+            string path = Application.ExecutablePath;//获取可执行文件路径
+            Process.Start(path);//再次运行程序
+            Environment.Exit(0);//关闭当前程序
+            //Program.pluginManagment.Init();
         }
     }
 }

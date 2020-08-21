@@ -131,6 +131,7 @@ namespace Launcher
         }
         public bool UnLoad()
         {
+            FreeLibrary(hLib);
             return FreeLibrary(hLib);
         }
         public bool HasFunction(string ApiName, JObject json)

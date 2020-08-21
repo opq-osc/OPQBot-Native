@@ -37,7 +37,7 @@ namespace Launcher
             int count = 0;
             foreach (var item in directoryInfo.GetFiles().Where(x => x.Extension == ".dll"))
             {
-                if(Load(item.FullName))
+                if (Load(item.FullName))
                     count++;
             }
             LogHelper.WriteLine(CQLogLevel.Info, "插件载入", $"一共加载了{count}个插件");
@@ -55,9 +55,9 @@ namespace Launcher
             Dll dll = new Dll();
             if (!Directory.Exists(@"data\tmp"))
                 Directory.CreateDirectory(@"data\tmp");
-            string destpath = @"data\tmp\"+plugininfo.Name;
-            File.Copy(plugininfo.FullName, destpath,true);
-            File.Copy(plugininfo.FullName.Replace(".dll", ".json"), destpath.Replace(".dll",".json"), true);
+            string destpath = @"data\tmp\" + plugininfo.Name;
+            File.Copy(plugininfo.FullName, destpath, true);
+            File.Copy(plugininfo.FullName.Replace(".dll", ".json"), destpath.Replace(".dll", ".json"), true);
             IntPtr iLib = dll.Load(destpath, json);
             if (iLib == (IntPtr)0)
             {
@@ -83,20 +83,30 @@ namespace Launcher
                 NotifyIconHelper.RemoveMenu(plugin.appinfo.Name);
                 Plugins.Remove(plugin);
                 LogHelper.WriteLine(CQLogLevel.InfoSuccess, "插件卸载", $"插件 {plugin.appinfo.Name} 卸载成功");
+                plugin = null; GC.Collect();
             }
             catch (Exception e)
             {
                 LogHelper.WriteLine(CQLogLevel.Error, "插件卸载", e.Message, e.StackTrace);
             }
         }
-        public void ReLoad()
+        public void UnLoad()
         {
-            for(int i=0;i<Plugins.Count;i++)
+            for (int i = 0; i < Plugins.Count; i++)
             {
                 Plugin item = Plugins[0];
-                UnLoad(item);                
+                UnLoad(item);
             }
+        }
+        public void Init()
+        {
+            if(Directory.Exists(@"data\tmp"))
+                //Directory.Delete(@"data\tmp", true);
             Load();
+            LogHelper.WriteLine("遍历启动事件……");
+            CallFunction("StartUp");
+            CallFunction("Enable");
+            NotifyIconHelper.ShowNotifyIcon();
         }
         [DllImport("CQP.dll", EntryPoint = "cq_start")]
         private static extern bool cq_start(IntPtr path, int authcode);

@@ -1,4 +1,5 @@
 ﻿using Deserizition;
+using Launcher.Forms;
 using Launcher.Sdk.Cqp.Enum;
 using Launcher.Sdk.Cqp.Expand;
 using Native.Tool.IniConfig;
@@ -23,21 +24,25 @@ namespace Launcher
     {
         public static Client socket;
         public static PluginManagment pluginManagment = new PluginManagment();
+        [STAThread]
+        static void M1ain()
+        {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new Login());
+        }
         static void Main(string[] args)
         {
             Init();
+            pluginManagment.Init();
+            LogHelper.WriteLine("插件载入完成，开始连接服务器");
+
             socket = new Client(Save.url);
             socket.Opened += SocketOpened;
             socket.Message += SocketMessage;
             socket.SocketConnectionClosed += SocketConnectionClosed;
             socket.Error += SocketError;
             string QQ = Save.curentQQ.ToString();//框架在线的QQ号
-            pluginManagment.Load();
-            LogHelper.WriteLine("遍历启动事件……");
-            pluginManagment.CallFunction("StartUp");
-            pluginManagment.CallFunction("Enable");
-            NotifyIconHelper.ShowNotifyIcon();
-            LogHelper.WriteLine("插件载入完成，开始连接服务器");
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
             socket.Connect();
             // register for 'connect' event with io server
@@ -278,8 +283,9 @@ namespace Launcher
                 string url = Console.ReadLine();
                 if (url.Reverse().First() != '/')
                     url += '/';
+                Save.url = url;
                 ini.Object["Config"]["QQ"] = new IValue(qq);
-                ini.Object["Config"]["url"] = new IValue(Save.url);
+                ini.Object["Config"]["url"] = new IValue(url);
                 ini.Save();
                 Console.WriteLine("需要修改请在目录下的Config.ini内修改");
             }
