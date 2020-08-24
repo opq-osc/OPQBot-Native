@@ -11,11 +11,13 @@ using System.Text;
 using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
 using System;
+using System.Collections.Generic;
 
 namespace Launcher
 {
     public static class ProgressMessage
     {
+        public static List<GroupMemberList> MemberSave = new List<GroupMemberList>();
         /// <summary>
         /// 将消息中的东西替换为CQ码
         /// </summary>
@@ -31,7 +33,12 @@ namespace Launcher
                     {
                         TextMessage textMessage = JsonConvert.DeserializeObject<TextMessage>(msg);
                         result = textMessage.Content;
-                        GroupMemberList ls = JsonConvert.DeserializeObject<GroupMemberList>(WebAPI.GetGroupMemberList(message.CurrentPacket.Data.FromGroupId));
+                        GroupMemberList ls = MemberSave.Find(x => x.GroupUin == message.CurrentPacket.Data.FromGroupId);
+                        if (ls == null)
+                        {
+                            ls = JsonConvert.DeserializeObject<GroupMemberList>(WebAPI.GetGroupMemberList(message.CurrentPacket.Data.FromGroupId));
+                            MemberSave.Add(ls);
+                        }
                         foreach (var item in textMessage.UserID)
                         {
                             GroupMemberList.Memberlist mem = ls.MemberList.Where(x => x.MemberUin == item).First();
@@ -88,7 +95,7 @@ namespace Launcher
                                     ini.Save();
                                 }
                                 result += CQApi.CQCode_Image(md5);
-                            }                            
+                            }
                         }
                         break;
                     }
