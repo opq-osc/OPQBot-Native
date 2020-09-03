@@ -25,13 +25,13 @@ namespace Launcher
         public static Client socket;
         public static PluginManagment pluginManagment = new PluginManagment();
         [STAThread]
-        static void Main()
+        static void M1ain()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+            Application.Run(new LogForm());
         }
-        static void M1ain(string[] args)
+        static void Main(string[] args)
         {
             Init();
             pluginManagment.Init();
@@ -40,6 +40,7 @@ namespace Launcher
             socket = new Client(Save.url);
             socket.Opened += SocketOpened;
             socket.Message += SocketMessage;
+            socket.ConnectionRetryAttempt += Socket_ConnectionRetryAttempt;
             socket.SocketConnectionClosed += SocketConnectionClosed;
             socket.Error += SocketError;
             string QQ = Save.curentQQ.ToString();//框架在线的QQ号
@@ -55,7 +56,7 @@ namespace Launcher
                 {
                     //var jsonMsg = callback as string;
                     //LogHelper.WriteLine(string.Format("callback [root].[messageAck]: {0} \r\n", jsonMsg));
-                    LogHelper.WriteLine($"服务器连接成功，开始处理事件……");
+                    LogHelper.WriteLine($"服务器连接成功，开始处理事件……");                    
                 }
                  );
                 //获取已登录QQ的群列表
@@ -96,6 +97,7 @@ namespace Launcher
             {
                 OnEventsHandler(fn);
             });
+
             // make the socket.io connection
             while (true)
             {
@@ -255,7 +257,6 @@ namespace Launcher
                 }
             }); task.Start();
         }
-
         private static void Init()
         {
             IniConfig ini = new IniConfig("Config.ini");
@@ -309,13 +310,20 @@ namespace Launcher
 
         static void SocketError(object sender, ErrorEventArgs e)
         {
-            LogHelper.WriteLine("socket client error:");
-            LogHelper.WriteLine(e.Message);
+            LogHelper.WriteLine("与服务器连线断开，尝试重连中");
+            //LogHelper.WriteLine(e.Message);
         }
 
         static void SocketConnectionClosed(object sender, EventArgs e)
         {
-            LogHelper.WriteLine("WebSocketConnection was terminated!");
+            LogHelper.WriteLine("与服务器连线断开，尝试重连中");
+        }
+
+        private static void Socket_ConnectionRetryAttempt(object sender, EventArgs e)
+        {
+            LogHelper.WriteLine("与服务器连线断开，尝试重连中");
+            Thread.Sleep(10000);
+            socket.Connect();
         }
 
         static void SocketMessage(object sender, MessageEventArgs e)

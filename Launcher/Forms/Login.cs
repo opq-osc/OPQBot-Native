@@ -44,6 +44,9 @@ namespace Launcher.Forms
             ini.Object["Config"]["QQ"] = new IValue(textBox_QQ.Text);
             ini.Object["Config"]["url"] = new IValue(textBox_URL.Text);
             ini.Save();
+            MainForm mainForm = new MainForm();
+            mainForm.Show();
+            this.Hide();
         }
     }
 }
