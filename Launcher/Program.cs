@@ -25,19 +25,18 @@ namespace Launcher
         public static Client socket;
         public static PluginManagment pluginManagment = new PluginManagment();
         [STAThread]
-        static void M1ain()
+        static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new LogForm());
+            Application.Run(new Login());
         }
-        static void Main(string[] args)
+        static void M1ain(string[] args)
         {
             Init();
             pluginManagment.Init();
             LogHelper.WriteLine("插件载入完成，开始连接服务器");
-
-            socket = new Client(Save.url);
+            Client socket = new Client(Save.url);
             socket.Opened += SocketOpened;
             socket.Message += SocketMessage;
             socket.ConnectionRetryAttempt += Socket_ConnectionRetryAttempt;
@@ -70,12 +69,12 @@ namespace Launcher
                 //socket.Emit("GetGroupUserList", JSON.Replace("\"", "\\\""));//json 需要处理一下转义
 
                 //获取登录二维码
-                socket.Emit("GetQrcode", "", null, (callback) =>
-                {
-                    var jsonMsg = callback as string;
-                    LogHelper.WriteLine(string.Format("GetQrcode From Websocket: {0} \r\n", jsonMsg));
-                }
-                   );
+                //socket.Emit("GetQrcode", "", null, (callback) =>
+                //{
+                //    var jsonMsg = callback as string;
+                //    LogHelper.WriteLine(string.Format("GetQrcode From Websocket: {0} \r\n", jsonMsg));
+                //}
+                //   );
             });
             //二维码检测事件
             socket.On("OnCheckLoginQrcode", (fn) =>
