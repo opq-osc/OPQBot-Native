@@ -25,13 +25,13 @@ namespace Launcher
         public static Client socket;
         public static PluginManagment pluginManagment = new PluginManagment();
         [STAThread]
-        static void Main()
+        static void M1ain()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Login());
         }
-        static void M1ain(string[] args)
+        static void Main(string[] args)
         {
             Init();
             pluginManagment.Init();

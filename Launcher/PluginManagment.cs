@@ -30,7 +30,7 @@ namespace Launcher
         public void Load()
         {
             NotifyIconHelper.Init();
-            string path = @"data\plugins";
+            string path = Path.Combine(Environment.CurrentDirectory, "data", "plugins");
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
             DirectoryInfo directoryInfo = new DirectoryInfo(path);
@@ -100,8 +100,8 @@ namespace Launcher
         }
         public void Init()
         {
-            if(Directory.Exists(@"data\tmp"))
-                //Directory.Delete(@"data\tmp", true);
+            if (Directory.Exists(@"data\tmp"))
+                Directory.Delete(@"data\tmp", true);
             Load();
             LogHelper.WriteLine("遍历启动事件……");
             CallFunction("StartUp");
