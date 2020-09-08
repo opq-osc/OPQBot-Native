@@ -7,11 +7,14 @@ using System.IO;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace Launcher
 {
     public class PluginManagment
     {
+        public static bool formFlag = false;
+        public static ListView formListView;
         public List<Plugin> Plugins = new List<Plugin>();
         public class Plugin
         {

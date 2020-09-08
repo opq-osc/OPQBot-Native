@@ -1,6 +1,7 @@
 ﻿using Deserizition;
 using Native.Tool.IniConfig;
 using Native.Tool.IniConfig.Linq;
+using SocketIOClient;
 using System;
 using System.Windows.Forms;
 
@@ -41,12 +42,35 @@ namespace Launcher.Forms
 
         private void button_Link_Click(object sender, EventArgs e)
         {
+            button_Link.Enabled = false;
             ini.Object["Config"]["QQ"] = new IValue(textBox_QQ.Text);
             ini.Object["Config"]["url"] = new IValue(textBox_URL.Text);
             ini.Save();
-            MainForm mainForm = new MainForm();
-            mainForm.Show();
-            this.Hide();
+            Save.curentQQ = Convert.ToInt64(textBox_QQ.Text);
+            Save.url = textBox_URL.Text;
+            Client socket = new Client(Save.url);
+            socket.Error += Client_Error;
+            socket.Connect();
+            socket.On("connect", (fn) =>
+            {
+                socket.Emit("GetWebConn",Save.curentQQ.ToString());
+                this.Invoke(new MethodInvoker(() =>
+                {
+                    MainForm mainForm = new MainForm();
+                    mainForm.socket = socket;
+                    mainForm.Show();
+                    this.Hide();
+                    button_Link.Enabled = true;
+                }));
+            });
+        }
+
+        private void Client_Error(object sender, ErrorEventArgs e)
+        {
+            MessageBox.Show("连接失败，请检查连接地址是否填写正确");
+            Client client = sender as Client;
+            client.Dispose();
+            button_Link.Invoke(new MethodInvoker(()=> { button_Link.Enabled = true; }));
         }
     }
 }

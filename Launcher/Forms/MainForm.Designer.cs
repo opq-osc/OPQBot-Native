@@ -62,36 +62,36 @@
             this.重载应用toolStripMenuItem,
             this.退出toolStripMenuItem});
             this.RightContext.Name = "RIghtContext";
-            this.RightContext.Size = new System.Drawing.Size(181, 120);
+            this.RightContext.Size = new System.Drawing.Size(125, 98);
             // 
             // 插件菜单ToolStripMenuItem
             // 
             this.插件菜单ToolStripMenuItem.Name = "插件菜单ToolStripMenuItem";
-            this.插件菜单ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.插件菜单ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.插件菜单ToolStripMenuItem.Text = "应用";
             // 
             // 日志toolStripMenuItem
             // 
             this.日志toolStripMenuItem.Name = "日志toolStripMenuItem";
-            this.日志toolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.日志toolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.日志toolStripMenuItem.Text = "日志";
             this.日志toolStripMenuItem.Click += new System.EventHandler(this.日志toolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(121, 6);
             // 
             // 重载应用toolStripMenuItem
             // 
             this.重载应用toolStripMenuItem.Name = "重载应用toolStripMenuItem";
-            this.重载应用toolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.重载应用toolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.重载应用toolStripMenuItem.Text = "重载应用";
             // 
             // 退出toolStripMenuItem
             // 
             this.退出toolStripMenuItem.Name = "退出toolStripMenuItem";
-            this.退出toolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.退出toolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.退出toolStripMenuItem.Text = "退出";
             this.退出toolStripMenuItem.Click += new System.EventHandler(this.退出toolStripMenuItem_Click);
             // 
@@ -105,6 +105,8 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "MainForm";
+            this.ShowIcon = false;
+            this.ShowInTaskbar = false;
             this.Text = "OPQBot-Native 兼容框架";
             this.TopMost = true;
             this.Load += new System.EventHandler(this.MainForm_Load);

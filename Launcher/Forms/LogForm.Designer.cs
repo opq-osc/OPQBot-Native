@@ -50,6 +50,7 @@
             this.columnHeader3,
             this.columnHeader4,
             this.columnHeader5});
+            this.listView_LogMain.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.listView_LogMain.FullRowSelect = true;
             this.listView_LogMain.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.listView_LogMain.HideSelection = false;
@@ -65,10 +66,12 @@
             // columnHeader1
             // 
             this.columnHeader1.Text = "时间";
+            this.columnHeader1.Width = 97;
             // 
             // columnHeader2
             // 
             this.columnHeader2.Text = "来源";
+            this.columnHeader2.Width = 91;
             // 
             // columnHeader3
             // 
@@ -78,7 +81,7 @@
             // columnHeader4
             // 
             this.columnHeader4.Text = "内容";
-            this.columnHeader4.Width = 485;
+            this.columnHeader4.Width = 417;
             // 
             // columnHeader5
             // 
@@ -122,6 +125,7 @@
             this.checkBox_Update.TabIndex = 3;
             this.checkBox_Update.Text = "实时模式";
             this.checkBox_Update.UseVisualStyleBackColor = true;
+            this.checkBox_Update.CheckedChanged += new System.EventHandler(this.checkBox_Update_CheckedChanged);
             // 
             // checkBox_AboveAll
             // 
@@ -132,6 +136,7 @@
             this.checkBox_AboveAll.TabIndex = 4;
             this.checkBox_AboveAll.Text = "窗口置顶";
             this.checkBox_AboveAll.UseVisualStyleBackColor = true;
+            this.checkBox_AboveAll.CheckedChanged += new System.EventHandler(this.checkBox_AboveAll_CheckedChanged);
             // 
             // button_Close
             // 
