@@ -81,5 +81,12 @@ namespace Launcher.Forms
                 thread.Start();
             }
         }
+
+        private void listView_LogMain_ItemMouseHover(object sender, ListViewItemMouseHoverEventArgs e)
+        {
+            ToolTip toolTip = new ToolTip();
+            string itemInfor = e.Item.SubItems[3].Text;
+            toolTip.SetToolTip((e.Item).ListView, itemInfor);
+        }
     }
 }

@@ -62,6 +62,7 @@
             this.listView_LogMain.TabIndex = 0;
             this.listView_LogMain.UseCompatibleStateImageBehavior = false;
             this.listView_LogMain.View = System.Windows.Forms.View.Details;
+            this.listView_LogMain.ItemMouseHover += new System.Windows.Forms.ListViewItemMouseHoverEventHandler(this.listView_LogMain_ItemMouseHover);
             this.listView_LogMain.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listView_LogMain_MouseUp);
             // 
             // columnHeader1

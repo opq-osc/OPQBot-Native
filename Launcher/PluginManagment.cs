@@ -3,6 +3,7 @@ using Launcher.Sdk.Cqp.Model;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.ExceptionServices;
@@ -126,6 +127,14 @@ namespace Launcher
                     LogHelper.WriteLine(CQLogLevel.Error, $"插件 {item.appinfo.Name} {ApiName} 函数发生错误，错误信息:{e.Message} {e.StackTrace}");
                 }
             }
+        }
+        public void ReLoad()
+        {
+            UnLoad();
+            NotifyIconHelper.HideNotifyIcon();
+            string path = System.Windows.Forms.Application.ExecutablePath;//获取可执行文件路径
+            Process.Start(path);//再次运行程序
+            Environment.Exit(0);//关闭当前程序
         }
     }
 }

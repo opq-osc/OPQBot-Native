@@ -67,7 +67,7 @@ namespace Launcher
                         Quit();
                         return;
                     case "ReLoad":
-                        ReLoad();
+                        MainForm.pluginManagment.ReLoad();
                         return;
                     case "LogForm":
                         MainForm.CallLogForm();
@@ -111,15 +111,6 @@ namespace Launcher
             MainForm.pluginManagment.CallFunction("Exit");
             NotifyIconHelper.HideNotifyIcon();
             Environment.Exit(0);
-        }
-        public static void ReLoad()
-        {
-            MainForm.pluginManagment.UnLoad();
-            HideNotifyIcon();
-            string path = Application.ExecutablePath;//获取可执行文件路径
-            Process.Start(path);//再次运行程序
-            Environment.Exit(0);//关闭当前程序
-            //Program.pluginManagment.Init();
         }
         public static void AddManageMenu()
         {

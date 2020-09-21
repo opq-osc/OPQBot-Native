@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -60,7 +61,8 @@ namespace Launcher.Forms
             NotifyIconHelper.ShowNotifyIcon();
             //载入插件
             pluginManagment = new PluginManagment();
-            pluginManagment.Init();            
+            Thread thread = new Thread(() => { pluginManagment.Init(); });
+            thread.Start();
             //将托盘右键菜单复制一份
             pictureBox_Main.ContextMenu = notifyIcon.ContextMenu;
             //实例化圆形图片框, 实现圆形的头像
@@ -78,9 +80,28 @@ namespace Launcher.Forms
             //显示控件, 置顶
             this.Controls.Add(RoundpictureBox);
             RoundpictureBox.BringToFront();
+            //掉线重连处理
+            socket.ConnectionRetryAttempt += Socket_ConnectionRetryAttempt;
             //事件处理
             SocketHandler();
         }
+
+        private void Socket_ConnectionRetryAttempt(object sender, EventArgs e)
+        {
+            LogHelper.WriteLine("与服务器连线断开，尝试重连中");
+            while (true)
+            {
+                Thread.Sleep(30000);
+                try
+                {
+                    HttpWebClient.Get($"http://{Save.url}v1/LuaApiCaller?qq=${Save.curentQQ}&funcname=GetQQUserList&timeout=10");
+                }
+                catch { continue; }
+                socket.Connect();
+                break;
+            }
+        }
+
         private void pictureBox_Main_MouseDown(object sender, MouseEventArgs e)
         {
             //拖动窗体

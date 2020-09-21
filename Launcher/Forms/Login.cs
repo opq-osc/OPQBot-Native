@@ -19,8 +19,13 @@ namespace Launcher.Forms
             Init();
             textBox_QQ.Text = Save.curentQQ.ToString();
             textBox_URL.Text = Save.url;
+            if (ini.Object["Config"]["AutoLogin"].GetValueOrDefault(false))
+            {
+                checkBox_AutoLogin.Checked = true;
+                button_Link.PerformClick(); 
+            }
         }
-        private static void Init()
+        private void Init()
         {
             ini.Load();
             try
@@ -33,7 +38,8 @@ namespace Launcher.Forms
                 ini.Clear();
                 ini.Object.Add(new ISection("Config"));
                 ini.Object["Config"].Add("QQ", 0);
-                ini.Object["Config"].Add("url", "");
+                ini.Object["Config"].Add("url", "http://127.0.0.1:8888/");
+                ini.Object["Config"].Add("AutoLogin", false);
                 Save.curentQQ = 0;
                 Save.url = "";
                 ini.Save();
@@ -45,6 +51,7 @@ namespace Launcher.Forms
             button_Link.Enabled = false;
             ini.Object["Config"]["QQ"] = new IValue(textBox_QQ.Text);
             ini.Object["Config"]["url"] = new IValue(textBox_URL.Text);
+            ini.Object["Config"]["AutoLogin"] = new IValue(checkBox_AutoLogin.Checked);
             ini.Save();
             Save.curentQQ = Convert.ToInt64(textBox_QQ.Text);
             Save.url = textBox_URL.Text;
@@ -62,6 +69,7 @@ namespace Launcher.Forms
                     this.Hide();
                     button_Link.Enabled = true;
                 }));
+                socket.Error -= Client_Error;
             });
         }
 

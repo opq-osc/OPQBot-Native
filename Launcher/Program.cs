@@ -45,7 +45,7 @@ namespace Launcher
             {
                 if(MessageBox.Show($"发生错误，错误信息{ex}\n\n需要重启框架？", "错误", MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
                 {
-                    NotifyIconHelper.ReLoad();
+                    pluginManagment.ReLoad();
                 }
                 else
                 {
@@ -60,7 +60,7 @@ namespace Launcher
             {
                 if( MessageBox.Show($"发生错误，错误信息{e}\n\n需要重启框架？", "错误", MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
                 {
-                    NotifyIconHelper.ReLoad();
+                    pluginManagment.ReLoad();
                 }
                 else
                 {
@@ -367,7 +367,7 @@ namespace Launcher
                 {
                     HttpWebClient.Get($"http://{Save.url}v1/LuaApiCaller?qq=${Save.curentQQ}&funcname=GetQQUserList&timeout=10");
                 }
-                catch { }
+                catch { continue; }
                 socket.Connect();
                 break;
             }

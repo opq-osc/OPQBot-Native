@@ -33,6 +33,7 @@
             this.textBox_QQ = new System.Windows.Forms.TextBox();
             this.textBox_URL = new System.Windows.Forms.TextBox();
             this.button_Link = new System.Windows.Forms.Button();
+            this.checkBox_AutoLogin = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // label1
@@ -77,11 +78,22 @@
             this.button_Link.UseVisualStyleBackColor = true;
             this.button_Link.Click += new System.EventHandler(this.button_Link_Click);
             // 
+            // checkBox_AutoLogin
+            // 
+            this.checkBox_AutoLogin.AutoSize = true;
+            this.checkBox_AutoLogin.Location = new System.Drawing.Point(220, 94);
+            this.checkBox_AutoLogin.Name = "checkBox_AutoLogin";
+            this.checkBox_AutoLogin.Size = new System.Drawing.Size(72, 16);
+            this.checkBox_AutoLogin.TabIndex = 5;
+            this.checkBox_AutoLogin.Text = "自动登录";
+            this.checkBox_AutoLogin.UseVisualStyleBackColor = true;
+            // 
             // Login
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(352, 125);
+            this.Controls.Add(this.checkBox_AutoLogin);
             this.Controls.Add(this.button_Link);
             this.Controls.Add(this.textBox_URL);
             this.Controls.Add(this.textBox_QQ);
@@ -104,5 +116,6 @@
         private System.Windows.Forms.TextBox textBox_QQ;
         private System.Windows.Forms.TextBox textBox_URL;
         private System.Windows.Forms.Button button_Link;
+        private System.Windows.Forms.CheckBox checkBox_AutoLogin;
     }
 }

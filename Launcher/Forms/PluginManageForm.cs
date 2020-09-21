@@ -78,5 +78,11 @@ namespace Launcher.Forms
             foreach (var item in (JArray)json["auth"])
                 listBox_Auth.Items.Add(ChineseName[Convert.ToInt32(item.ToString())]);
         }
+
+        private void button_Reload_Click(object sender, EventArgs e)
+        {
+            if(MessageBox.Show("确认重启框架吗？","框架提出了一个疑问",MessageBoxButtons.YesNo,MessageBoxIcon.Question)==DialogResult.Yes)
+                MainForm.pluginManagment.ReLoad();
+        }
     }
 }

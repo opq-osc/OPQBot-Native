@@ -177,6 +177,7 @@
             this.button_Reload.TabIndex = 0;
             this.button_Reload.Text = "重载插件";
             this.button_Reload.UseVisualStyleBackColor = true;
+            this.button_Reload.Click += new System.EventHandler(this.button_Reload_Click);
             // 
             // groupBox_Desc
             // 
