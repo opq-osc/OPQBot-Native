@@ -1,7 +1,7 @@
-﻿using Launcher.Sdk.Cqp.Enum;
+﻿using Deserizition;
+using Launcher.Sdk.Cqp.Enum;
 using System;
 using System.Drawing;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace Launcher
@@ -13,10 +13,10 @@ namespace Launcher
             string msg = string.Empty;
             foreach (var item in messages)
                 msg += item;
-            if(!PluginManagment.formFlag)
+            if(!Save.formFlag)
                 WriteLine(CQLogLevel.Info, "提示", msg);
             else
-                LogWriter(PluginManagment.formListView, CQLogLevel.Info, "OPQBot框架", "提示","...", messages);
+                LogWriter(Save.logListView, CQLogLevel.Info, "OPQBot框架", "提示","...", messages);
         }
         //写日志方法
         //TODO：写入Sqlite
@@ -33,7 +33,7 @@ namespace Launcher
             listViewItem.SubItems.Add(msg);
             listViewItem.SubItems.Add(status);
             listViewItem.ForeColor = LogColor;
-            listView.Items.Add(listViewItem);
+            listView.Invoke(new MethodInvoker(() => { listView.Items.Add(listViewItem); })); 
         }
         private static Color GetLogColor(CQLogLevel level)
         {
@@ -107,10 +107,10 @@ namespace Launcher
                     Console.ForegroundColor = ConsoleColor.White;
                     break;
             }
-            if (!PluginManagment.formFlag)
+            if (!Save.formFlag)
                 Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}][OPQBot框架 {type}]{msg}");
             else
-                LogWriter(PluginManagment.formListView, level, "OPQBot框架", type,"...", messages);
+                LogWriter(Save.logListView, level, "OPQBot框架", type,"...", messages);
         }
     }
 }

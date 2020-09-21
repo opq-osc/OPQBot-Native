@@ -2,6 +2,7 @@
 using Launcher.Forms;
 using Launcher.Sdk.Cqp.Enum;
 using Launcher.Sdk.Cqp.Expand;
+using Native.Tool.Http;
 using Native.Tool.IniConfig;
 using Native.Tool.IniConfig.Linq;
 using Newtonsoft.Json;
@@ -12,6 +13,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,17 +25,54 @@ namespace Launcher
     public static class Program
     {
         public static Client socket;
-        public static PluginManagment pluginManagment = new PluginManagment();
+        public static PluginManagment pluginManagment;
+
         [STAThread]
+        [HandleProcessCorruptedStateExceptions]
         static void Main()
         {
             Application.EnableVisualStyles();
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            Application.ThreadException += Application_ThreadException;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Login());
         }
-        static void M1ain(string[] args)
+
+        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            if (e.ExceptionObject is Exception ex)
+            {
+                if(MessageBox.Show($"发生错误，错误信息{ex}\n\n需要重启框架？", "错误", MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
+                {
+                    NotifyIconHelper.ReLoad();
+                }
+                else
+                {
+                    Environment.Exit(0);
+                }
+            }
+        }
+
+        private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
+        {
+            if (e.Exception != null)
+            {
+                if( MessageBox.Show($"发生错误，错误信息{e}\n\n需要重启框架？", "错误", MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
+                {
+                    NotifyIconHelper.ReLoad();
+                }
+                else
+                {
+                    Environment.Exit(0);
+                }
+            }
+        }
+
+        static void Ma1in(string[] args)
         {
             Init();
+            pluginManagment = new PluginManagment();
             pluginManagment.Init();
             LogHelper.WriteLine("插件载入完成，开始连接服务器");
             Client socket = new Client(Save.url);
@@ -321,8 +360,17 @@ namespace Launcher
         private static void Socket_ConnectionRetryAttempt(object sender, EventArgs e)
         {
             LogHelper.WriteLine("与服务器连线断开，尝试重连中");
-            Thread.Sleep(10000);
-            socket.Connect();
+            while (true)
+            {
+                Thread.Sleep(30000);
+                try
+                {
+                    HttpWebClient.Get($"http://{Save.url}v1/LuaApiCaller?qq=${Save.curentQQ}&funcname=GetQQUserList&timeout=10");
+                }
+                catch { }
+                socket.Connect();
+                break;
+            }
         }
 
         static void SocketMessage(object sender, MessageEventArgs e)

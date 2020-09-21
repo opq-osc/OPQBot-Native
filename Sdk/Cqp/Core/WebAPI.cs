@@ -11,6 +11,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Launcher.Sdk.Cqp.Core
 {
@@ -103,6 +104,15 @@ namespace Launcher.Sdk.Cqp.Core
             };
             return SendRequest(url, data.ToString());
         }
+        public static string GetFriendList()
+        {
+            string url = $@"{Save.url}v1/LuaApiCaller?qq={Save.curentQQ}&funcname=GetQQUserList&timeout=10";
+            JObject data = new JObject
+            {
+                {"StartIndex",0}
+            };
+            return SendRequest(url, data.ToString());
+        }
         public static string SendRequest(string url, string data)
         {
             HttpWebClient http = new HttpWebClient
@@ -115,7 +125,15 @@ namespace Launcher.Sdk.Cqp.Core
                 UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36",
                 TimeOut = 10000
             };
-            return http.UploadString(url, data.ToString());
+            string tmp = http.UploadString(url, data.ToString());
+            Thread.Sleep(1000);
+            return tmp;
+        }
+        public static string SendRequest(string url,string data,string origin,string type,string desc,CQLogLevel level)
+        {
+            string result = SendRequest(url, data);
+            CoreHelper.LogWriter(Save.logListView,(int)level,origin,type,"...",desc);
+            return result;
         }
     }
 }

@@ -7,14 +7,11 @@ using System.IO;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
 
 namespace Launcher
 {
     public class PluginManagment
     {
-        public static bool formFlag = false;
-        public static ListView formListView;
         public List<Plugin> Plugins = new List<Plugin>();
         public class Plugin
         {
@@ -32,7 +29,6 @@ namespace Launcher
         }
         public void Load()
         {
-            NotifyIconHelper.Init();
             string path = Path.Combine(Environment.CurrentDirectory, "data", "plugins");
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
@@ -44,6 +40,7 @@ namespace Launcher
                     count++;
             }
             LogHelper.WriteLine(CQLogLevel.Info, "插件载入", $"一共加载了{count}个插件");
+            NotifyIconHelper.AddManageMenu();
         }
         public bool Load(string filepath)
         {
@@ -109,7 +106,6 @@ namespace Launcher
             LogHelper.WriteLine("遍历启动事件……");
             CallFunction("StartUp");
             CallFunction("Enable");
-            NotifyIconHelper.ShowNotifyIcon();
         }
         [DllImport("CQP.dll", EntryPoint = "cq_start")]
         private static extern bool cq_start(IntPtr path, int authcode);

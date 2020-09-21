@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using SocketIOClient;
+using System.Windows.Forms;
 
 
 namespace Deserizition
@@ -33,5 +33,8 @@ namespace Deserizition
         public static string url { get; set; }
         public static long curentQQ { get; set; }
         public static List<Message> MsgList { get; set; } = new List<Message>();
+        public static string name { get; set; }
+        public static ListView logListView { get; set; }
+        public static bool formFlag { get; set; }
     }
 }

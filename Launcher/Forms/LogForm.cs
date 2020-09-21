@@ -1,7 +1,6 @@
-﻿using Launcher.Sdk.Cqp.Enum;
-using SocketIOClient;
+﻿using Deserizition;
+using Launcher.Sdk.Cqp.Enum;
 using System;
-using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -15,8 +14,6 @@ namespace Launcher.Forms
         }
         #region --字段--
         public static ListView ListView_log;
-        public Client socket;
-        public static PluginManagment pluginManagment;
         public bool formTopMost=false;
         #endregion
 
@@ -25,10 +22,8 @@ namespace Launcher.Forms
             ListView_log = listView_LogMain;
             comboBox_LogLevel.SelectedIndex = 1;
             LogHelper.LogWriter(ListView_log, CQLogLevel.Info,"OPQBot框架","提示","...","成功连接到服务器");
-            PluginManagment.formFlag = true;
-            PluginManagment.formListView = listView_LogMain;
-            pluginManagment = new PluginManagment();
-            pluginManagment.Init();
+            Save.formFlag = true;
+            Save.logListView = listView_LogMain;
         }
 
         private void comboBox_LogLevel_SelectedIndexChanged(object sender, EventArgs e)
@@ -65,6 +60,26 @@ namespace Launcher.Forms
         {
             formTopMost = (sender as CheckBox).Checked;
             this.TopMost = formTopMost;
+        }
+
+        private void listView_LogMain_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (listView_LogMain.SelectedItems.Count != 0 && e.Button == MouseButtons.Right)
+            {
+                Thread thread = new Thread(() =>
+                {
+                    label_Desc.Invoke(new MethodInvoker(() =>
+                    {
+                        label_Desc.Text = "已复制日志内容";
+                        label_Desc.Visible = true;
+                        string text = listView_LogMain.SelectedItems[0].SubItems[3].Text;
+                        Clipboard.SetText(text);
+                    }));
+                    Thread.Sleep(2000);
+                    label_Desc.Invoke(new MethodInvoker(() => { label_Desc.Text = "日志列表将实时滚动"; label_Desc.Visible = false; }));
+                });
+                thread.Start();
+            }
         }
     }
 }
