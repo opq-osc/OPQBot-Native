@@ -22,18 +22,7 @@ namespace Launcher
         //TODO：写入Sqlite
         public static void LogWriter(ListView listView, CQLogLevel level, string logOrigin, string type, string status, params string[] messages)
         {
-            Color LogColor = GetLogColor(level);
-            ListViewItem listViewItem = new ListViewItem();
-            listViewItem.SubItems[0].Text = DateTime.Now.ToString("今天 HH:mm:ss");
-            listViewItem.SubItems.Add(logOrigin);
-            listViewItem.SubItems.Add(type);
-            string msg = string.Empty;
-            foreach (var item in messages)
-                msg += item;
-            listViewItem.SubItems.Add(msg);
-            listViewItem.SubItems.Add(status);
-            listViewItem.ForeColor = LogColor;
-            listView.Invoke(new MethodInvoker(() => { listView.Items.Add(listViewItem); })); 
+            CoreHelper.LogWriter(listView, (int)level, logOrigin, type, status, messages);
         }
         private static Color GetLogColor(CQLogLevel level)
         {

@@ -49,10 +49,15 @@ namespace Launcher.Forms
                 Thread thread = new Thread(()=> 
                 {
                     label_Desc.Invoke(new MethodInvoker(() => { label_Desc.Visible = true; }));
+                    Save.AutoScroll = true;
                     Thread.Sleep(2000);
                     label_Desc.Invoke(new MethodInvoker(() => { label_Desc.Visible = false; }));
                 });
                 thread.Start();
+            }
+            else
+            {
+                Save.AutoScroll = false;
             }
         }
 

@@ -68,8 +68,15 @@ namespace Deserizition
                 msg += item;
             listViewItem.SubItems.Add(msg);
             listViewItem.SubItems.Add(status);
-            listViewItem.ForeColor = LogColor;
-            listView.Invoke(new MethodInvoker(() => { listView.Items.Add(listViewItem); }));
+            listViewItem.ForeColor = LogColor;            
+            listView.Invoke(new MethodInvoker(() => {
+                listView.Items.Add(listViewItem);
+                if (Save.AutoScroll)
+                {
+                    listView.EnsureVisible(listView.Items.Count - 1);
+                    listViewItem.Selected = true;
+                }
+            }));            
         }
         private static Color GetLogColor(LogLevel level)
         {

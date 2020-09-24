@@ -94,7 +94,7 @@ namespace Launcher.Forms
                 Thread.Sleep(30000);
                 try
                 {
-                    HttpWebClient.Get($"http://{Save.url}v1/LuaApiCaller?qq=${Save.curentQQ}&funcname=GetQQUserList&timeout=10");
+                    HttpWebClient.Get($"{Save.url}v1/LuaApiCaller?qq={Save.curentQQ}&funcname=GetQQUserList&timeout=10");
                 }
                 catch { continue; }
                 socket.Connect();
