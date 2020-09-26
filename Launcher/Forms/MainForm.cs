@@ -88,15 +88,16 @@ namespace Launcher.Forms
 
         private void Socket_ConnectionRetryAttempt(object sender, EventArgs e)
         {
-            LogHelper.WriteLine("与服务器连线断开，尝试重连中");
+            int count = 1;
             while (true)
             {
+                LogHelper.WriteLine("与服务器连线断开，30s后尝试重新连接，第{count}次尝试中");
                 Thread.Sleep(30000);
                 try
                 {
                     HttpWebClient.Get($"{Save.url}v1/LuaApiCaller?qq={Save.curentQQ}&funcname=GetQQUserList&timeout=10");
                 }
-                catch { continue; }
+                catch { count++; continue; }
                 socket.Connect();
                 break;
             }

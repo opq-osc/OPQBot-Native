@@ -61,6 +61,8 @@ namespace Launcher.Forms
             socket.On("connect", (fn) =>
             {
                 socket.Emit("GetWebConn",Save.curentQQ.ToString());
+                if (Save.logListView != null)
+                    return;
                 this.Invoke(new MethodInvoker(() =>
                 {
                     MainForm mainForm = new MainForm();
