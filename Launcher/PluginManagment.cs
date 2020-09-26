@@ -1,4 +1,5 @@
-﻿using Launcher.Sdk.Cqp.Enum;
+﻿using Launcher.Forms;
+using Launcher.Sdk.Cqp.Enum;
 using Launcher.Sdk.Cqp.Model;
 using Newtonsoft.Json.Linq;
 using System;
@@ -8,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Launcher
 {
@@ -101,8 +103,17 @@ namespace Launcher
         }
         public void Init()
         {
-            if (Directory.Exists(@"data\tmp"))
-                Directory.Delete(@"data\tmp", true);
+            try
+            {
+                if (Directory.Exists(@"data\tmp"))
+                    Directory.Delete(@"data\tmp", true);
+            }
+            catch
+            {
+                Thread.Sleep(1000);
+                if (Directory.Exists(@"data\tmp"))
+                    Directory.Delete(@"data\tmp", true);
+            }
             Load();
             LogHelper.WriteLine("遍历启动事件……");
             CallFunction("StartUp");
@@ -125,16 +136,20 @@ namespace Launcher
                 catch (Exception e)
                 {
                     LogHelper.WriteLine(CQLogLevel.Error, $"插件 {item.appinfo.Name} {ApiName} 函数发生错误，错误信息:{e.Message} {e.StackTrace}");
+                    if(MessageBox((IntPtr)0,$"插件 {item.appinfo.Name} {ApiName} 函数发生错误，错误信息:{e.Message} {e.StackTrace}\n\n点确定 忽略 此错误，点取消 重载 框架","已捕获的错误",4+16)==7)
+                        ReLoad();
                 }
             }
         }
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        public static extern int MessageBox(IntPtr hWnd, String text, String caption, uint type);
         public void ReLoad()
         {
             UnLoad();
             NotifyIconHelper.HideNotifyIcon();
-            string path = System.Windows.Forms.Application.ExecutablePath;//获取可执行文件路径
+            string path = typeof(MainForm).Assembly.Location;//获取可执行文件路径
             Process.Start(path);//再次运行程序
-            Environment.Exit(0);//关闭当前程序
+            Environment.Exit(0);//关闭当前程序            
         }
     }
 }

@@ -126,5 +126,10 @@ namespace Launcher
             PluginManageForm form = new PluginManageForm();
             form.Show();
         }
+        public static void ReStart()
+        {
+            HideNotifyIcon();
+            Application.Restart();
+        } 
     }
 }

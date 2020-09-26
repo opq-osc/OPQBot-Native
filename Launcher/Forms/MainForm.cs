@@ -66,15 +66,25 @@ namespace Launcher.Forms
             //将托盘右键菜单复制一份
             pictureBox_Main.ContextMenu = notifyIcon.ContextMenu;
             //实例化圆形图片框, 实现圆形的头像
+            HttpWebClient http = new HttpWebClient() {TimeOut=3000};
+            byte[] data = http.DownloadData($"http://q1.qlogo.cn/g?b=qq&nk={Save.curentQQ}&s=640");
+            MemoryStream ms = new MemoryStream(data);
+            Image image;
+            if (ms.Length > 0)
+                image = Image.FromStream(ms);
+            else
+                image = null;
             RoundPictureBox RoundpictureBox = new RoundPictureBox
             {
                 Size = new Size(43, 43),
-                Image = Image.FromFile(@"E:\图\Phone\QQ图片20200905184122.jpg"),
+                //Image = Image.FromFile(@"E:\图\Phone\QQ图片20200905184122.jpg"),                
                 SizeMode = PictureBoxSizeMode.StretchImage,
                 Left = -1,
                 Top = 0,
-                ContextMenu=notifyIcon.ContextMenu
+                ContextMenu = notifyIcon.ContextMenu
             };
+            if (image != null)
+                RoundpictureBox.Image = image;
             //添加拖动事件
             RoundpictureBox.MouseDown += pictureBox_Main_MouseDown;
             //显示控件, 置顶
@@ -91,7 +101,7 @@ namespace Launcher.Forms
             int count = 1;
             while (true)
             {
-                LogHelper.WriteLine("与服务器连线断开，30s后尝试重新连接，第{count}次尝试中");
+                LogHelper.WriteLine($"与服务器连线断开，30s后尝试重新连接，第{count}次尝试中");
                 Thread.Sleep(30000);
                 try
                 {

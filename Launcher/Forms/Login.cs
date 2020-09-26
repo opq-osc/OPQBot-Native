@@ -61,8 +61,11 @@ namespace Launcher.Forms
             socket.On("connect", (fn) =>
             {
                 socket.Emit("GetWebConn",Save.curentQQ.ToString());
-                if (Save.logListView != null)
-                    return;
+                if (Save.logListView != null)                
+                {
+                    CoreHelper.WriteLine("重新连接到服务器");
+                    return; 
+                }
                 this.Invoke(new MethodInvoker(() =>
                 {
                     MainForm mainForm = new MainForm();
