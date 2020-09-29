@@ -100,7 +100,7 @@ namespace Launcher.Sdk.Cqp.Core
             JObject data = new JObject
             {
                 {"GroupUin",groupid},
-                {"LastUin",0},
+                {"LastUin",0}
             };
             return SendRequest(url, data.ToString());
         }

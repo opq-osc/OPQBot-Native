@@ -44,8 +44,12 @@ namespace Launcher
                             GroupMemberList.Memberlist mem = ls.MemberList.Where(x => x.MemberUin == item).First();
                             foreach (var pro in mem.GetType().GetProperties())
                             {
-                                if (string.IsNullOrEmpty(pro.GetValue(mem).ToString()))
-                                    pro.SetValue(mem, null);
+                                try
+                                {
+                                    if(string.IsNullOrEmpty(pro.GetValue(mem).ToString()))
+                                        pro.SetValue(mem, null);
+                                }
+                                catch(NullReferenceException e) { pro.SetValue(mem, null); }
                             }
                             string originStr = "@" + (mem.AutoRemark ?? mem.GroupCard ?? mem.NickName);
                             result = result.Replace(originStr, CQApi.CQCode_At(item).ToSendString());
