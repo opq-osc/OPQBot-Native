@@ -17,6 +17,13 @@ namespace Launcher.Sdk.Cqp.Core
 {
     public static class WebAPI
     {
+        /// <summary>
+        /// 群消息测试函数
+        /// </summary>
+        /// <param name="authcode"></param>
+        /// <param name="groupid"></param>
+        /// <param name="msg"></param>
+        /// <returns></returns>
         public static int CQ_sendGroupMsg(int authcode, long groupid, IntPtr msg)
         {
             string text = Marshal.PtrToStringAnsi(msg);
@@ -93,7 +100,11 @@ namespace Launcher.Sdk.Cqp.Core
             SendRequest(url, data.ToString());
             return 0;
         }
-
+        /// <summary>
+        /// 获取群成员列表
+        /// </summary>
+        /// <param name="groupid">群号</param>
+        /// <returns>raw json</returns>
         public static string GetGroupMemberList(long groupid)
         {
             string url = $@"{Save.url}v1/LuaApiCaller?qq={Save.curentQQ}&funcname=GetGroupUserList&timeout=10";
@@ -104,6 +115,10 @@ namespace Launcher.Sdk.Cqp.Core
             };
             return SendRequest(url, data.ToString());
         }
+        /// <summary>
+        /// 获取好友列表
+        /// </summary>
+        /// <returns>raw json</returns>
         public static string GetFriendList()
         {
             string url = $@"{Save.url}v1/LuaApiCaller?qq={Save.curentQQ}&funcname=GetQQUserList&timeout=10";
@@ -113,6 +128,12 @@ namespace Launcher.Sdk.Cqp.Core
             };
             return SendRequest(url, data.ToString());
         }
+        /// <summary>
+        /// 发送Post请求
+        /// </summary>
+        /// <param name="url">网址</param>
+        /// <param name="data">负载消息</param>
+        /// <returns>接口返回的消息</returns>
         public static string SendRequest(string url, string data)
         {
             HttpWebClient http = new HttpWebClient
@@ -129,6 +150,16 @@ namespace Launcher.Sdk.Cqp.Core
             Thread.Sleep(1000);
             return tmp;
         }
+        /// <summary>
+        /// 发送Post请求的同时写入一条日志
+        /// </summary>
+        /// <param name="url">网址</param>
+        /// <param name="data">负载信息</param>
+        /// <param name="origin">消息来源</param>
+        /// <param name="type">消息类型</param>
+        /// <param name="desc">消息内容</param>
+        /// <param name="level">日志等级</param>
+        /// <returns>接口返回的消息</returns>
         public static string SendRequest(string url,string data,string origin,string type,string desc,CQLogLevel level)
         {
             string result = SendRequest(url, data);

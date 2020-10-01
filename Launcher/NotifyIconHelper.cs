@@ -11,6 +11,9 @@ using System.Windows.Forms;
 
 namespace Launcher
 {
+    /// <summary>
+    /// 托盘帮助类
+    /// </summary>
     public static class NotifyIconHelper
     {
         public static NotifyIcon _NotifyIcon;

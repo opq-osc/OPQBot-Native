@@ -13,13 +13,25 @@ using System.Threading;
 
 namespace Launcher
 {
+    /// <summary>
+    /// 管理CQ插件的类
+    /// </summary>
     public class PluginManagment
     {
         public List<Plugin> Plugins = new List<Plugin>();
         public class Plugin
         {
+            /// <summary>
+            /// 内存句柄
+            /// </summary>
             public IntPtr iLib;
+            /// <summary>
+            /// 插件的AppInfo
+            /// </summary>
             public AppInfo appinfo;
+            /// <summary>
+            /// 插件的json部分,包含名称、描述、函数入口以及窗口名称部分
+            /// </summary>
             public JObject json;
             public Dll dll;
             public Plugin(IntPtr iLib, AppInfo appinfo, JObject json, Dll dll)
@@ -30,6 +42,9 @@ namespace Launcher
                 this.dll = dll;
             }
         }
+        /// <summary>
+        /// 从 data\plugins 文件夹下载入所有拥有同名json的dll插件，不包含子文件夹
+        /// </summary>
         public void Load()
         {
             string path = Path.Combine(Environment.CurrentDirectory, "data", "plugins");
@@ -45,6 +60,11 @@ namespace Launcher
             LogHelper.WriteLine(CQLogLevel.Info, "插件载入", $"一共加载了{count}个插件");
             NotifyIconHelper.AddManageMenu();
         }
+        /// <summary>
+        /// 以绝对路径路径载入拥有同名json的dll插件
+        /// </summary>
+        /// <param name="filepath">插件dll的绝对路径</param>
+        /// <returns>载入是否成功</returns>
         public bool Load(string filepath)
         {
             FileInfo plugininfo = new FileInfo(filepath);
@@ -58,26 +78,37 @@ namespace Launcher
             Dll dll = new Dll();
             if (!Directory.Exists(@"data\tmp"))
                 Directory.CreateDirectory(@"data\tmp");
+            //复制需要载入的插件至临时文件夹,可直接覆盖原dll便于插件重载
             string destpath = @"data\tmp\" + plugininfo.Name;
             File.Copy(plugininfo.FullName, destpath, true);
+            //复制它的json
             File.Copy(plugininfo.FullName.Replace(".dll", ".json"), destpath.Replace(".dll", ".json"), true);
-            IntPtr iLib = dll.Load(destpath, json);
+            IntPtr iLib = dll.Load(destpath, json);//将dll插件LoadLibrary,并进行函数委托的实例化
             if (iLib == (IntPtr)0)
             {
                 LogHelper.WriteLine(CQLogLevel.Error, "插件载入", $"插件 {plugininfo.Name} 加载失败,返回句柄为空,GetLastError={Dll.GetLastError()}");
                 return false;
             }
+            //执行插件的init,分配一个authcode
             dll.DoInitialize(authcode);
+            //获取插件的appinfo,返回示例 9,me.cqp.luohuaming.Sign,分别为ApiVer以及AppID
             KeyValuePair<int, string> appInfotext = dll.GetAppInfo();
             AppInfo appInfo = new AppInfo(appInfotext.Value, 0, appInfotext.Key
                 , json["name"].ToString(), json["version"].ToString(), Convert.ToInt32(json["version_id"].ToString())
                 , json["author"].ToString(), json["description"].ToString(), authcode);
+            //保存至插件列表
             Plugins.Add(new Plugin(iLib, appInfo, json, dll));
             LogHelper.WriteLine(CQLogLevel.InfoSuccess, "插件载入", $"插件 {appInfo.Name} 加载成功");
+            //自写方法,用于……用于什么来着，似乎有点多余，晚些看看有什么用
             cq_start(Marshal.StringToHGlobalAnsi(destpath), authcode);
+            //将它的窗口写入托盘右键菜单
             NotifyIconHelper.LoadMenu(json);
             return true;
         }
+        /// <summary>
+        /// 卸载插件，执行被卸载事件，从菜单移除此插件的菜单
+        /// </summary>
+        /// <param name="plugin"></param>
         public void UnLoad(Plugin plugin)
         {
             try
@@ -93,6 +124,9 @@ namespace Launcher
                 LogHelper.WriteLine(CQLogLevel.Error, "插件卸载", e.Message, e.StackTrace);
             }
         }
+        /// <summary>
+        /// 插件全部卸载
+        /// </summary>
         public void UnLoad()
         {
             for (int i = 0; i < Plugins.Count; i++)
@@ -101,6 +135,10 @@ namespace Launcher
                 UnLoad(item);
             }
         }
+        //写在构造函数是不是还好点?
+        /// <summary>
+        /// 成员初始化，用于删除上次运行的临时目录、加载插件以及执行启动事件
+        /// </summary>
         public void Init()
         {
             try
@@ -108,7 +146,7 @@ namespace Launcher
                 if (Directory.Exists(@"data\tmp"))
                     Directory.Delete(@"data\tmp", true);
             }
-            catch
+            catch//有时候重载有前一进程还未退出,后一进程就启动的情况,导致无法删除而临时文件爆炸
             {
                 Thread.Sleep(1000);
                 if (Directory.Exists(@"data\tmp"))
@@ -121,17 +159,28 @@ namespace Launcher
         }
         [DllImport("CQP.dll", EntryPoint = "cq_start")]
         private static extern bool cq_start(IntPtr path, int authcode);
-
+        /// <summary>
+        /// 核心方法调用，将前端处理的数据传递给插件对应事件处理，尝试捕获非托管插件的异常
+        /// </summary>
+        /// <param name="ApiName">调用的事件名称，前端统一名称，或许应该写成枚举</param>
+        /// <param name="args">参数表</param>
         [HandleProcessCorruptedStateExceptions]
         public void CallFunction(string ApiName, params object[] args)
         {
+            //遍历插件列表,遇到标记消息阻断则跳出
             foreach (var item in Plugins)
             {
                 Dll dll = item.dll;
+                //先看此插件有没有使用此事件
                 if (!dll.HasFunction(ApiName, item.json)) continue;
                 try
                 {
-                    if (dll.CallFunction(ApiName, args) == 1) return;
+                    //存在事件,调用函数,返回1表示消息阻塞,跳出后续
+                    if (dll.CallFunction(ApiName, args) == 1)
+                    {
+                        LogHelper.WriteLine($"由 {item.appinfo.Name} 结束消息处理");
+                        return;
+                    }
                 }
                 catch (Exception e)
                 {
@@ -143,6 +192,10 @@ namespace Launcher
         }
         [DllImport("user32.dll", CharSet = CharSet.Unicode)]
         public static extern int MessageBox(IntPtr hWnd, String text, String caption, uint type);
+        /// <summary>
+        /// 重载应用
+        /// 未找到去除文件占用的方法，只能重启程序来实现重载了
+        /// </summary>
         public void ReLoad()
         {
             UnLoad();

@@ -43,9 +43,15 @@ namespace Deserizition
         /// </summary>
         Fatal = 40
     }
-
+    /// <summary>
+    /// 公用帮助类,实现:日志
+    /// </summary>
     public static class CoreHelper
     {
+        /// <summary>
+        /// 以info为等级，"OPQBot框架"为来源，"提示"为类型写出一条日志
+        /// </summary>
+        /// <param name="messages">日志内容</param>
         public static void WriteLine(string messages)
         {
             if (!Save.formFlag)
@@ -53,14 +59,22 @@ namespace Deserizition
             else
                 LogWriter(Save.logListView,(int)LogLevel.Info, "OPQBot框架", "提示", "...", messages);
         }
-        //写日志方法
         //TODO：写入Sqlite
+        /// <summary>
+        /// 向指定的ListView输出一条指定内容的日志
+        /// </summary>
+        /// <param name="listView">日志窗口的ListView</param>
+        /// <param name="level">日志等级</param>
+        /// <param name="logOrigin">消息来源</param>
+        /// <param name="type">类型</param>
+        /// <param name="status">状态(留空)</param>
+        /// <param name="messages">日志内容</param>
         public static void LogWriter(ListView listView, int level, string logOrigin, string type, string status, params string[] messages)
         {
             LogLevel loglevel = (LogLevel)Enum.Parse(typeof(LogLevel), Enum.GetName(typeof(LogLevel), level));
             Color LogColor = GetLogColor(loglevel);
             ListViewItem listViewItem = new ListViewItem();
-            listViewItem.SubItems[0].Text = DateTime.Now.ToString("今天 HH:mm:ss");
+            listViewItem.SubItems[0].Text = DateTime.Now.ToString("今天 HH:mm:ss");//时间
             listViewItem.SubItems.Add(logOrigin);
             listViewItem.SubItems.Add(type);
             string msg = string.Empty;
@@ -68,16 +82,21 @@ namespace Deserizition
                 msg += item;
             listViewItem.SubItems.Add(msg);
             listViewItem.SubItems.Add(status);
-            listViewItem.ForeColor = LogColor;            
+            listViewItem.ForeColor = LogColor;//消息颜色    
             listView.Invoke(new MethodInvoker(() => {
                 listView.Items.Add(listViewItem);
-                if (Save.AutoScroll)
+                if (Save.AutoScroll)//日志自动滚动
                 {
                     listView.EnsureVisible(listView.Items.Count - 1);
                     listViewItem.Selected = true;
                 }
             }));            
         }
+        /// <summary>
+        /// 获取日志文本颜色
+        /// </summary>
+        /// <param name="level">日志等级</param>
+        /// <returns></returns>
         private static Color GetLogColor(LogLevel level)
         {
             Color LogColor;
@@ -114,7 +133,13 @@ namespace Deserizition
 
             return LogColor;
         }
-
+        /// <summary>
+        /// 反正套娃就对了
+        /// </summary>
+        /// <param name="pluginname"></param>
+        /// <param name="level"></param>
+        /// <param name="type"></param>
+        /// <param name="messages"></param>
         public static void WriteLine(string pluginname,int level, string type, string messages)
         {
             LogLevel loglevel = (LogLevel)Enum.Parse(typeof(LogLevel), Enum.GetName(typeof(LogLevel), level));

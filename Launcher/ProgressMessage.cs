@@ -31,10 +31,14 @@ namespace Launcher
             {
                 case "AtMsg":
                     {
+                        //at消息主要将消息中的at消息转变为CQ码
+                        //而@人名 中的人名格式可能会不同,不能直接用群名片替换,所以要从群成员列表寻找这个人
+                        //按备注->群名片->昵称的顺序,替换可能出现的名称
                         TextMessage textMessage = JsonConvert.DeserializeObject<TextMessage>(msg);
                         result = textMessage.Content;
+                        //从缓存寻找这个群
                         GroupMemberList ls = MemberSave.Find(x => x.GroupUin == message.CurrentPacket.Data.FromGroupId);
-                        if (ls == null)
+                        if (ls == null)//未在缓存找到,将这个群加入缓存
                         {
                             ls = JsonConvert.DeserializeObject<GroupMemberList>(WebAPI.GetGroupMemberList(message.CurrentPacket.Data.FromGroupId));
                             MemberSave.Add(ls);
@@ -44,12 +48,16 @@ namespace Launcher
                             GroupMemberList.Memberlist mem = ls.MemberList.Where(x => x.MemberUin == item).First();
                             foreach (var pro in mem.GetType().GetProperties())
                             {
+                                //将空文本变成null,方便后续??运算符
                                 try
                                 {
                                     if(string.IsNullOrEmpty(pro.GetValue(mem).ToString()))
                                         pro.SetValue(mem, null);
                                 }
-                                catch(NullReferenceException e) { pro.SetValue(mem, null); }
+                                catch(NullReferenceException e)
+                                {
+                                    pro.SetValue(mem, null);//如果是null则会跳至catch块
+                                }
                             }
                             string originStr = "@" + (mem.AutoRemark ?? mem.GroupCard ?? mem.NickName);
                             result = result.Replace(originStr, CQApi.CQCode_At(item).ToSendString());
@@ -61,11 +69,12 @@ namespace Launcher
                     break;
                 case "PicMsg":
                     {
+                        //图片消息是将图片消息的信息配置进image文件夹下的以MD5为名称的cqimg文件内
                         PicMessage picMessage = JsonConvert.DeserializeObject<PicMessage>(message.CurrentPacket.Data.Content);
                         if (!Directory.Exists("data\\image"))
                             Directory.CreateDirectory("data\\image");
                         result = picMessage.Content;
-                        if (picMessage.GroupPic != null)
+                        if (picMessage.GroupPic != null)//是群图片消息
                         {
                             foreach (var item in picMessage.GroupPic)
                             {
@@ -83,7 +92,7 @@ namespace Launcher
                                 result += CQApi.CQCode_Image(md5);
                             }
                         }
-                        else
+                        else//是好友图片消息
                         {
                             foreach (var item in picMessage.FriendPic)
                             {
@@ -122,7 +131,8 @@ namespace Launcher
                         break;
                     }
             }
-            result = Regex.Replace(result, "\\[表情(\\d*)\\]", "[CQ:face,id=$1]");
+            result = Regex.Replace(result, "\\[表情(\\d*)\\]", "[CQ:face,id=$1]");//处理QQ表情信息
+            //处理emoji消息
             foreach (var a in result)
             {
                 //UTF-8下，大部分的emoji都是以\ud83d开头

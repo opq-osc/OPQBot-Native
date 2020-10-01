@@ -32,8 +32,10 @@ namespace Launcher
         static void Main()
         {
             Application.EnableVisualStyles();
-            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            //异常捕获
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);            
             Application.ThreadException += Application_ThreadException;
+            //未处理的异常捕获
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Login());
@@ -68,7 +70,7 @@ namespace Launcher
                 }
             }
         }
-
+        #region --存档部分--
         static void Ma1in(string[] args)
         {
             Init();
@@ -392,5 +394,6 @@ namespace Launcher
                 socket.Dispose(); // close & dispose of socket client
             }
         }
+        #endregion
     }
 }
