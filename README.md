@@ -32,7 +32,7 @@ V2机制去除了base64发音频和图片的方法，所以需要全限定路径
 ## CQ码解析进度
 - [x] 图片(CQ:image)
 - [x] at(CQ:at)
-- [x] 音频(CQ:record)(已知可用的格式 amr silk，其中silk格式的音频在电脑端无法正常听，在手机端可以正常听，但是不能转文本)
+- [x] 音频(CQ:record)
 - [ ] 地图(CQ:loaction)
 - [ ] xml消息(CQ:rich)
 - [x] 表情(CQ:face)
