@@ -184,7 +184,7 @@ namespace Launcher
                 }
                 catch (Exception e)
                 {
-                    LogHelper.WriteLine(CQLogLevel.Error, $"插件 {item.appinfo.Name} {ApiName} 函数发生错误，错误信息:{e.Message} {e.StackTrace}");
+                    LogHelper.WriteLine(CQLogLevel.Error,"函数执行异常" ,$"插件 {item.appinfo.Name} {ApiName} 函数发生错误，错误信息:{e.Message} {e.StackTrace}");
                     if(MessageBox((IntPtr)0,$"插件 {item.appinfo.Name} {ApiName} 函数发生错误，错误信息:{e.Message} {e.StackTrace}\n\n点确定 忽略 此错误，点取消 重载 框架","已捕获的错误",4+16)==7)
                         ReLoad();
                 }

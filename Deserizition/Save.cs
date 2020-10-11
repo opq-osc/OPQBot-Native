@@ -37,5 +37,6 @@ namespace Deserizition
         public static ListView logListView { get; set; }
         public static bool formFlag { get; set; }
         public static bool AutoScroll { get; set; } = true;
+        public static string OPQBotPath { get; set; }
     }
 }

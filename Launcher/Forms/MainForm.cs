@@ -25,6 +25,7 @@ namespace Launcher.Forms
         static LogForm logForm = new LogForm();
         public Client socket;
         public static PluginManagment pluginManagment;
+        private static int TryCount = 0;
         public MainForm()
         {
             InitializeComponent();
@@ -43,7 +44,7 @@ namespace Launcher.Forms
             string name = (JObject.Parse(
                 SendRequest($@"{Save.url}v1/LuaApiCaller?qq={Save.curentQQ}&funcname=GetQQUserList&timeout=10", "{\"StartIndex\":0}")
                 )["Friendlist"] as JArray).Where
-                (x=>x["FriendUin"].ToString()==Save.curentQQ.ToString())
+                (x => x["FriendUin"].ToString() == Save.curentQQ.ToString())
                 .FirstOrDefault()["NickName"].ToString();
             Save.name = name;
             //移动窗口到右下角
@@ -59,6 +60,7 @@ namespace Launcher.Forms
             NotifyIconHelper._NotifyIcon = notifyIcon;
             NotifyIconHelper.Init();
             NotifyIconHelper.ShowNotifyIcon();
+            notifyIcon.BalloonTipClicked += NotifyIcon_BalloonTipClicked;
             //载入插件
             pluginManagment = new PluginManagment();
             Thread thread = new Thread(() => { pluginManagment.Init(); });
@@ -66,7 +68,7 @@ namespace Launcher.Forms
             //将托盘右键菜单复制一份
             pictureBox_Main.ContextMenu = notifyIcon.ContextMenu;
             //实例化圆形图片框, 实现圆形的头像
-            HttpWebClient http = new HttpWebClient() {TimeOut=3000};
+            HttpWebClient http = new HttpWebClient() { TimeOut = 3000 };
             byte[] data = http.DownloadData($"http://q1.qlogo.cn/g?b=qq&nk={Save.curentQQ}&s=640");
             MemoryStream ms = new MemoryStream(data);
             Image image;
@@ -90,27 +92,14 @@ namespace Launcher.Forms
             //显示控件, 置顶
             this.Controls.Add(RoundpictureBox);
             RoundpictureBox.BringToFront();
-            //掉线重连处理
-            socket.ConnectionRetryAttempt += Socket_ConnectionRetryAttempt;
             //事件处理
             SocketHandler();
         }
 
-        private void Socket_ConnectionRetryAttempt(object sender, EventArgs e)
+        private void NotifyIcon_BalloonTipClicked(object sender, EventArgs e)
         {
-            int count = 1;
-            while (true)
-            {
-                LogHelper.WriteLine($"与服务器连线断开，30s后尝试重新连接，第{count}次尝试中");
-                Thread.Sleep(30000);
-                try
-                {
-                    HttpWebClient.Get($"{Save.url}v1/LuaApiCaller?qq={Save.curentQQ}&funcname=GetQQUserList&timeout=10");
-                }
-                catch { count++; continue; }
-                socket.Connect();
-                break;
-            }
+            this.TopMost = false;
+            this.TopMost = true;
         }
 
         private void pictureBox_Main_MouseDown(object sender, MouseEventArgs e)
@@ -163,11 +152,13 @@ namespace Launcher.Forms
             //收到群消息的回调事件
             socket.On("OnGroupMsgs", (fn) =>
             {
+                TryCount = 0;
                 GroupMessageHandler(fn);
             });
             //收到好友消息的回调事件
             socket.On("OnFriendMsgs", (fn) =>
             {
+                TryCount = 0;
                 FriendMessageHandler(fn);
             });
             //统一事件管理如好友进群事件 好友请求事件 退群等事件集合
@@ -322,8 +313,13 @@ namespace Launcher.Forms
                         GroupShut_groupid = Convert.ToInt64(GroupShut_data["GroupID"].ToString());
                         GroupShut_qqid = Convert.ToInt64(GroupShut_data["UserID"].ToString());
                         GroupShut_shuttime = Convert.ToInt64(GroupShut_data["ShutTime"].ToString());
-                        pluginManagment.CallFunction("GroupBan", (GroupShut_shuttime == 0 ? 1 : 2), GetTimeStamp(), GroupShut_groupid, 0, GroupShut_qqid);
+                        pluginManagment.CallFunction("GroupBan", (GroupShut_shuttime == 0 ? 1 : 2)
+                            , GetTimeStamp(), GroupShut_groupid, 0, GroupShut_qqid, GroupShut_shuttime);
                         LogHelper.WriteLine($"群 {GroupShut_groupid} UserID {GroupShut_qqid} 禁言时间 {GroupShut_shuttime}秒");
+                        break;
+                    case "ON_EVENT_QQ_NETWORK_CHANGE":
+                        TryCount++;
+                        LogHelper.WriteLine($"与服务器连接断开，第{TryCount}次尝试重连");
                         break;
                 }
             }); task.Start();
