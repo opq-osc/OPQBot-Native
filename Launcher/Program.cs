@@ -1,6 +1,8 @@
 ﻿using Launcher.Forms;
 using SocketIOClient;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Windows.Forms;
@@ -16,6 +18,12 @@ namespace Launcher
         [HandleProcessCorruptedStateExceptions]
         static void Main()
         {
+            Process[] process = Process.GetProcessesByName("Launcher");
+            if (process.Length != 1)
+            {
+                MessageBox.Show("已经启动了一个程序");
+                return;
+            }
             Application.EnableVisualStyles();
             //异常捕获
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);            
