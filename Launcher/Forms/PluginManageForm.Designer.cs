@@ -42,7 +42,6 @@
             this.groupBox_Desc = new System.Windows.Forms.GroupBox();
             this.listBox_Auth = new System.Windows.Forms.ListBox();
             this.button_Unload = new System.Windows.Forms.Button();
-            this.label_Description = new System.Windows.Forms.Label();
             this.button_Dev = new System.Windows.Forms.Button();
             this.button_Menu = new System.Windows.Forms.Button();
             this.button_Disable = new System.Windows.Forms.Button();
@@ -52,13 +51,14 @@
             this.label_DescriptionTitle = new System.Windows.Forms.Label();
             this.label_VersionTitle = new System.Windows.Forms.Label();
             this.label_AuthorTitle = new System.Windows.Forms.Label();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label_Description = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.panel1.SuspendLayout();
             this.groupBox_Desc.SuspendLayout();
-            this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // listView_PluginList
@@ -73,7 +73,7 @@
             this.listView_PluginList.HideSelection = false;
             this.listView_PluginList.LabelWrap = false;
             this.listView_PluginList.Location = new System.Drawing.Point(9, 10);
-            this.listView_PluginList.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.listView_PluginList.Margin = new System.Windows.Forms.Padding(2);
             this.listView_PluginList.MultiSelect = false;
             this.listView_PluginList.Name = "listView_PluginList";
             this.listView_PluginList.Size = new System.Drawing.Size(303, 360);
@@ -107,7 +107,7 @@
             this.panel1.Controls.Add(this.button_Reload);
             this.panel1.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.panel1.Location = new System.Drawing.Point(0, 380);
-            this.panel1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.panel1.Margin = new System.Windows.Forms.Padding(2);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(619, 54);
             this.panel1.TabIndex = 1;
@@ -126,7 +126,7 @@
             // button_Close
             // 
             this.button_Close.Location = new System.Drawing.Point(527, 12);
-            this.button_Close.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button_Close.Margin = new System.Windows.Forms.Padding(2);
             this.button_Close.Name = "button_Close";
             this.button_Close.Size = new System.Drawing.Size(77, 34);
             this.button_Close.TabIndex = 4;
@@ -151,7 +151,7 @@
             // button_AppDir
             // 
             this.button_AppDir.Location = new System.Drawing.Point(181, 12);
-            this.button_AppDir.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button_AppDir.Margin = new System.Windows.Forms.Padding(2);
             this.button_AppDir.Name = "button_AppDir";
             this.button_AppDir.Size = new System.Drawing.Size(77, 34);
             this.button_AppDir.TabIndex = 2;
@@ -161,7 +161,7 @@
             // button_EventList
             // 
             this.button_EventList.Location = new System.Drawing.Point(96, 12);
-            this.button_EventList.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button_EventList.Margin = new System.Windows.Forms.Padding(2);
             this.button_EventList.Name = "button_EventList";
             this.button_EventList.Size = new System.Drawing.Size(77, 34);
             this.button_EventList.TabIndex = 1;
@@ -171,7 +171,7 @@
             // button_Reload
             // 
             this.button_Reload.Location = new System.Drawing.Point(11, 12);
-            this.button_Reload.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button_Reload.Margin = new System.Windows.Forms.Padding(2);
             this.button_Reload.Name = "button_Reload";
             this.button_Reload.Size = new System.Drawing.Size(77, 34);
             this.button_Reload.TabIndex = 0;
@@ -196,9 +196,9 @@
             this.groupBox_Desc.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.groupBox_Desc.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.groupBox_Desc.Location = new System.Drawing.Point(316, 4);
-            this.groupBox_Desc.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox_Desc.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox_Desc.Name = "groupBox_Desc";
-            this.groupBox_Desc.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox_Desc.Padding = new System.Windows.Forms.Padding(2);
             this.groupBox_Desc.Size = new System.Drawing.Size(288, 366);
             this.groupBox_Desc.TabIndex = 2;
             this.groupBox_Desc.TabStop = false;
@@ -212,7 +212,7 @@
             this.listBox_Auth.FormattingEnabled = true;
             this.listBox_Auth.ItemHeight = 19;
             this.listBox_Auth.Location = new System.Drawing.Point(4, 199);
-            this.listBox_Auth.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.listBox_Auth.Margin = new System.Windows.Forms.Padding(2);
             this.listBox_Auth.Name = "listBox_Auth";
             this.listBox_Auth.ScrollAlwaysVisible = true;
             this.listBox_Auth.Size = new System.Drawing.Size(280, 95);
@@ -221,27 +221,17 @@
             // button_Unload
             // 
             this.button_Unload.Location = new System.Drawing.Point(219, 327);
-            this.button_Unload.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button_Unload.Margin = new System.Windows.Forms.Padding(2);
             this.button_Unload.Name = "button_Unload";
             this.button_Unload.Size = new System.Drawing.Size(58, 32);
             this.button_Unload.TabIndex = 10;
             this.button_Unload.Text = "卸载";
             this.button_Unload.UseVisualStyleBackColor = true;
             // 
-            // label_Description
-            // 
-            this.label_Description.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_Description.Location = new System.Drawing.Point(3, 19);
-            this.label_Description.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label_Description.Name = "label_Description";
-            this.label_Description.Size = new System.Drawing.Size(281, 77);
-            this.label_Description.TabIndex = 0;
-            this.label_Description.Text = "说明1.0";
-            // 
             // button_Dev
             // 
             this.button_Dev.Location = new System.Drawing.Point(147, 327);
-            this.button_Dev.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button_Dev.Margin = new System.Windows.Forms.Padding(2);
             this.button_Dev.Name = "button_Dev";
             this.button_Dev.Size = new System.Drawing.Size(58, 32);
             this.button_Dev.TabIndex = 9;
@@ -251,7 +241,7 @@
             // button_Menu
             // 
             this.button_Menu.Location = new System.Drawing.Point(77, 327);
-            this.button_Menu.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button_Menu.Margin = new System.Windows.Forms.Padding(2);
             this.button_Menu.Name = "button_Menu";
             this.button_Menu.Size = new System.Drawing.Size(58, 32);
             this.button_Menu.TabIndex = 8;
@@ -261,12 +251,13 @@
             // button_Disable
             // 
             this.button_Disable.Location = new System.Drawing.Point(7, 327);
-            this.button_Disable.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button_Disable.Margin = new System.Windows.Forms.Padding(2);
             this.button_Disable.Name = "button_Disable";
             this.button_Disable.Size = new System.Drawing.Size(58, 32);
             this.button_Disable.TabIndex = 7;
             this.button_Disable.Text = "停用";
             this.button_Disable.UseVisualStyleBackColor = true;
+            this.button_Disable.Click += new System.EventHandler(this.button_Disable_Click);
             // 
             // label_Auth
             // 
@@ -328,6 +319,26 @@
             this.label_AuthorTitle.TabIndex = 0;
             this.label_AuthorTitle.Text = "作者";
             // 
+            // groupBox1
+            // 
+            this.groupBox1.BackColor = System.Drawing.Color.Transparent;
+            this.groupBox1.Controls.Add(this.label_Description);
+            this.groupBox1.Location = new System.Drawing.Point(1, 74);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(287, 99);
+            this.groupBox1.TabIndex = 11;
+            this.groupBox1.TabStop = false;
+            // 
+            // label_Description
+            // 
+            this.label_Description.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_Description.Location = new System.Drawing.Point(3, 19);
+            this.label_Description.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label_Description.Name = "label_Description";
+            this.label_Description.Size = new System.Drawing.Size(281, 77);
+            this.label_Description.TabIndex = 0;
+            this.label_Description.Text = "说明1.0";
+            // 
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.label1);
@@ -346,16 +357,6 @@
             this.label1.TabIndex = 3;
             this.label1.Text = "从左侧选择一个应用";
             // 
-            // groupBox1
-            // 
-            this.groupBox1.BackColor = System.Drawing.Color.Transparent;
-            this.groupBox1.Controls.Add(this.label_Description);
-            this.groupBox1.Location = new System.Drawing.Point(1, 74);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(287, 99);
-            this.groupBox1.TabIndex = 11;
-            this.groupBox1.TabStop = false;
-            // 
             // PluginManageForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -367,7 +368,7 @@
             this.Controls.Add(this.listView_PluginList);
             this.Controls.Add(this.groupBox2);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.MaximizeBox = false;
             this.Name = "PluginManageForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -377,9 +378,9 @@
             this.panel1.PerformLayout();
             this.groupBox_Desc.ResumeLayout(false);
             this.groupBox_Desc.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
-            this.groupBox1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }

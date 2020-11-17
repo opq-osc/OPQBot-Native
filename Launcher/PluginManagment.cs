@@ -19,6 +19,7 @@ namespace Launcher
     public class PluginManagment
     {
         public List<Plugin> Plugins = new List<Plugin>();
+        private JObject PluginState = new JObject();
         public class Plugin
         {
             /// <summary>
@@ -34,12 +35,17 @@ namespace Launcher
             /// </summary>
             public JObject json;
             public Dll dll;
-            public Plugin(IntPtr iLib, AppInfo appinfo, JObject json, Dll dll)
+            /// <summary>
+            /// 标记插件是否启用
+            /// </summary>
+            public bool Enable;
+            public Plugin(IntPtr iLib, AppInfo appinfo, JObject json, Dll dll, bool enable)
             {
                 this.iLib = iLib;
                 this.appinfo = appinfo;
                 this.json = json;
                 this.dll = dll;
+                this.Enable = enable;
             }
         }
         /// <summary>
@@ -96,8 +102,9 @@ namespace Launcher
             AppInfo appInfo = new AppInfo(appInfotext.Value, 0, appInfotext.Key
                 , json["name"].ToString(), json["version"].ToString(), Convert.ToInt32(json["version_id"].ToString())
                 , json["author"].ToString(), json["description"].ToString(), authcode);
+            bool enabled = GetPluginState(appInfo);
             //保存至插件列表
-            Plugins.Add(new Plugin(iLib, appInfo, json, dll));
+            Plugins.Add(new Plugin(iLib, appInfo, json, dll, enabled));
             LogHelper.WriteLine(CQLogLevel.InfoSuccess, "插件载入", $"插件 {appInfo.Name} 加载成功");
             //自写方法,用于……用于什么来着，似乎有点多余，晚些看看有什么用
             cq_start(Marshal.StringToHGlobalAnsi(destpath), authcode);
@@ -105,6 +112,33 @@ namespace Launcher
             NotifyIconHelper.LoadMenu(json);
             return true;
         }
+        public void FlipPluginState(Plugin plugin)
+        {
+            var c = PluginState["states"].Where(x => x["Name"].ToString() == plugin.appinfo.Id).FirstOrDefault();
+            c["Enabled"] = c["Enabled"].Value<int>() == 1 ? 0 : 1;
+            File.WriteAllText(@"conf\states.json", PluginState.ToString());
+        }
+        private bool GetPluginState(AppInfo appInfo)
+        {
+            JArray statesArray = PluginState["states"] as JArray;
+            if (!statesArray.Any(x => x["Name"].ToString() == appInfo.Id))
+            {
+                JObject plugin = new JObject()
+                {
+                    new JProperty("Name",appInfo.Id),
+                    new JProperty("Enabled",1)
+                };
+                statesArray.Add(plugin);
+                File.WriteAllText(@"conf\states.json", PluginState.ToString());
+                return true;
+            }
+            else
+            {
+                return statesArray.Where(x => x["Name"].ToString() == appInfo.Id).First()["Enabled"]
+                    .Value<int>() == 1;
+            }
+        }
+
         /// <summary>
         /// 卸载插件，执行被卸载事件，从菜单移除此插件的菜单
         /// </summary>
@@ -129,10 +163,13 @@ namespace Launcher
         /// </summary>
         public void UnLoad()
         {
-            for (int i = 0; i < Plugins.Count; i++)
+            int max = Plugins.Count;
+            for (int i = 0; i < max; i++)
             {
                 Plugin item = Plugins[0];
                 UnLoad(item);
+                item.dll.Dispose();
+                GC.Collect();
             }
         }
         //写在构造函数是不是还好点?
@@ -151,6 +188,19 @@ namespace Launcher
                 Thread.Sleep(1000);
                 if (Directory.Exists(@"data\tmp"))
                     Directory.Delete(@"data\tmp", true);
+            }
+            if (!Directory.Exists("conf"))
+            {
+                Directory.CreateDirectory("conf");
+            }
+            if (File.Exists(@"conf\states.json"))
+            {
+                PluginState = JObject.Parse(File.ReadAllText(@"conf\states.json"));
+            }
+            if (PluginState.Count == 0)
+            {
+                PluginState.Add(new JProperty("states", new JArray()));
+                File.WriteAllText(@"conf\states.json", PluginState.ToString());
             }
             Load();
             LogHelper.WriteLine("遍历启动事件……");
@@ -172,7 +222,7 @@ namespace Launcher
             {
                 Dll dll = item.dll;
                 //先看此插件有没有使用此事件
-                if (!dll.HasFunction(ApiName, item.json)) continue;
+                if (!item.Enable || !dll.HasFunction(ApiName, item.json)) continue;
                 try
                 {
                     //存在事件,调用函数,返回1表示消息阻塞,跳出后续
@@ -184,8 +234,8 @@ namespace Launcher
                 }
                 catch (Exception e)
                 {
-                    LogHelper.WriteLine(CQLogLevel.Error,"函数执行异常" ,$"插件 {item.appinfo.Name} {ApiName} 函数发生错误，错误信息:{e.Message} {e.StackTrace}");
-                    if(MessageBox((IntPtr)0,$"插件 {item.appinfo.Name} {ApiName} 函数发生错误，错误信息:{e.Message} {e.StackTrace}\n\n点确定 忽略 此错误，点取消 重载 框架","已捕获的错误",4+16)==7)
+                    LogHelper.WriteLine(CQLogLevel.Error, "函数执行异常", $"插件 {item.appinfo.Name} {ApiName} 函数发生错误，错误信息:{e.Message} {e.StackTrace}");
+                    if (MessageBox((IntPtr)0, $"插件 {item.appinfo.Name} {ApiName} 函数发生错误，错误信息:{e.Message} {e.StackTrace}\n\n点确定 忽略 此错误，点取消 重载 框架", "已捕获的错误", 4 + 16) == 7)
                         ReLoad();
                 }
             }
@@ -200,9 +250,10 @@ namespace Launcher
         {
             UnLoad();
             NotifyIconHelper.HideNotifyIcon();
+            //Load();
             string path = typeof(MainForm).Assembly.Location;//获取可执行文件路径
-            Process.Start(path);//再次运行程序
-            Environment.Exit(0);//关闭当前程序            
+            Process.Start(path);//再次运行程序
+            Environment.Exit(0);//关闭当前程序
         }
     }
 }

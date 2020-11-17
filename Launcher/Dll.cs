@@ -1,13 +1,15 @@
 ﻿using Launcher.Sdk.Cqp.Enum;
+using Launcher.Sdk.Cqp.Expand;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 
 namespace Launcher
 {
-    public class Dll
+    public class Dll : IDisposable
     {
         [DllImport("kernel32.dll")]
         private extern static IntPtr LoadLibrary(String path);
@@ -27,9 +29,12 @@ namespace Launcher
         [DllImport("CQP.dll", EntryPoint = "AddRequestToSave")]
         public extern static bool AddRequestToSave(Deserizition.Requests request);
 
+        [DllImport("Kernel32")]
+        private extern static bool CloseHandle(IntPtr handle);
+
         private IntPtr hLib;
 
-        private delegate IntPtr Type_AppInfo();
+        private delegate string Type_AppInfo();
         private delegate int Type_Initialize(int authcode);
         private delegate int Type_PrivateMsg(int subType, int msgId, long fromQQ, IntPtr msg, int font);
         private delegate int Type_GroupMsg(int subType, int msgId, long fromGroup, long fromQQ, string fromAnonymous, IntPtr msg, int font);
@@ -129,10 +134,55 @@ namespace Launcher
             }
             return (IntPtr)0;
         }
-        public bool UnLoad()
+
+        public void UnLoad()
         {
-            FreeLibrary(hLib);
-            return FreeLibrary(hLib);
+            Dispose();
+        }
+        
+        public void Dispose()
+        {
+            Console.WriteLine("调用IDisposable接口");
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        ~Dll()
+        {
+            Console.WriteLine("调用析构");
+            Dispose(false);
+        }
+        private void Dispose(bool flag)
+        {
+            if (flag)
+            {
+                AppInfo = null;
+                Initialize = null;
+                PrivateMsg = null;
+                GroupMsg = null;
+                Upload = null;
+                AdminChange = null;
+                GroupMemberDecrease = null;
+                GroupMemberIncrease = null;
+                GroupBan = null;
+                FriendAdded = null;
+                FriendRequest = null;
+                GroupAddRequest = null;
+                Startup = null;
+                Exit = null;
+                Enable = null;
+                Disable = null;
+            }
+            if (hLib != IntPtr.Zero)
+            {
+                IntPtr c;
+                do
+                {
+                    if (!FreeLibrary(hLib))
+                        Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+                    c = GetProcAddress(hLib, "AppInfo");
+                } while (c != IntPtr.Zero);
+                hLib = IntPtr.Zero;
+            }
         }
         public bool HasFunction(string ApiName, JObject json)
         {
@@ -198,7 +248,8 @@ namespace Launcher
         }
         public KeyValuePair<int, string> GetAppInfo()
         {
-            string appinfo = Marshal.PtrToStringAnsi(AppInfo());
+            string appinfo = AppInfo();
+            //string appinfo = "9,me.cqp.luohuaming.setu";
             string[] pair = appinfo.Split(',');
             if (pair.Length != 2)
                 throw new Exception("获取AppInfo信息失败");

@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace Launcher.Forms
@@ -13,7 +14,7 @@ namespace Launcher.Forms
             InitializeComponent();
         }
         List<PluginManagment.Plugin> plugins = new List<PluginManagment.Plugin>();
-        static readonly Dictionary<int, string> ChineseName =new Dictionary<int, string>() {
+        static readonly Dictionary<int, string> ChineseName = new Dictionary<int, string>() {
             {20,"[敏感]取Cookies"},
             {30,"接收语音"},
             {101,"发送群消息"},
@@ -43,10 +44,11 @@ namespace Launcher.Forms
         private void PluginManageForm_Load(object sender, EventArgs e)
         {
             plugins = MainForm.pluginManagment.Plugins;
-            foreach(var item in plugins)
+            foreach (var item in plugins)
             {
                 ListViewItem listViewItem = new ListViewItem();
-                listViewItem.SubItems[0].Text = item.appinfo.Name;
+                listViewItem.ForeColor = item.Enable ? Color.Black : Color.Gray;
+                listViewItem.SubItems[0].Text = (item.Enable ? "" : "[未启用] ") + item.appinfo.Name;
                 listViewItem.SubItems.Add(item.appinfo.Version.ToString());
                 listViewItem.SubItems.Add(item.appinfo.Author);
                 listView_PluginList.Items.Add(listViewItem);
@@ -64,7 +66,10 @@ namespace Launcher.Forms
             if (listView_PluginList.SelectedItems.Count != 0)
             {
                 groupBox_Desc.Visible = true;
-                ShowPluginInfo(plugins.Find(x=>x.appinfo.Name==listView_PluginList.SelectedItems[0].Text));
+                var plugin = MainForm.pluginManagment.Plugins[listView_PluginList.SelectedItems[0].Index];
+                button_Disable.Text = plugin.Enable ? "停用" : "启用";
+                //ShowPluginInfo(plugins.Find(x => x.appinfo.Name == listView_PluginList.SelectedItems[0].Text));
+                ShowPluginInfo(plugin);
             }
         }
         private void ShowPluginInfo(PluginManagment.Plugin plugin)
@@ -83,6 +88,29 @@ namespace Launcher.Forms
         {
             if (MessageBox.Show("确认重启框架吗？", "框架提出了一个疑问", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 MainForm.pluginManagment.ReLoad();
+        }
+
+        private void button_Disable_Click(object sender, EventArgs e)
+        {
+            if (listView_PluginList.SelectedItems.Count == 0)
+                return;
+            var plugin = MainForm.pluginManagment.Plugins[listView_PluginList.SelectedItems[0].Index];
+            var listBoxItem = listView_PluginList.SelectedItems[0];
+            if (plugin.Enable)
+            {
+                plugin.Enable = false;
+                listBoxItem.ForeColor = Color.Gray;
+                listBoxItem.SubItems[0].Text = (plugin.Enable ? "" : "[未启用] ") + plugin.appinfo.Name;
+                button_Disable.Text = "启用";
+            }
+            else
+            {
+                plugin.Enable = true;
+                listBoxItem.ForeColor = Color.Black;
+                listBoxItem.SubItems[0].Text = (plugin.Enable ? "" : "[未启用] ") + plugin.appinfo.Name;
+                button_Disable.Text = "停用";
+            }
+            MainForm.pluginManagment.FlipPluginState(plugin);
         }
     }
 }

@@ -69,17 +69,25 @@ namespace Launcher.Forms
             pictureBox_Main.ContextMenu = notifyIcon.ContextMenu;
             //实例化圆形图片框, 实现圆形的头像
             HttpWebClient http = new HttpWebClient() { TimeOut = 3000 };
-            byte[] data = http.DownloadData($"http://q1.qlogo.cn/g?b=qq&nk={Save.curentQQ}&s=640");
-            MemoryStream ms = new MemoryStream(data);
-            Image image;
-            if (ms.Length > 0)
-                image = Image.FromStream(ms);
-            else
-                image = null;
+            byte[] data = { };
+            Image image = Image.FromFile(@"conf\DefaultPic.jpeg");
+            try
+            {
+                data = http.DownloadData($"http://q1.qlogo.cn/g?b=qq&nk={Save.curentQQ}&s=640");
+                MemoryStream ms = new MemoryStream(data);
+                if (ms.Length > 0)
+                    image = Image.FromStream(ms);
+                else
+                    image = Image.FromFile(@"conf\DefaultPic.jpeg");
+            }
+            catch
+            {
+                CoreHelper.WriteLine("下载头像超时，重新启动程序可能解决这个问题");
+            }
+
             RoundPictureBox RoundpictureBox = new RoundPictureBox
             {
                 Size = new Size(43, 43),
-                //Image = Image.FromFile(@"E:\图\Phone\QQ图片20200905184122.jpg"),                
                 SizeMode = PictureBoxSizeMode.StretchImage,
                 Left = -1,
                 Top = 0,
