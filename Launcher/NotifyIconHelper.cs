@@ -70,8 +70,8 @@ namespace Launcher
                         Quit();
                         return;
                     case "ReLoad":
-                        //MainForm.pluginManagment.ReLoad();
-                        ReStart();
+                        MainForm.pluginManagment.ReLoad();
+                        //ReStart();
                         return;
                     case "LogForm":
                         MainForm.CallLogForm();

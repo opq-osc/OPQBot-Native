@@ -252,7 +252,7 @@ namespace Launcher
             NotifyIconHelper.HideNotifyIcon();
             //Load();
             string path = typeof(MainForm).Assembly.Location;//获取可执行文件路径
-            Process.Start(path);//再次运行程序
+            Process.Start(path,"-r");//再次运行程序
             Environment.Exit(0);//关闭当前程序
         }
     }

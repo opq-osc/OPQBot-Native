@@ -20,17 +20,28 @@ namespace Launcher
 
         [STAThread]
         [HandleProcessCorruptedStateExceptions]
-        static void Main()
+        static void Main(params string[] args)
         {
             Process[] process = Process.GetProcessesByName("Launcher");
-            if (process.Length != 1)
+            if (args.Length != 0 && args[0] == "-r")
             {
-                MessageBox.Show("已经启动了一个程序");
-                return;
+                int initialNum = process.Length;
+                while(Process.GetProcessesByName("Launcher").Length!=initialNum-1)
+                {
+                    Thread.Sleep(1000);
+                }
+            }
+            else
+            {
+                if (process.Length != 1)
+                {
+                    MessageBox.Show("已经启动了一个程序");
+                    return;
+                }
             }
             Application.EnableVisualStyles();
             //异常捕获
-            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);            
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
             Application.ThreadException += Application_ThreadException;
             //未处理的异常捕获
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
@@ -67,7 +78,7 @@ namespace Launcher
             AppInfo appInfo = new AppInfo(appInfotext.Value, 0, appInfotext.Key
                 , json["name"].ToString(), json["version"].ToString(), Convert.ToInt32(json["version_id"].ToString())
                 , json["author"].ToString(), json["description"].ToString(), 0);
-            Plugins.Add(new PluginManagment.Plugin(iLib, appInfo, json, dll,false));
+            Plugins.Add(new PluginManagment.Plugin(iLib, appInfo, json, dll, false));
 
             Console.WriteLine($"插件 {appInfo.Name} 加载成功");
             return true;
@@ -81,12 +92,12 @@ namespace Launcher
             try
             {
                 plugin.dll.UnLoad();
-                Console.WriteLine($"插件 {plugin.appinfo.Name} 卸载成功");                
-                plugin= null;
+                Console.WriteLine($"插件 {plugin.appinfo.Name} 卸载成功");
+                plugin = null;
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message+e.StackTrace);
+                Console.WriteLine(e.Message + e.StackTrace);
             }
         }
 
@@ -95,10 +106,10 @@ namespace Launcher
         {
             if (e.ExceptionObject is Exception ex)
             {
-                if(MessageBox.Show($"发生错误，错误信息{ex}\n\n需要重启框架？", "错误"
+                if (MessageBox.Show($"发生错误，错误信息{ex}\n\n需要重启框架？", "错误"
                     , MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
                 {
-                    pluginManagment.ReLoad();
+                    MainForm.pluginManagment.ReLoad();
                 }
                 else
                 {
@@ -111,10 +122,10 @@ namespace Launcher
         {
             if (e.Exception != null)
             {
-                if( MessageBox.Show($"发生错误，错误信息{e}\n\n需要重启框架？", "错误"
+                if (MessageBox.Show($"发生错误，错误信息{e}\n\n需要重启框架？", "错误"
                     , MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
                 {
-                    pluginManagment.ReLoad();
+                    MainForm.pluginManagment.ReLoad();
                 }
                 else
                 {
