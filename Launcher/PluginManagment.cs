@@ -19,7 +19,6 @@ namespace Launcher
     public class PluginManagment
     {
         public List<Plugin> Plugins = new List<Plugin>();
-        private JObject PluginState = new JObject();
         public class Plugin
         {
             /// <summary>
@@ -114,13 +113,13 @@ namespace Launcher
         }
         public void FlipPluginState(Plugin plugin)
         {
-            var c = PluginState["states"].Where(x => x["Name"].ToString() == plugin.appinfo.Id).FirstOrDefault();
+            var c = MainForm.AppConfig["states"].Where(x => x["Name"].ToString() == plugin.appinfo.Id).FirstOrDefault();
             c["Enabled"] = c["Enabled"].Value<int>() == 1 ? 0 : 1;
-            File.WriteAllText(@"conf\states.json", PluginState.ToString());
+            File.WriteAllText(@"conf\states.json", MainForm.AppConfig.ToString());
         }
         private bool GetPluginState(AppInfo appInfo)
         {
-            JArray statesArray = PluginState["states"] as JArray;
+            JArray statesArray = MainForm.AppConfig["states"] as JArray;
             if (!statesArray.Any(x => x["Name"].ToString() == appInfo.Id))
             {
                 JObject plugin = new JObject()
@@ -129,7 +128,7 @@ namespace Launcher
                     new JProperty("Enabled",1)
                 };
                 statesArray.Add(plugin);
-                File.WriteAllText(@"conf\states.json", PluginState.ToString());
+                File.WriteAllText(@"conf\states.json", MainForm.AppConfig.ToString());
                 return true;
             }
             else
@@ -185,22 +184,14 @@ namespace Launcher
             }
             catch//有时候重载有前一进程还未退出,后一进程就启动的情况,导致无法删除而临时文件爆炸
             {
-                Thread.Sleep(1000);
                 if (Directory.Exists(@"data\tmp"))
                     Directory.Delete(@"data\tmp", true);
             }
-            if (!Directory.Exists("conf"))
+            
+            if (MainForm.AppConfig.Count == 0)
             {
-                Directory.CreateDirectory("conf");
-            }
-            if (File.Exists(@"conf\states.json"))
-            {
-                PluginState = JObject.Parse(File.ReadAllText(@"conf\states.json"));
-            }
-            if (PluginState.Count == 0)
-            {
-                PluginState.Add(new JProperty("states", new JArray()));
-                File.WriteAllText(@"conf\states.json", PluginState.ToString());
+                MainForm.AppConfig.Add(new JProperty("states", new JArray()));
+                File.WriteAllText(@"conf\states.json", MainForm.AppConfig.ToString());
             }
             Load();
             LogHelper.WriteLine("遍历启动事件……");
@@ -248,7 +239,7 @@ namespace Launcher
         /// </summary>
         public void ReLoad()
         {
-            UnLoad();
+            //UnLoad();
             NotifyIconHelper.HideNotifyIcon();
             //Load();
             string path = typeof(MainForm).Assembly.Location;//获取可执行文件路径

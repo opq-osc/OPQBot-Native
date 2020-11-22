@@ -62,9 +62,11 @@
             this.Name = "MainForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "OPQBot-Native 兼容框架";
             this.TopMost = true;
             this.Load += new System.EventHandler(this.MainForm_Load);
+            this.Move += new System.EventHandler(this.MainForm_Move);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_Main)).EndInit();
             this.ResumeLayout(false);
 

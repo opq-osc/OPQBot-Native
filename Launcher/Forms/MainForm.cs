@@ -26,9 +26,11 @@ namespace Launcher.Forms
         public Client socket;
         public static PluginManagment pluginManagment;
         private static int TryCount = 0;
+        public static JObject AppConfig = new JObject();
+        static bool Loaded = false;
         public MainForm()
         {
-            InitializeComponent();
+            InitializeComponent();            
         }
         #region 拖动无窗体的控件
         [DllImport("user32.dll")]
@@ -47,8 +49,30 @@ namespace Launcher.Forms
                 (x => x["FriendUin"].ToString() == Save.curentQQ.ToString())
                 .FirstOrDefault()["NickName"].ToString();
             Save.name = name;
-            //移动窗口到右下角
-            this.Left = 1800; this.Top = 907;
+            if (!Directory.Exists("conf"))
+            {
+                Directory.CreateDirectory("conf");
+            }
+            if (File.Exists(@"conf\states.json"))
+            {
+                AppConfig = JObject.Parse(File.ReadAllText(@"conf\states.json"));
+            }
+            if (AppConfig.Count == 0 || !AppConfig.ContainsKey("Main"))
+            {
+                JObject config = new JObject
+                {
+                    new JProperty("FormX",Left),
+                    new JProperty("FormY",Top)
+                };
+                AppConfig.Add(new JProperty("Main", config));
+                File.WriteAllText(@"conf\states.json", AppConfig.ToString());
+
+            }
+            else
+            {
+                Left = Convert.ToInt32(AppConfig["Main"]["FormX"].ToString());
+                Top = Convert.ToInt32(AppConfig["Main"]["FormY"].ToString());
+            }
             //设置窗口透明色, 实现窗口背景透明
             this.TransparencyKey = Color.Gray;
             this.BackColor = Color.Gray;
@@ -100,6 +124,7 @@ namespace Launcher.Forms
             //显示控件, 置顶
             this.Controls.Add(RoundpictureBox);
             RoundpictureBox.BringToFront();
+            Loaded = true;
             //事件处理
             SocketHandler();
         }
@@ -335,6 +360,15 @@ namespace Launcher.Forms
         public static long GetTimeStamp()
         {
             return (DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000000;
+        }
+
+        private void MainForm_Move(object sender, EventArgs e)
+        {
+            if (Loaded is false)
+                return;
+            AppConfig["Main"]["FormX"] = Left;
+            AppConfig["Main"]["FormY"] = Top;
+            File.WriteAllText(@"conf\states.json", AppConfig.ToString());
         }
     }
 }
