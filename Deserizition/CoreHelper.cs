@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+
 namespace Deserizition
 {
     public enum LogLevel
@@ -181,6 +182,5 @@ namespace Deserizition
             else
                 LogWriter(Save.logListView, (int)level,string.IsNullOrEmpty(pluginname)?"OPQBot框架":pluginname, type, "...", messages);
         }
-
     }
 }

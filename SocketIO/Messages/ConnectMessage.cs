@@ -40,7 +40,7 @@ namespace SocketIOClient.Messages
         {
             get
             {
-                return string.Format("1::{0}{1}", this.Endpoint, string.Empty, string.Empty);
+                return string.Format("1::{0}{1}", this.Endpoint, string.Empty);
             }
         }
     }

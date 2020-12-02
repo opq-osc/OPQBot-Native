@@ -1,4 +1,5 @@
-﻿using Launcher.Forms;
+﻿using Deserizition;
+using Launcher.Forms;
 using Launcher.Sdk.Cqp.Model;
 using Newtonsoft.Json.Linq;
 using SocketIOClient;
@@ -106,12 +107,12 @@ namespace Launcher
         {
             if (e.ExceptionObject is Exception ex)
             {
-                if (MessageBox.Show($"发生错误，错误信息{ex}\n\n需要重启框架？", "错误"
-                    , MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
+                var b = ErrorHelper.ShowErrorDialog(ex.ToString());
+                if (b == ErrorHelper.TaskDialogResult.ReloadApp)
                 {
                     MainForm.pluginManagment.ReLoad();
                 }
-                else
+                else if (b == ErrorHelper.TaskDialogResult.Exit)
                 {
                     Environment.Exit(0);
                 }
@@ -122,16 +123,16 @@ namespace Launcher
         {
             if (e.Exception != null)
             {
-                if (MessageBox.Show($"发生错误，错误信息{e}\n\n需要重启框架？", "错误"
-                    , MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
+                var b = ErrorHelper.ShowErrorDialog(e.ToString());
+                if (b==ErrorHelper.TaskDialogResult.ReloadApp)
                 {
                     MainForm.pluginManagment.ReLoad();
                 }
-                else
+                else if(b==ErrorHelper.TaskDialogResult.Exit)
                 {
                     Environment.Exit(0);
                 }
             }
-        }
+        }        
     }
 }

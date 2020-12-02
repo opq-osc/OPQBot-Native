@@ -226,13 +226,20 @@ namespace Launcher
                 catch (Exception e)
                 {
                     LogHelper.WriteLine(CQLogLevel.Error, "函数执行异常", $"插件 {item.appinfo.Name} {ApiName} 函数发生错误，错误信息:{e.Message} {e.StackTrace}");
-                    if (MessageBox((IntPtr)0, $"插件 {item.appinfo.Name} {ApiName} 函数发生错误，错误信息:{e.Message} {e.StackTrace}\n\n点确定 忽略 此错误，点取消 重载 框架", "已捕获的错误", 4 + 16) == 7)
-                        ReLoad();
+                    var b = ErrorHelper.ShowErrorDialog($"错误模块：{item.appinfo.Name}\n{ApiName} 函数发生错误，错误信息:\n{e.Message} {e.StackTrace}");
+                    switch(b)
+                    {
+                        case ErrorHelper.TaskDialogResult.ReloadApp:
+                            ReLoad();
+                            break;
+                        case ErrorHelper.TaskDialogResult.Exit:
+                            NotifyIconHelper.HideNotifyIcon();
+                            Environment.Exit(0);
+                            break;
+                    }
                 }
             }
         }
-        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
-        public static extern int MessageBox(IntPtr hWnd, String text, String caption, uint type);
         /// <summary>
         /// 重载应用
         /// 未找到去除文件占用的方法，只能重启程序来实现重载了
