@@ -36,8 +36,8 @@ namespace Launcher
             {
                 if (process.Length != 1)
                 {
-                    MessageBox.Show("已经启动了一个程序");
-                    return;
+                    //MessageBox.Show("已经启动了一个程序");
+                    //return;
                 }
             }
             Application.EnableVisualStyles();

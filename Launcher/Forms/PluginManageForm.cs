@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
 namespace Launcher.Forms
@@ -43,6 +44,7 @@ namespace Launcher.Forms
         };
         private void PluginManageForm_Load(object sender, EventArgs e)
         {
+            label_MainVersion.Text = $"{Application.ProductVersion}（开发版本）";
             plugins = MainForm.pluginManagment.Plugins;
             foreach (var item in plugins)
             {
@@ -68,8 +70,14 @@ namespace Launcher.Forms
                 groupBox_Desc.Visible = true;
                 var plugin = MainForm.pluginManagment.Plugins[listView_PluginList.SelectedItems[0].Index];
                 button_Disable.Text = plugin.Enable ? "停用" : "启用";
+                string desc = $"{plugin.appinfo.Name} ({plugin.appinfo.Id})";
+                if(desc.Length>=37)
+                {
+                    desc=desc.Substring(0, 28)+"...";
+                }
+                groupBox_Desc.Text = desc;
                 //ShowPluginInfo(plugins.Find(x => x.appinfo.Name == listView_PluginList.SelectedItems[0].Text));
-                ShowPluginInfo(plugin);
+                ShowPluginInfo(plugin);                
             }
         }
         private void ShowPluginInfo(PluginManagment.Plugin plugin)
@@ -79,7 +87,7 @@ namespace Launcher.Forms
             label_Version.Text = appinfo.Version.ToString();
             label_Description.Text = appinfo.Description;
             JObject json = plugin.json;
-            label_Auth.Text = $"需要以下权限({JArray.Parse(json["auth"].ToString()).Count})个";
+            label_Auth.Text = $"需要以下权限（{JArray.Parse(json["auth"].ToString()).Count}个）";
             foreach (var item in (JArray)json["auth"])
                 listBox_Auth.Items.Add(ChineseName[Convert.ToInt32(item.ToString())]);
         }
