@@ -314,6 +314,7 @@
             this.button_Menu.TabIndex = 8;
             this.button_Menu.Text = "菜单";
             this.button_Menu.UseVisualStyleBackColor = true;
+            this.button_Menu.Click += new System.EventHandler(this.button_Menu_Click);
             // 
             // button_Disable
             // 

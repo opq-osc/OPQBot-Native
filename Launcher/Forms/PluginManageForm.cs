@@ -136,5 +136,23 @@ namespace Launcher.Forms
             string path = Path.Combine(Application.StartupPath, "data", "plugins");
             Process.Start(path);
         }
+
+        private void button_Menu_Click(object sender, EventArgs e)
+        {
+            if (listView_PluginList.SelectedItems.Count != 0)
+            {
+                var plugin = MainForm.pluginManagment.Plugins[listView_PluginList.SelectedItems[0].Index];
+                ContextMenu menu = NotifyIconHelper._NotifyIcon.ContextMenu;
+                var res = menu.MenuItems.Find("PluginMenu", false)[0].MenuItems.Find(plugin.appinfo.Name, false)[0];
+                ContextMenu contextMenu = new ContextMenu();
+                foreach(MenuItem item in res.MenuItems)
+                {
+                    var b = item.CloneMenu();
+                    b.Tag = item.Tag;
+                    contextMenu.MenuItems.Add(b);
+                }    
+                contextMenu.Show(button_Menu,button_Menu.PointToClient(MousePosition));
+            }
+        }
     }
 }
