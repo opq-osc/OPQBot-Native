@@ -40,29 +40,29 @@
             this.button_EventList = new System.Windows.Forms.Button();
             this.button_Reload = new System.Windows.Forms.Button();
             this.groupBox_Desc = new System.Windows.Forms.GroupBox();
+            this.panel3 = new System.Windows.Forms.Panel();
+            this.label_VersionTitle = new System.Windows.Forms.Label();
+            this.label_Version = new System.Windows.Forms.Label();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.label_AuthorTitle = new System.Windows.Forms.Label();
+            this.label_Author = new System.Windows.Forms.Label();
             this.listBox_Auth = new System.Windows.Forms.ListBox();
             this.button_Unload = new System.Windows.Forms.Button();
             this.button_Dev = new System.Windows.Forms.Button();
             this.button_Menu = new System.Windows.Forms.Button();
             this.button_Disable = new System.Windows.Forms.Button();
             this.label_Auth = new System.Windows.Forms.Label();
-            this.label_Version = new System.Windows.Forms.Label();
-            this.label_Author = new System.Windows.Forms.Label();
             this.label_DescriptionTitle = new System.Windows.Forms.Label();
-            this.label_VersionTitle = new System.Windows.Forms.Label();
-            this.label_AuthorTitle = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.label_Description = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.panel3 = new System.Windows.Forms.Panel();
             this.panel1.SuspendLayout();
             this.groupBox_Desc.SuspendLayout();
+            this.panel3.SuspendLayout();
+            this.panel2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
-            this.panel2.SuspendLayout();
-            this.panel3.SuspendLayout();
             this.SuspendLayout();
             // 
             // listView_PluginList
@@ -161,6 +161,7 @@
             this.button_AppDir.TabIndex = 2;
             this.button_AppDir.Text = "应用目录";
             this.button_AppDir.UseVisualStyleBackColor = true;
+            this.button_AppDir.Click += new System.EventHandler(this.button_AppDir_Click);
             // 
             // button_EventList
             // 
@@ -206,6 +207,70 @@
             this.groupBox_Desc.TabStop = false;
             this.groupBox_Desc.Text = "应用信息";
             this.groupBox_Desc.Visible = false;
+            // 
+            // panel3
+            // 
+            this.panel3.Controls.Add(this.label_VersionTitle);
+            this.panel3.Controls.Add(this.label_Version);
+            this.panel3.Location = new System.Drawing.Point(4, 40);
+            this.panel3.Name = "panel3";
+            this.panel3.Size = new System.Drawing.Size(277, 24);
+            this.panel3.TabIndex = 4;
+            // 
+            // label_VersionTitle
+            // 
+            this.label_VersionTitle.AutoSize = true;
+            this.label_VersionTitle.Dock = System.Windows.Forms.DockStyle.Left;
+            this.label_VersionTitle.Location = new System.Drawing.Point(0, 0);
+            this.label_VersionTitle.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label_VersionTitle.Name = "label_VersionTitle";
+            this.label_VersionTitle.Size = new System.Drawing.Size(32, 17);
+            this.label_VersionTitle.TabIndex = 1;
+            this.label_VersionTitle.Text = "版本";
+            // 
+            // label_Version
+            // 
+            this.label_Version.AutoSize = true;
+            this.label_Version.Dock = System.Windows.Forms.DockStyle.Right;
+            this.label_Version.Location = new System.Drawing.Point(242, 0);
+            this.label_Version.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label_Version.Name = "label_Version";
+            this.label_Version.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.label_Version.Size = new System.Drawing.Size(35, 17);
+            this.label_Version.TabIndex = 4;
+            this.label_Version.Text = "1.0.1";
+            // 
+            // panel2
+            // 
+            this.panel2.Controls.Add(this.label_AuthorTitle);
+            this.panel2.Controls.Add(this.label_Author);
+            this.panel2.Location = new System.Drawing.Point(4, 19);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(281, 19);
+            this.panel2.TabIndex = 4;
+            // 
+            // label_AuthorTitle
+            // 
+            this.label_AuthorTitle.AutoSize = true;
+            this.label_AuthorTitle.Dock = System.Windows.Forms.DockStyle.Left;
+            this.label_AuthorTitle.Location = new System.Drawing.Point(0, 0);
+            this.label_AuthorTitle.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label_AuthorTitle.Name = "label_AuthorTitle";
+            this.label_AuthorTitle.Size = new System.Drawing.Size(32, 17);
+            this.label_AuthorTitle.TabIndex = 0;
+            this.label_AuthorTitle.Text = "作者";
+            // 
+            // label_Author
+            // 
+            this.label_Author.AutoSize = true;
+            this.label_Author.Dock = System.Windows.Forms.DockStyle.Right;
+            this.label_Author.Location = new System.Drawing.Point(237, 0);
+            this.label_Author.Margin = new System.Windows.Forms.Padding(0);
+            this.label_Author.Name = "label_Author";
+            this.label_Author.Size = new System.Drawing.Size(44, 17);
+            this.label_Author.TabIndex = 3;
+            this.label_Author.Text = "落花茗";
+            this.label_Author.TextAlign = System.Drawing.ContentAlignment.BottomRight;
             // 
             // listBox_Auth
             // 
@@ -271,30 +336,6 @@
             this.label_Auth.TabIndex = 5;
             this.label_Auth.Text = "需要以下权限（xx个）";
             // 
-            // label_Version
-            // 
-            this.label_Version.AutoSize = true;
-            this.label_Version.Dock = System.Windows.Forms.DockStyle.Right;
-            this.label_Version.Location = new System.Drawing.Point(242, 0);
-            this.label_Version.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label_Version.Name = "label_Version";
-            this.label_Version.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.label_Version.Size = new System.Drawing.Size(35, 17);
-            this.label_Version.TabIndex = 4;
-            this.label_Version.Text = "1.0.1";
-            // 
-            // label_Author
-            // 
-            this.label_Author.AutoSize = true;
-            this.label_Author.Dock = System.Windows.Forms.DockStyle.Right;
-            this.label_Author.Location = new System.Drawing.Point(237, 0);
-            this.label_Author.Margin = new System.Windows.Forms.Padding(0);
-            this.label_Author.Name = "label_Author";
-            this.label_Author.Size = new System.Drawing.Size(44, 17);
-            this.label_Author.TabIndex = 3;
-            this.label_Author.Text = "落花茗";
-            this.label_Author.TextAlign = System.Drawing.ContentAlignment.BottomRight;
-            // 
             // label_DescriptionTitle
             // 
             this.label_DescriptionTitle.AutoSize = true;
@@ -304,28 +345,6 @@
             this.label_DescriptionTitle.Size = new System.Drawing.Size(32, 17);
             this.label_DescriptionTitle.TabIndex = 2;
             this.label_DescriptionTitle.Text = "说明";
-            // 
-            // label_VersionTitle
-            // 
-            this.label_VersionTitle.AutoSize = true;
-            this.label_VersionTitle.Dock = System.Windows.Forms.DockStyle.Left;
-            this.label_VersionTitle.Location = new System.Drawing.Point(0, 0);
-            this.label_VersionTitle.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label_VersionTitle.Name = "label_VersionTitle";
-            this.label_VersionTitle.Size = new System.Drawing.Size(32, 17);
-            this.label_VersionTitle.TabIndex = 1;
-            this.label_VersionTitle.Text = "版本";
-            // 
-            // label_AuthorTitle
-            // 
-            this.label_AuthorTitle.AutoSize = true;
-            this.label_AuthorTitle.Dock = System.Windows.Forms.DockStyle.Left;
-            this.label_AuthorTitle.Location = new System.Drawing.Point(0, 0);
-            this.label_AuthorTitle.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label_AuthorTitle.Name = "label_AuthorTitle";
-            this.label_AuthorTitle.Size = new System.Drawing.Size(32, 17);
-            this.label_AuthorTitle.TabIndex = 0;
-            this.label_AuthorTitle.Text = "作者";
             // 
             // groupBox1
             // 
@@ -365,24 +384,6 @@
             this.label1.TabIndex = 3;
             this.label1.Text = "从左侧选择一个应用";
             // 
-            // panel2
-            // 
-            this.panel2.Controls.Add(this.label_AuthorTitle);
-            this.panel2.Controls.Add(this.label_Author);
-            this.panel2.Location = new System.Drawing.Point(4, 19);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(281, 19);
-            this.panel2.TabIndex = 4;
-            // 
-            // panel3
-            // 
-            this.panel3.Controls.Add(this.label_VersionTitle);
-            this.panel3.Controls.Add(this.label_Version);
-            this.panel3.Location = new System.Drawing.Point(4, 40);
-            this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(277, 24);
-            this.panel3.TabIndex = 4;
-            // 
             // PluginManageForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -404,13 +405,13 @@
             this.panel1.PerformLayout();
             this.groupBox_Desc.ResumeLayout(false);
             this.groupBox_Desc.PerformLayout();
+            this.panel3.ResumeLayout(false);
+            this.panel3.PerformLayout();
+            this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
-            this.panel2.ResumeLayout(false);
-            this.panel2.PerformLayout();
-            this.panel3.ResumeLayout(false);
-            this.panel3.PerformLayout();
             this.ResumeLayout(false);
 
         }

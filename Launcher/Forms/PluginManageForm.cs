@@ -2,8 +2,10 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Text;
 using System.Windows.Forms;
 
 namespace Launcher.Forms
@@ -71,13 +73,21 @@ namespace Launcher.Forms
                 var plugin = MainForm.pluginManagment.Plugins[listView_PluginList.SelectedItems[0].Index];
                 button_Disable.Text = plugin.Enable ? "停用" : "启用";
                 string desc = $"{plugin.appinfo.Name} ({plugin.appinfo.Id})";
-                if(desc.Length>=37)
+                var b = Encoding.Default.GetBytes(desc);
+                if (b.Length >= 40)
                 {
-                    desc=desc.Substring(0, 28)+"...";
+                    List<byte> res = new List<byte>();
+                    for (int i = 0; i < 37; i++)
+                        res.Add(b[i]);
+                    desc = Encoding.Default.GetString(res.ToArray()) + "...";
                 }
                 groupBox_Desc.Text = desc;
                 //ShowPluginInfo(plugins.Find(x => x.appinfo.Name == listView_PluginList.SelectedItems[0].Text));
-                ShowPluginInfo(plugin);                
+                ShowPluginInfo(plugin);
+            }
+            else
+            {
+                groupBox_Desc.Visible = false;
             }
         }
         private void ShowPluginInfo(PluginManagment.Plugin plugin)
@@ -119,6 +129,12 @@ namespace Launcher.Forms
                 button_Disable.Text = "停用";
             }
             MainForm.pluginManagment.FlipPluginState(plugin);
+        }
+
+        private void button_AppDir_Click(object sender, EventArgs e)
+        {
+            string path = Path.Combine(Application.StartupPath, "data", "plugins");
+            Process.Start(path);
         }
     }
 }

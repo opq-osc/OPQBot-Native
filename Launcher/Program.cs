@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.ExceptionServices;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -107,7 +106,7 @@ namespace Launcher
         {
             if (e.ExceptionObject is Exception ex)
             {
-                var b = ErrorHelper.ShowErrorDialog(ex.ToString());
+                var b = ErrorHelper.ShowErrorDialog($"{ex.Message}\n{ex.StackTrace}");
                 if (b == ErrorHelper.TaskDialogResult.ReloadApp)
                 {
                     MainForm.pluginManagment.ReLoad();
@@ -123,7 +122,7 @@ namespace Launcher
         {
             if (e.Exception != null)
             {
-                var b = ErrorHelper.ShowErrorDialog(e.ToString());
+                var b = ErrorHelper.ShowErrorDialog($"{e.Exception.Message}\n{e.Exception.StackTrace}");
                 if (b==ErrorHelper.TaskDialogResult.ReloadApp)
                 {
                     MainForm.pluginManagment.ReLoad();
