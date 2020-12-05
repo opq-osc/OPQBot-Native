@@ -108,7 +108,8 @@ namespace Launcher.Forms
                     new JProperty("FormX",Left),
                     new JProperty("FormY",Top),
                     new JProperty("ShowWindow",true),
-                    new JProperty("TopMost",true)
+                    new JProperty("TopMost",true),
+                    new JProperty("ExpandWindow",false)
                 };
                 AppConfig.Add(new JProperty("Main", config));
                 File.WriteAllText(@"conf\states.json", AppConfig.ToString());
@@ -121,6 +122,7 @@ namespace Launcher.Forms
                 //所以在调用Show之后需要用标志位恢复对Visable的变化值
                 ShowFlag = bool.Parse(AppConfig["Main"]["ShowWindow"].ToString());
                 TopFlag = bool.Parse(AppConfig["Main"]["TopMost"].ToString());
+                ExpandWindow(bool.Parse(AppConfig["Main"]["ExpandWindow"].ToString()));
             }
             //设置窗口透明色, 实现窗口背景透明
             this.TransparencyKey = Color.Gray;
@@ -174,6 +176,7 @@ namespace Launcher.Forms
             //显示控件, 置顶
             this.Controls.Add(RoundpictureBox);
             RoundpictureBox.BringToFront();
+            RoundpictureBox.MouseDoubleClick += RoundpictureBox_MouseDoubleClick;
             Loaded = true;
             //事件处理
             SocketHandler();
@@ -182,6 +185,28 @@ namespace Launcher.Forms
             Timer.Tick += CheckTopMost;
             Timer.Start();
         }
+
+        private void ExpandWindow(bool flag)
+        {
+            if (flag)
+            {
+                Size = new Size(44, 44);
+                pictureBox_Main.Visible = false;
+            }
+            else
+            {
+                Size = new Size(102, 44);
+                pictureBox_Main.Visible = true;
+            }
+        }
+
+        private void RoundpictureBox_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            ExpandWindow(pictureBox_Main.Visible);
+            AppConfig["Main"]["ExpandWindow"] = !pictureBox_Main.Visible;
+            File.WriteAllText(@"conf\states.json", AppConfig.ToString());
+        }
+
         /// <summary>
         /// 窗口置顶维护事件
         /// </summary>
@@ -201,8 +226,11 @@ namespace Launcher.Forms
         /// </summary>
         private void pictureBox_Main_MouseDown(object sender, MouseEventArgs e)
         {
-            ReleaseCapture();
-            SendMessage(this.Handle, WM_SYSCOMMAND, SC_MOVE + HTCAPTION, 0);
+            if (e.Button == MouseButtons.Left && e.Clicks == 1)
+            {
+                ReleaseCapture();
+                SendMessage(this.Handle, WM_SYSCOMMAND, SC_MOVE + HTCAPTION, 0);
+            }
         }
         /// <summary>
         /// 圆形图片框, 来自CSDN
