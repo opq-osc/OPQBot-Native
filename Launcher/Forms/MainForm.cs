@@ -23,19 +23,49 @@ namespace Launcher.Forms
     public partial class MainForm : Form
     {
         #region --公开成员--
+        /// <summary>
+        /// 显示窗口标志
+        /// </summary>
         public bool ShowFlag = true;
+        /// <summary>
+        /// 窗口置顶标志
+        /// </summary>
         public bool TopFlag = true;
+        /// <summary>
+        /// 公有 与服务器连接 SocketIO对象
+        /// </summary>
         public Client socket;
         #endregion
         #region --静态私有成员--
+        /// <summary>
+        /// 用于本类中对日志窗口的操作的 窗口对象
+        /// </summary>
         static LogForm logForm = new LogForm();
+        /// <summary>
+        /// 网络重连次数
+        /// </summary>
         static int TryCount = 0;
+        /// <summary>
+        /// 标志窗口是否载入完成的变量
+        /// </summary>
         static bool Loaded = false;
+        /// <summary>
+        /// 置顶维护时钟
+        /// </summary>
         static System.Windows.Forms.Timer Timer = new System.Windows.Forms.Timer();
         #endregion
         #region --静态公开成员--
+        /// <summary>
+        /// 公开窗口对象
+        /// </summary>
         public static MainForm FormBackup;
+        /// <summary>
+        /// 插件管理模块
+        /// </summary>
         public static PluginManagment pluginManagment;
+        /// <summary>
+        /// 程序的主设置,包括插件的开启状态以及窗口位置 是否显示窗口 窗口是否置顶 配置
+        /// </summary>
         public static JObject AppConfig = new JObject();
         #endregion
         public MainForm()
@@ -54,6 +84,7 @@ namespace Launcher.Forms
         private void MainForm_Load(object sender, EventArgs e)
         {
             FormBackup = this;
+            //根据登录时的QQ号 获取QQ昵称
             string name = (JObject.Parse(
                 SendRequest($@"{Save.url}v1/LuaApiCaller?qq={Save.curentQQ}&funcname=GetQQUserList&timeout=10", "{\"StartIndex\":0}")
                 )["Friendlist"] as JArray).Where
@@ -64,10 +95,12 @@ namespace Launcher.Forms
             {
                 Directory.CreateDirectory("conf");
             }
+            //读取窗口相关配置
             if (File.Exists(@"conf\states.json"))
             {
                 AppConfig = JObject.Parse(File.ReadAllText(@"conf\states.json"));
             }
+            //配置文件为空或不包含配置相关键
             if (AppConfig.Count == 0 || !AppConfig.ContainsKey("Main"))
             {
                 JObject config = new JObject
@@ -80,10 +113,12 @@ namespace Launcher.Forms
                 AppConfig.Add(new JProperty("Main", config));
                 File.WriteAllText(@"conf\states.json", AppConfig.ToString());
             }
-            else
+            else//存在并读取配置
             {
                 Left = Convert.ToInt32(AppConfig["Main"]["FormX"].ToString());
                 Top = Convert.ToInt32(AppConfig["Main"]["FormY"].ToString());
+                //不直接给Visable赋值是因为外部调用Show函数会覆盖对Visable的赋值
+                //所以在调用Show之后需要用标志位恢复对Visable的变化值
                 ShowFlag = bool.Parse(AppConfig["Main"]["ShowWindow"].ToString());
                 TopFlag = bool.Parse(AppConfig["Main"]["TopMost"].ToString());
             }
@@ -98,7 +133,6 @@ namespace Launcher.Forms
             NotifyIconHelper._NotifyIcon = notifyIcon;
             NotifyIconHelper.Init();
             NotifyIconHelper.ShowNotifyIcon();
-            notifyIcon.BalloonTipClicked += NotifyIcon_BalloonTipClicked;            
             //载入插件
             pluginManagment = new PluginManagment();
             Thread thread = new Thread(() => { pluginManagment.Init(); });
@@ -108,18 +142,20 @@ namespace Launcher.Forms
             //实例化圆形图片框, 实现圆形的头像
             HttpWebClient http = new HttpWebClient() { TimeOut = 3000 };
             byte[] data = { };
+            //默认头像,防止网络问题造成空头像出现
             Image image = Image.FromFile(@"conf\DefaultPic.jpeg");
             try
             {
                 data = http.DownloadData($"http://q1.qlogo.cn/g?b=qq&nk={Save.curentQQ}&s=640");
                 MemoryStream ms = new MemoryStream(data);
-                if (ms.Length > 0)
+                if (ms.Length > 0)//下载成功
                     image = Image.FromStream(ms);
-                else
+                else//下载失败
                     image = Image.FromFile(@"conf\DefaultPic.jpeg");
             }
             catch
             {
+                //网络异常,图片使用默认头像
                 CoreHelper.WriteLine("下载头像超时，重新启动程序可能解决这个问题");
             }
 
@@ -141,15 +177,18 @@ namespace Launcher.Forms
             Loaded = true;
             //事件处理
             SocketHandler();
-
+            //置顶维护时钟,每60秒将窗口重新置顶
             Timer.Interval = 60000;
             Timer.Tick += CheckTopMost;
             Timer.Start();
         }
-
+        /// <summary>
+        /// 窗口置顶维护事件
+        /// </summary>
         private void CheckTopMost(object sender, EventArgs e)
         {
             bool flag = NotifyIconHelper._NotifyIcon.ContextMenu.MenuItems[6].Checked;
+            //获取窗口是否需要置顶
             if (flag is true)
             {
                 FormBackup.TopMost = false;
@@ -157,20 +196,17 @@ namespace Launcher.Forms
                 FormBackup.TopMost = true;
             }
         }
-
-        private void NotifyIcon_BalloonTipClicked(object sender, EventArgs e)
-        {
-            this.TopMost = false;
-            this.TopMost = true;
-        }
-
+        /// <summary>
+        /// 拖动窗体
+        /// </summary>
         private void pictureBox_Main_MouseDown(object sender, MouseEventArgs e)
         {
-            //拖动窗体
             ReleaseCapture();
             SendMessage(this.Handle, WM_SYSCOMMAND, SC_MOVE + HTCAPTION, 0);
         }
-        //圆形图片框, 来自CSDN
+        /// <summary>
+        /// 圆形图片框, 来自CSDN
+        /// </summary>
         public class RoundPictureBox : PictureBox
         {
             protected override void OnCreateControl()
@@ -191,10 +227,11 @@ namespace Launcher.Forms
             logForm.TopMost = true;
             logForm.TopMost = logForm.formTopMost;
         }
-        private void 退出toolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Application.Exit();
-        }
+        /// <summary>
+        /// 发送请求子事件
+        /// </summary>
+        /// <param name="url">发送请求的URL</param>
+        /// <param name="data">负载</param>
         public static string SendRequest(string url, string data)
         {
             HttpWebClient http = new HttpWebClient
@@ -209,6 +246,9 @@ namespace Launcher.Forms
             };
             return http.UploadString(url, data.ToString());
         }
+        /// <summary>
+        /// 分发获取到的消息到相对于的事件
+        /// </summary>
         void SocketHandler()
         {
             //收到群消息的回调事件
@@ -229,6 +269,9 @@ namespace Launcher.Forms
                 OnEventsHandler(fn);
             });
         }
+        /// <summary>
+        /// 私聊消息处理事件
+        /// </summary>
         private static void FriendMessageHandler(IMessage fn)
         {
             Task task = new Task(() =>
@@ -251,6 +294,9 @@ namespace Launcher.Forms
                 LogHelper.WriteLine($"耗时 {stopwatch.ElapsedMilliseconds} ms");
             }); task.Start();
         }
+        /// <summary>
+        /// 群消息处理事件
+        /// </summary>
         private static void GroupMessageHandler(IMessage fn)
         {
             Task task = new Task(() =>
@@ -293,6 +339,9 @@ namespace Launcher.Forms
                 LogHelper.WriteLine($"耗时 {stopwatch.ElapsedMilliseconds} ms");
             }); task.Start();
         }
+        /// <summary>
+        /// 消息事件之外的事件处理
+        /// </summary>
         private static void OnEventsHandler(IMessage fn)
         {
             Task task = new Task(() =>
@@ -386,11 +435,16 @@ namespace Launcher.Forms
                 }
             }); task.Start();
         }
+        /// <summary>
+        /// 获取时间戳
+        /// </summary>
         public static long GetTimeStamp()
         {
             return (DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000000;
         }
-
+        /// <summary>
+        /// 窗体移动事件,将位置写入配置
+        /// </summary>
         private void MainForm_Move(object sender, EventArgs e)
         {
             if (Loaded is false)
@@ -399,6 +453,8 @@ namespace Launcher.Forms
             AppConfig["Main"]["FormY"] = Top;
             File.WriteAllText(@"conf\states.json", AppConfig.ToString());
         }
+
+        #region --托盘按钮对应窗口事件--
         public static void HideWindow()
         {
             FormBackup.Visible = false;
@@ -423,5 +479,6 @@ namespace Launcher.Forms
             AppConfig["Main"]["TopMost"] = false;
             File.WriteAllText(@"conf\states.json", AppConfig.ToString());
         }
+        #endregion
     }
 }
