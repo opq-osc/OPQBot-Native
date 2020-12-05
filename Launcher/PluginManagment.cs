@@ -9,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
-using System.Threading;
 
 namespace Launcher
 {
@@ -101,7 +100,7 @@ namespace Launcher
             AppInfo appInfo = new AppInfo(appInfotext.Value, 0, appInfotext.Key
                 , json["name"].ToString(), json["version"].ToString(), Convert.ToInt32(json["version_id"].ToString())
                 , json["author"].ToString(), json["description"].ToString(), authcode);
-            bool enabled = GetPluginState(appInfo);
+            bool enabled = GetPluginState(appInfo);//获取插件启用状态
             //保存至插件列表
             Plugins.Add(new Plugin(iLib, appInfo, json, dll, enabled));
             LogHelper.WriteLine(CQLogLevel.InfoSuccess, "插件载入", $"插件 {appInfo.Name} 加载成功");
@@ -111,15 +110,25 @@ namespace Launcher
             NotifyIconHelper.LoadMenu(json);
             return true;
         }
+        /// <summary>
+        /// 翻转插件启用状态
+        /// </summary>
         public void FlipPluginState(Plugin plugin)
         {
-            var c = MainForm.AppConfig["states"].Where(x => x["Name"].ToString() == plugin.appinfo.Id).FirstOrDefault();
+            var c = MainForm.AppConfig["states"]
+                            .Where(x => x["Name"].ToString() == plugin.appinfo.Id)
+                            .FirstOrDefault();
             c["Enabled"] = c["Enabled"].Value<int>() == 1 ? 0 : 1;
             File.WriteAllText(@"conf\states.json", MainForm.AppConfig.ToString());
         }
+        /// <summary>
+        /// 从配置获取插件启用状态
+        /// </summary>
+        /// <param name="appInfo">需要获取的Appinfo</param>
         private bool GetPluginState(AppInfo appInfo)
         {
             JArray statesArray = MainForm.AppConfig["states"] as JArray;
+            //没有states键,新建一个
             if(statesArray==null)
             {
                 var b = new JProperty("states",new JArray());
@@ -127,6 +136,7 @@ namespace Launcher
                 File.WriteAllText(@"conf\states.json", MainForm.AppConfig.ToString());
                 statesArray= MainForm.AppConfig["states"] as JArray;
             }
+            //没有此插件的配置,新建一个并返回true
             if (!statesArray.Any(x => x["Name"].ToString() == appInfo.Id))
             {
                 JObject plugin = new JObject()
@@ -184,6 +194,7 @@ namespace Launcher
         /// </summary>
         public void Init()
         {
+            //TODO:斟酌是否可以删除try-catch
             try
             {
                 if (Directory.Exists(@"data\tmp"))
