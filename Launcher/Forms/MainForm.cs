@@ -22,15 +22,25 @@ namespace Launcher.Forms
 {
     public partial class MainForm : Form
     {
-        static LogForm logForm = new LogForm();
+        #region --公开成员--
+        public bool ShowFlag = true;
+        public bool TopFlag = true;
         public Client socket;
-        public static PluginManagment pluginManagment;
-        private static int TryCount = 0;
-        public static JObject AppConfig = new JObject();
+        #endregion
+        #region --静态私有成员--
+        static LogForm logForm = new LogForm();
+        static int TryCount = 0;
         static bool Loaded = false;
+        static System.Windows.Forms.Timer Timer = new System.Windows.Forms.Timer();
+        #endregion
+        #region --静态公开成员--
+        public static MainForm FormBackup;
+        public static PluginManagment pluginManagment;
+        public static JObject AppConfig = new JObject();
+        #endregion
         public MainForm()
         {
-            InitializeComponent();            
+            InitializeComponent();
         }
         #region 拖动无窗体的控件
         [DllImport("user32.dll")]
@@ -43,6 +53,7 @@ namespace Launcher.Forms
         #endregion
         private void MainForm_Load(object sender, EventArgs e)
         {
+            FormBackup = this;
             string name = (JObject.Parse(
                 SendRequest($@"{Save.url}v1/LuaApiCaller?qq={Save.curentQQ}&funcname=GetQQUserList&timeout=10", "{\"StartIndex\":0}")
                 )["Friendlist"] as JArray).Where
@@ -62,16 +73,19 @@ namespace Launcher.Forms
                 JObject config = new JObject
                 {
                     new JProperty("FormX",Left),
-                    new JProperty("FormY",Top)
+                    new JProperty("FormY",Top),
+                    new JProperty("ShowWindow",true),
+                    new JProperty("TopMost",true)
                 };
                 AppConfig.Add(new JProperty("Main", config));
                 File.WriteAllText(@"conf\states.json", AppConfig.ToString());
-
             }
             else
             {
                 Left = Convert.ToInt32(AppConfig["Main"]["FormX"].ToString());
                 Top = Convert.ToInt32(AppConfig["Main"]["FormY"].ToString());
+                ShowFlag = bool.Parse(AppConfig["Main"]["ShowWindow"].ToString());
+                TopFlag = bool.Parse(AppConfig["Main"]["TopMost"].ToString());
             }
             //设置窗口透明色, 实现窗口背景透明
             this.TransparencyKey = Color.Gray;
@@ -84,7 +98,7 @@ namespace Launcher.Forms
             NotifyIconHelper._NotifyIcon = notifyIcon;
             NotifyIconHelper.Init();
             NotifyIconHelper.ShowNotifyIcon();
-            notifyIcon.BalloonTipClicked += NotifyIcon_BalloonTipClicked;
+            notifyIcon.BalloonTipClicked += NotifyIcon_BalloonTipClicked;            
             //载入插件
             pluginManagment = new PluginManagment();
             Thread thread = new Thread(() => { pluginManagment.Init(); });
@@ -127,6 +141,21 @@ namespace Launcher.Forms
             Loaded = true;
             //事件处理
             SocketHandler();
+
+            Timer.Interval = 60000;
+            Timer.Tick += CheckTopMost;
+            Timer.Start();
+        }
+
+        private void CheckTopMost(object sender, EventArgs e)
+        {
+            bool flag = NotifyIconHelper._NotifyIcon.ContextMenu.MenuItems[6].Checked;
+            if (flag is true)
+            {
+                FormBackup.TopMost = false;
+                Thread.Sleep(100);
+                FormBackup.TopMost = true;
+            }
         }
 
         private void NotifyIcon_BalloonTipClicked(object sender, EventArgs e)
@@ -368,6 +397,30 @@ namespace Launcher.Forms
                 return;
             AppConfig["Main"]["FormX"] = Left;
             AppConfig["Main"]["FormY"] = Top;
+            File.WriteAllText(@"conf\states.json", AppConfig.ToString());
+        }
+        public static void HideWindow()
+        {
+            FormBackup.Visible = false;
+            AppConfig["Main"]["ShowWindow"] = false;
+            File.WriteAllText(@"conf\states.json", AppConfig.ToString());
+        }
+        public static void ShowWindow()
+        {
+            FormBackup.Visible = true;
+            AppConfig["Main"]["ShowWindow"] = true;
+            File.WriteAllText(@"conf\states.json", AppConfig.ToString());
+        }
+        public static void TopMost_Enable()
+        {
+            FormBackup.TopMost = true;
+            AppConfig["Main"]["TopMost"] = true;
+            File.WriteAllText(@"conf\states.json", AppConfig.ToString());
+        }
+        public static void TopMost_Disabled()
+        {
+            FormBackup.TopMost = false;
+            AppConfig["Main"]["TopMost"] = false;
             File.WriteAllText(@"conf\states.json", AppConfig.ToString());
         }
     }

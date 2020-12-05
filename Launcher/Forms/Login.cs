@@ -71,6 +71,8 @@ namespace Launcher.Forms
                     MainForm mainForm = new MainForm();
                     mainForm.socket = socket;
                     mainForm.Show();
+                    mainForm.Visible= mainForm.ShowFlag;
+                    mainForm.TopMost = mainForm.TopFlag;
                     this.Hide();
                     button_Link.Enabled = true;
                 }));

@@ -3,7 +3,6 @@ using Launcher.Forms;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
@@ -27,12 +26,17 @@ namespace Launcher
             menu.MenuItems.Add(new MenuItem() { Text = "应用", Name = "PluginMenu" });
             menu.MenuItems.Add(new MenuItem() { Text = "日志", Tag = "LogForm" });
             menu.MenuItems.Add("-");
+            menu.MenuItems.Add(new MenuItem() { Text = "显示悬浮窗", Tag = "Displaywindow", Checked= MainForm.FormBackup.ShowFlag });
+            menu.MenuItems.Add(new MenuItem() { Text = "窗口置顶", Tag = "TopMost", Checked = MainForm.FormBackup.TopFlag });
+            menu.MenuItems.Add("-");
             menu.MenuItems.Add(new MenuItem() { Text = "重载应用", Tag = "ReLoad" });
             menu.MenuItems.Add(new MenuItem() { Text = "退出", Tag = "Quit" });
 
             menu.MenuItems[3].Click += MenuItem_Click;
             menu.MenuItems[5].Click += MenuItem_Click;
             menu.MenuItems[6].Click += MenuItem_Click;
+            menu.MenuItems[8].Click += MenuItem_Click;
+            menu.MenuItems[9].Click += MenuItem_Click;
         }
         public static void LoadMenu(JObject json)//初始化,遍历json的menu节点
         {
@@ -62,19 +66,43 @@ namespace Launcher
 
         private static void MenuItem_Click(object sender, EventArgs e)
         {
+            var targetItem = sender as MenuItem;
             try
             {
-                switch ((sender as MenuItem).Tag)
+                switch (targetItem.Tag)
                 {
                     case "Quit":
                         Quit();
                         return;
                     case "ReLoad":
                         MainForm.pluginManagment.ReLoad();
-                        //ReStart();
                         return;
                     case "LogForm":
                         MainForm.CallLogForm();
+                        return;
+                    case "Displaywindow":
+                        if (targetItem.Checked)
+                        {
+                            targetItem.Checked = false;
+                            MainForm.HideWindow();
+                        }
+                        else
+                        {
+                            targetItem.Checked = true;
+                            MainForm.ShowWindow();
+                        }
+                        return;
+                    case "TopMost":
+                        if (targetItem.Checked)
+                        {
+                            targetItem.Checked = false;
+                            MainForm.TopMost_Disabled();
+                        }
+                        else
+                        {
+                            targetItem.Checked = true;
+                            MainForm.TopMost_Enable();
+                        }
                         return;
                 }
                 KeyValuePair<string, string> pair = (KeyValuePair<string, string>)(sender as MenuItem).Tag;

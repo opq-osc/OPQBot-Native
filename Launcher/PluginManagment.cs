@@ -120,6 +120,13 @@ namespace Launcher
         private bool GetPluginState(AppInfo appInfo)
         {
             JArray statesArray = MainForm.AppConfig["states"] as JArray;
+            if(statesArray==null)
+            {
+                var b = new JProperty("states",new JArray());
+                MainForm.AppConfig.Add(b);
+                File.WriteAllText(@"conf\states.json", MainForm.AppConfig.ToString());
+                statesArray= MainForm.AppConfig["states"] as JArray;
+            }
             if (!statesArray.Any(x => x["Name"].ToString() == appInfo.Id))
             {
                 JObject plugin = new JObject()
