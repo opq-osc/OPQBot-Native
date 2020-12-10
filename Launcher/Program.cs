@@ -26,9 +26,12 @@ namespace Launcher
             if (args.Length != 0 && args[0] == "-r")
             {
                 int initialNum = process.Length;
-                while(Process.GetProcessesByName("Launcher").Length!=initialNum-1)
+                if (initialNum != 1)
                 {
-                    Thread.Sleep(1000);
+                    while (Process.GetProcessesByName("Launcher").Length != initialNum - 1)
+                    {
+                        Thread.Sleep(1000);
+                    }
                 }
             }
             else
@@ -123,15 +126,15 @@ namespace Launcher
             if (e.Exception != null)
             {
                 var b = ErrorHelper.ShowErrorDialog($"{e.Exception.Message}\n{e.Exception.StackTrace}");
-                if (b==ErrorHelper.TaskDialogResult.ReloadApp)
+                if (b == ErrorHelper.TaskDialogResult.ReloadApp)
                 {
                     MainForm.pluginManagment.ReLoad();
                 }
-                else if(b==ErrorHelper.TaskDialogResult.Exit)
+                else if (b == ErrorHelper.TaskDialogResult.Exit)
                 {
                     Environment.Exit(0);
                 }
             }
-        }        
+        }
     }
 }
