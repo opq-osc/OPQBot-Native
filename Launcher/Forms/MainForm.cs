@@ -53,6 +53,7 @@ namespace Launcher.Forms
         /// 置顶维护时钟
         /// </summary>
         static System.Windows.Forms.Timer Timer = new System.Windows.Forms.Timer();
+        static Encoding GB18030 = Encoding.GetEncoding("GB18030");
         #endregion
         #region --静态公开成员--
         /// <summary>
@@ -306,10 +307,13 @@ namespace Launcher.Forms
             {
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
-                ReceiveMessage groupMessage = JsonConvert.DeserializeObject<ReceiveMessage>(((JSONMessage)fn).MessageText);
-                string message = ProgressMessage.Start(groupMessage);
-                ReceiveMessage.Data data = groupMessage.CurrentPacket.Data;
-                if (groupMessage.CurrentPacket.Data.FromUin == Save.curentQQ)
+                ReceiveMessage PrivateMessage = JsonConvert.DeserializeObject<ReceiveMessage>(((JSONMessage)fn).MessageText);
+                string message = ProgressMessage.Start(PrivateMessage);
+                var b = Encoding.UTF8.GetBytes(message);
+                message = GB18030.GetString(Encoding.Convert(Encoding.UTF8, GB18030, b));
+
+                ReceiveMessage.Data data = PrivateMessage.CurrentPacket.Data;
+                if (PrivateMessage.CurrentPacket.Data.FromUin == Save.curentQQ)
                 {
                     Dll.AddMsgToSave(new Deserizition.Message(Save.MsgList.Count + 1, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message));
                     return;
@@ -351,6 +355,9 @@ namespace Launcher.Forms
                     return;
                 }
                 string message = ProgressMessage.Start(groupMessage);
+                var b = Encoding.UTF8.GetBytes(message);                
+                message = GB18030.GetString(Encoding.Convert(Encoding.UTF8, GB18030, b));
+
                 //表示自己发送出去的消息, 写入消息列表
                 if (groupMessage.CurrentPacket.Data.FromUserId == Save.curentQQ)
                 {
@@ -360,9 +367,11 @@ namespace Launcher.Forms
                 LogHelper.WriteLine(CQLogLevel.InfoReceive, "[↓]收到消息", $"来源群:{data.FromGroupId}({data.FromGroupName}) 来源QQ:{data.FromUserId}({data.FromNickName}) {message}");
                 var c = new Deserizition.Message(Save.MsgList.Count + 1, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message);
                 Dll.AddMsgToSave(c);//保存消息到消息列表
+                var point = Marshal.UnsafeAddrOfPinnedArrayElement(GB18030.GetBytes(message),0);
                 //调用插件功能
                 pluginManagment.CallFunction("GroupMsg", 2, Save.MsgList.Count + 1, data.FromGroupId, data.FromUserId,
-                      "", Marshal.StringToHGlobalAnsi(message), 0);
+                      "", point, 0);
+                GC.Collect();
                 stopwatch.Stop();
                 LogHelper.WriteLine($"耗时 {stopwatch.ElapsedMilliseconds} ms");
             }); task.Start();

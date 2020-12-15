@@ -104,7 +104,7 @@ namespace Launcher
             //保存至插件列表
             Plugins.Add(new Plugin(iLib, appInfo, json, dll, enabled));
             LogHelper.WriteLine(CQLogLevel.InfoSuccess, "插件载入", $"插件 {appInfo.Name} 加载成功");
-            //自写方法,用于……用于什么来着，似乎有点多余，晚些看看有什么用
+
             cq_start(Marshal.StringToHGlobalAnsi(destpath), authcode);
             //将它的窗口写入托盘右键菜单
             NotifyIconHelper.LoadMenu(json);
