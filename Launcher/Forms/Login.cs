@@ -1,6 +1,6 @@
 ﻿using Deserizition;
-using Native.Tool.IniConfig;
-using Native.Tool.IniConfig.Linq;
+using Jie2GG.Tool.IniConfig;
+using Jie2GG.Tool.IniConfig.Linq;
 using SocketIOClient;
 using System;
 using System.Windows.Forms;

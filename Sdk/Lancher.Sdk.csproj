@@ -99,9 +99,9 @@
       <Project>{18CC2E4A-E049-4A31-8A52-0000371A558B}</Project>
       <Name>Deserizition</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Native.Tool\Native.Tool.csproj">
+    <ProjectReference Include="..\Jie2GG.Tool\Jie2GG.Tool.csproj">
       <Project>{0CA93EB9-4E25-46C6-94D2-0F97137A1606}</Project>
-      <Name>Native.Tool</Name>
+      <Name>Jie2GG.Tool</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

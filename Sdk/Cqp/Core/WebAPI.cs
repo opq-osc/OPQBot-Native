@@ -1,105 +1,14 @@
 ﻿using Deserizition;
 using Launcher.Sdk.Cqp.Enum;
-using Launcher.Sdk.Cqp.Expand;
-using Launcher.Sdk.Cqp.Model;
-using Native.Tool.Http;
-using Native.Tool.IniConfig;
+using Jie2GG.Tool.Http;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace Launcher.Sdk.Cqp.Core
 {
     public static class WebAPI
     {
-        /// <summary>
-        /// 群消息测试函数
-        /// </summary>
-        /// <param name="authcode"></param>
-        /// <param name="groupid"></param>
-        /// <param name="msg"></param>
-        /// <returns></returns>
-        public static int CQ_sendGroupMsg(int authcode, long groupid, IntPtr msg)
-        {
-            string text = Marshal.PtrToStringAnsi(msg);
-            string url = $@"{Save.url}v1/LuaApiCaller?qq={Save.curentQQ}&funcname=SendMsg&timeout=10";
-            List<CQCode> cqCodeList = CQCode.Parse(text);
-            JObject data = new JObject
-            {
-                {"toUser",groupid},
-                {"sendToType",2},
-                {"groupid",0},
-                {"fileMd5","" }
-            };
-            bool Picflag = false, Atflag = false; ;
-            foreach (var item in cqCodeList)
-            {
-                switch (item.Function)
-                {
-                    case CQFunction.At://[CQ:at,qq=xxxx]
-                        {
-                            if (!data.ContainsKey("atUser"))
-                            {
-                                data.Add("atUser", Convert.ToInt64(item.Items["qq"]));
-                            }
-                            else if (data["atUser"].ToString() == "0")
-                                data["atUser"] = Convert.ToInt64(item.Items["qq"]);
-                            Atflag = true;
-                            break;
-                        }
-                    case CQFunction.Image:
-                        {
-                            if (!data.ContainsKey("content")) data.Add("content", "");
-                            if (!data.ContainsKey("picBase64Buf")) data.Add("picBase64Buf", "");
-                            if (!data.ContainsKey("picUrl")) data.Add("picUrl", "");
-                            if (!data.ContainsKey("atUser")) data.Add("atUser", 0);
-                            if (!data.ContainsKey("picUrl")) data.Add("picUrl", "");
-                            if (item.Items.ContainsKey("url"))
-                                data["picUrl"] = item.Items["url"];
-                            else if (item.Items.ContainsKey("file"))
-                            {
-                                if (File.Exists("data\\image\\" + item.Items["file"] + ".cqimg"))
-                                {
-                                    IniConfig ini = new IniConfig("data\\image\\" + item.Items["file"] + ".cqimg"); ini.Load();
-                                    data["picUrl"] = ini.Object["image"]["url"].ToString();
-                                    Picflag = true;
-                                    break;
-                                }
-                                string path = item.Items["file"], base64buf = string.Empty;
-                                if (File.Exists(path))
-                                {
-                                    base64buf = BinaryReaderExpand.ImageToBase64(path);
-                                }
-                                data["picBase64Buf"] = base64buf;
-                            }
-                            else if (item.Items.ContainsKey("md5"))
-                            {
-                                data["fileMd5"] = item.Items["file"];
-                            }
-                            Picflag = true;
-                            break;
-                        }
-                }
-            }
-            string filtered = Regex.Replace(text, @"\[CQ.*\]", "");
-            if (!string.IsNullOrEmpty(filtered)) data["content"] = filtered;
-            if (Picflag)
-                data.Add("sendMsgType", "PicMsg");
-            else if (Atflag)
-                data.Add("sendMsgType", "AtMsg");
-            else
-                data.Add("sendMsgType", "TextMsg");
-            if (!data.ContainsKey("atUser")) data.Add("atUser", 0);
-            Console.WriteLine($"发送消息,群号{groupid}");
-            Console.WriteLine(msg);
-            SendRequest(url, data.ToString());
-            return 0;
-        }
         /// <summary>
         /// 获取群成员列表
         /// </summary>
@@ -160,10 +69,10 @@ namespace Launcher.Sdk.Cqp.Core
         /// <param name="desc">消息内容</param>
         /// <param name="level">日志等级</param>
         /// <returns>接口返回的消息</returns>
-        public static string SendRequest(string url,string data,string origin,string type,string desc,CQLogLevel level)
+        public static string SendRequest(string url, string data, string origin, string type, string desc, CQLogLevel level)
         {
             string result = SendRequest(url, data);
-            CoreHelper.LogWriter(Save.logListView,(int)level,origin,type,"...",desc);
+            CoreHelper.LogWriter(Save.logListView, (int)level, origin, type, "...", desc);
             return result;
         }
     }

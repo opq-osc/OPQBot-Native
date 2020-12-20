@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocketIOClient", "SocketIO\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Deserizition", "Deserizition\Deserizition.csproj", "{18CC2E4A-E049-4A31-8A52-0000371A558B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Native.Tool", "Native.Tool\Native.Tool.csproj", "{0CA93EB9-4E25-46C6-94D2-0F97137A1606}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jie2GG.Tool", "Jie2GG.Tool\Jie2GG.Tool.csproj", "{0CA93EB9-4E25-46C6-94D2-0F97137A1606}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lancher.Sdk", "Sdk\Lancher.Sdk.csproj", "{D7A958B3-79D9-49F8-8BB4-9619BAB6ECBA}"
 EndProject

@@ -1,7 +1,7 @@
 ﻿using Deserizition;
 using Launcher.Sdk.Cqp.Enum;
 using Launcher.Sdk.Cqp.Expand;
-using Native.Tool.Http;
+using Jie2GG.Tool.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SocketIOClient;
