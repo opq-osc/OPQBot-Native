@@ -13,8 +13,7 @@
 ## 搭建教程
 * [OPQBot 环境搭建教程](https://github.com/Hellobaka/OPQBot-Native/wiki/OPQBot-%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E6%95%99%E7%A8%8B)
 * [OPQBot_Native 酷Q兼容框架搭建教程](https://github.com/Hellobaka/OPQBot-Native/wiki/OPQBot-Native-%E9%85%B7Q%E5%85%BC%E5%AE%B9%E6%A1%86%E6%9E%B6%E6%90%AD%E5%BB%BA%E6%95%99%E7%A8%8B)
-## 注意
-V2机制去除了base64发音频和图片的方法，所以需要全限定路径，这方面只做了WSL版本的适配，其他平台需求请用旧版本(<1.0.4)
+
 ## 事件实现进度
 - [x] id: 1 私聊消息处理
 - [x] id: 2 群消息处理
