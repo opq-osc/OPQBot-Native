@@ -1,15 +1,10 @@
-﻿using Deserizition;
-using Launcher.Forms;
-using Launcher.Sdk.Cqp.Model;
-using Newtonsoft.Json.Linq;
-using SocketIOClient;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Diagnostics;
-using System.IO;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Windows.Forms;
+using Launcher.Forms;
+using SocketIOClient;
 
 namespace Launcher
 {
@@ -51,60 +46,6 @@ namespace Launcher
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Login());
         }
-        #region --TEST--
-        static void M1ain()
-        {
-            Load(@"E:\酷Q机器人插件开发\OPQBot-Native\data\plugins\me.cqp.luohuaming.Setu.dll");
-            UnLoad(Plugins[0]);
-            GC.Collect();
-            Console.ReadLine();
-        }
-        static List<PluginManagment.Plugin> Plugins = new List<PluginManagment.Plugin>();
-        /// <summary>
-        /// 以绝对路径路径载入拥有同名json的dll插件
-        /// </summary>
-        /// <param name="filepath">插件dll的绝对路径</param>
-        /// <returns>载入是否成功</returns>
-        public static bool Load(string filepath)
-        {
-            FileInfo plugininfo = new FileInfo(filepath);
-            JObject json = JObject.Parse(File.ReadAllText(plugininfo.FullName.Replace(".dll", ".json")));
-            Dll dll = new Dll();
-            IntPtr iLib = dll.Load(filepath, json);//将dll插件LoadLibrary,并进行函数委托的实例化
-
-            if (iLib == (IntPtr)0)
-            {
-                Console.WriteLine($"插件 {plugininfo.Name} 加载失败,返回句柄为空,GetLastError={Dll.GetLastError()}");
-                return false;
-            }
-            KeyValuePair<int, string> appInfotext = dll.GetAppInfo();
-            AppInfo appInfo = new AppInfo(appInfotext.Value, 0, appInfotext.Key
-                , json["name"].ToString(), json["version"].ToString(), Convert.ToInt32(json["version_id"].ToString())
-                , json["author"].ToString(), json["description"].ToString(), 0);
-            Plugins.Add(new PluginManagment.Plugin(iLib, appInfo, json, dll, false));
-
-            Console.WriteLine($"插件 {appInfo.Name} 加载成功");
-            return true;
-        }
-        /// <summary>
-        /// 卸载插件，执行被卸载事件，从菜单移除此插件的菜单
-        /// </summary>
-        /// <param name="plugin"></param>
-        public static void UnLoad(PluginManagment.Plugin plugin)
-        {
-            try
-            {
-                plugin.dll.UnLoad();
-                Console.WriteLine($"插件 {plugin.appinfo.Name} 卸载成功");
-                plugin = null;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message + e.StackTrace);
-            }
-        }
-
-        #endregion
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             if (e.ExceptionObject is Exception ex)

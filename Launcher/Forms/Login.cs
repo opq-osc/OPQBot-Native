@@ -1,9 +1,9 @@
-﻿using Deserizition;
+﻿using System;
+using System.Windows.Forms;
+using Deserizition;
 using Jie2GG.Tool.IniConfig;
 using Jie2GG.Tool.IniConfig.Linq;
 using SocketIOClient;
-using System;
-using System.Windows.Forms;
 
 namespace Launcher.Forms
 {

@@ -1,14 +1,14 @@
-﻿using Launcher.Forms;
-using Launcher.Sdk.Cqp.Enum;
-using Launcher.Sdk.Cqp.Model;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
+using Launcher.Forms;
+using Launcher.Sdk.Cqp.Enum;
+using Launcher.Sdk.Cqp.Model;
+using Newtonsoft.Json.Linq;
 
 namespace Launcher
 {

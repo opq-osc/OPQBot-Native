@@ -1,12 +1,4 @@
-﻿using Deserizition;
-using Launcher.Sdk.Cqp.Enum;
-using Launcher.Sdk.Cqp.Expand;
-using Jie2GG.Tool.Http;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using SocketIOClient;
-using SocketIOClient.Messages;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -17,6 +9,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Deserizition;
+using Jie2GG.Tool.Http;
+using Launcher.Sdk.Cqp.Enum;
+using Launcher.Sdk.Cqp.Expand;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using SocketIOClient;
+using SocketIOClient.Messages;
 
 namespace Launcher.Forms
 {
@@ -355,7 +355,7 @@ namespace Launcher.Forms
                     return;
                 }
                 string message = ProgressMessage.Start(groupMessage);
-                var b = Encoding.UTF8.GetBytes(message);                
+                var b = Encoding.UTF8.GetBytes(message);
                 message = GB18030.GetString(Encoding.Convert(Encoding.UTF8, GB18030, b));
 
                 //表示自己发送出去的消息, 写入消息列表
@@ -367,10 +367,13 @@ namespace Launcher.Forms
                 LogHelper.WriteLine(CQLogLevel.InfoReceive, "[↓]收到消息", $"来源群:{data.FromGroupId}({data.FromGroupName}) 来源QQ:{data.FromUserId}({data.FromNickName}) {message}");
                 var c = new Deserizition.Message(Save.MsgList.Count + 1, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message);
                 Dll.AddMsgToSave(c);//保存消息到消息列表
-                var point = Marshal.UnsafeAddrOfPinnedArrayElement(GB18030.GetBytes(message),0);
+                byte[] messageBytes = GB18030.GetBytes(message+"\0");
+                var messageIntptr = Marshal.AllocHGlobal(messageBytes.Length);
+                Marshal.Copy(messageBytes, 0, messageIntptr, messageBytes.Length);
                 //调用插件功能
                 pluginManagment.CallFunction("GroupMsg", 2, Save.MsgList.Count + 1, data.FromGroupId, data.FromUserId,
-                      "", point, 0);
+                      "", messageIntptr, 0);
+                Marshal.FreeHGlobal(messageIntptr);
                 GC.Collect();
                 stopwatch.Stop();
                 LogHelper.WriteLine($"耗时 {stopwatch.ElapsedMilliseconds} ms");
@@ -462,7 +465,7 @@ namespace Launcher.Forms
                         GroupShut_qqid = Convert.ToInt64(GroupShut_data["UserID"].ToString());
                         GroupShut_shuttime = Convert.ToInt64(GroupShut_data["ShutTime"].ToString());
                         pluginManagment.CallFunction("GroupBan", (GroupShut_shuttime == 0 ? 1 : 2)
-                            , GetTimeStamp(), GroupShut_groupid, 0, GroupShut_qqid, GroupShut_shuttime);
+                            , GetTimeStamp(), GroupShut_groupid, 10001, GroupShut_qqid, GroupShut_shuttime);
                         LogHelper.WriteLine($"群 {GroupShut_groupid} UserID {GroupShut_qqid} 禁言时间 {GroupShut_shuttime}秒");
                         break;
                     case "ON_EVENT_QQ_NETWORK_CHANGE":
