@@ -304,6 +304,7 @@
             this.button_Dev.TabIndex = 9;
             this.button_Dev.Text = "开发";
             this.button_Dev.UseVisualStyleBackColor = true;
+            this.button_Dev.Click += new System.EventHandler(this.button_Dev_Click);
             // 
             // button_Menu
             // 

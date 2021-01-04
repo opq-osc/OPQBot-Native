@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
@@ -160,6 +161,22 @@ namespace Launcher.Forms
                 //PointToClient 将鼠标位置转换为相对于控件的位置
                 //MousePosition 控件中的属性
                 contextMenu.Show(button_Menu,button_Menu.PointToClient(MousePosition));
+            }
+        }
+
+        private void button_Dev_Click(object sender, EventArgs e)
+        {
+            if(MessageBox.Show("确认进入插件测试模式吗？测试状态下，此插件将无法处理消息"
+                , "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                string pluginName = plugins[listView_PluginList.SelectedItems[0].Index].appinfo.Name;
+                if (Deserizition.Save.TestPluginsList.Any(x => x == pluginName))
+                {
+                    MessageBox.Show("此插件已经处在测试模式下，不可重复添加");
+                    return;
+                }
+                PluginTester pluginTester = new PluginTester(new string[] { pluginName });
+                pluginTester.Show();
             }
         }
     }

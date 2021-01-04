@@ -38,5 +38,7 @@ namespace Deserizition
         public static bool formFlag { get; set; }
         public static bool AutoScroll { get; set; } = true;
         public static string OPQBotPath { get; set; }
+        public static List<string> TestPluginsList { get; set; } = new List<string>();
+        public static RichTextBox TestPluginChatter { get; set; }
     }
 }

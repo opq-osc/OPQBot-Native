@@ -215,6 +215,12 @@
     <Compile Include="Forms\PluginManageForm.Designer.cs">
       <DependentUpon>PluginManageForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\PluginTester.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\PluginTester.Designer.cs">
+      <DependentUpon>PluginTester.cs</DependentUpon>
+    </Compile>
     <Compile Include="LogHelper.cs" />
     <Compile Include="NotifyIconHelper.cs" />
     <Compile Include="PluginManagment.cs" />
@@ -261,6 +267,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\PluginManageForm.resx">
       <DependentUpon>PluginManageForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\PluginTester.resx">
+      <DependentUpon>PluginTester.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

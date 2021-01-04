@@ -29,6 +29,10 @@ namespace Launcher
                     }
                 }
             }
+            else if(args.Length != 0 && args[0] == "-i")
+            {
+                //Do nothing. Ignore Process Checking
+            }
             else
             {
                 if (process.Length != 1)

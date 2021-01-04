@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
+using Deserizition;
 using Launcher.Forms;
 using Launcher.Sdk.Cqp.Enum;
 using Launcher.Sdk.Cqp.Model;
@@ -129,12 +130,12 @@ namespace Launcher
         {
             JArray statesArray = MainForm.AppConfig["states"] as JArray;
             //没有states键,新建一个
-            if(statesArray==null)
+            if (statesArray == null)
             {
-                var b = new JProperty("states",new JArray());
+                var b = new JProperty("states", new JArray());
                 MainForm.AppConfig.Add(b);
                 File.WriteAllText(@"conf\states.json", MainForm.AppConfig.ToString());
-                statesArray= MainForm.AppConfig["states"] as JArray;
+                statesArray = MainForm.AppConfig["states"] as JArray;
             }
             //没有此插件的配置,新建一个并返回true
             if (!statesArray.Any(x => x["Name"].ToString() == appInfo.Id))
@@ -194,18 +195,9 @@ namespace Launcher
         /// </summary>
         public void Init()
         {
-            //TODO:斟酌是否可以删除try-catch
-            try
-            {
-                if (Directory.Exists(@"data\tmp"))
-                    Directory.Delete(@"data\tmp", true);
-            }
-            catch//有时候重载有前一进程还未退出,后一进程就启动的情况,导致无法删除而临时文件爆炸
-            {
-                if (Directory.Exists(@"data\tmp"))
-                    Directory.Delete(@"data\tmp", true);
-            }
-            
+            if (Directory.Exists(@"data\tmp"))
+                Directory.Delete(@"data\tmp", true);
+
             if (MainForm.AppConfig.Count == 0)
             {
                 MainForm.AppConfig.Add(new JProperty("states", new JArray()));
@@ -232,6 +224,11 @@ namespace Launcher
                 Dll dll = item.dll;
                 //先看此插件有没有使用此事件
                 if (!item.Enable || !dll.HasFunction(ApiName, item.json)) continue;
+                if (Save.TestPluginsList.Any(x => x == item.appinfo.Name))
+                {
+                    LogHelper.WriteLine($"{item.appinfo.Name} 插件测试中，忽略消息投递");
+                    continue;
+                }
                 try
                 {
                     //存在事件,调用函数,返回1表示消息阻塞,跳出后续
@@ -245,7 +242,7 @@ namespace Launcher
                 {
                     LogHelper.WriteLine(CQLogLevel.Error, "函数执行异常", $"插件 {item.appinfo.Name} {ApiName} 函数发生错误，错误信息:{e.Message} {e.StackTrace}");
                     var b = ErrorHelper.ShowErrorDialog($"错误模块：{item.appinfo.Name}\n{ApiName} 函数发生错误，错误信息:\n{e.Message} {e.StackTrace}");
-                    switch(b)
+                    switch (b)
                     {
                         case ErrorHelper.TaskDialogResult.ReloadApp:
                             ReLoad();
@@ -268,7 +265,7 @@ namespace Launcher
             NotifyIconHelper.HideNotifyIcon();
             //Load();
             string path = typeof(MainForm).Assembly.Location;//获取可执行文件路径
-            Process.Start(path,"-r");//再次运行程序
+            Process.Start(path, "-r");//再次运行程序
             Environment.Exit(0);//关闭当前程序
         }
     }
