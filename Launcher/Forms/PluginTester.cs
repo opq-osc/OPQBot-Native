@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Deserizition;
+using Newtonsoft.Json.Linq;
 using static Launcher.PluginManagment;
 
 namespace Launcher.Forms
@@ -37,6 +39,19 @@ namespace Launcher.Forms
             }
             else
             {
+                var json = MainForm.AppConfig;
+                if(!json.ContainsKey("PluginTester"))
+                {
+                    JObject config = new JObject
+                    {
+                        new JProperty("GroupID",GroupID.Text),
+                        new JProperty("QQID",QQID.Text),
+                    };
+                    json.Add(new JProperty("PluginTester", config));
+                    File.WriteAllText(@"conf\states.json", json.ToString());
+                }
+                json["PluginTester"]["GroupID"] = GroupID.Text;
+                json["PluginTester"]["QQID"] = QQID.Text;
                 Save.TestPluginsList.Remove(BeingTestedPlugin.appinfo.Name);
             }
         }
@@ -92,6 +107,22 @@ namespace Launcher.Forms
         {
             PluginName.Text = BeingTestedPlugin.appinfo.Name;
             Save.TestPluginChatter = ChatTextBox;
+            var json = MainForm.AppConfig;
+            if (!json.ContainsKey("PluginTester"))
+            {
+                JObject config = new JObject
+                {
+                    new JProperty("GroupID",GroupID.Text),
+                    new JProperty("QQID",QQID.Text),
+                };
+                json.Add(new JProperty("PluginTester", config));
+                File.WriteAllText(@"conf\states.json", json.ToString());
+            }
+            else
+            {
+                GroupID.Text = json["PluginTester"]["GroupID"].ToString();
+                QQID.Text = json["PluginTester"]["QQID"].ToString();
+            }
         }
 
         private void GroupID_KeyDown(object sender, KeyEventArgs e)

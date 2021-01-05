@@ -12,6 +12,7 @@ namespace Launcher
     {
         public static Client socket;
         public static PluginManagment pluginManagment;
+        public static bool IgnoreProcessChecking = false;
 
         [STAThread]
         [HandleProcessCorruptedStateExceptions]
@@ -31,6 +32,7 @@ namespace Launcher
             }
             else if(args.Length != 0 && args[0] == "-i")
             {
+                IgnoreProcessChecking = true;
                 //Do nothing. Ignore Process Checking
             }
             else
