@@ -138,6 +138,7 @@ namespace Launcher.Forms
             ChatTextBox.Focus();
             ChatTextBox.Select(ChatTextBox.TextLength, 0);
             ChatTextBox.ScrollToCaret();
+            MsgToSend.Focus();
         }
     }
 }

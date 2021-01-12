@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using Launcher.Sdk.Cqp.Enum;
 using Newtonsoft.Json.Linq;
@@ -9,7 +10,7 @@ namespace Launcher
     public class Dll : IDisposable
     {
         [DllImport("kernel32.dll")]
-        private extern static IntPtr LoadLibrary(String path);
+        public extern static IntPtr LoadLibrary(String path);
 
         [DllImport("kernel32.dll")]
         private extern static IntPtr GetProcAddress(IntPtr lib, String funcName);
@@ -31,7 +32,7 @@ namespace Launcher
 
         private IntPtr hLib;
 
-        private delegate string Type_AppInfo();
+        private delegate IntPtr Type_AppInfo();
         private delegate int Type_Initialize(int authcode);
         private delegate int Type_PrivateMsg(int subType, int msgId, long fromQQ, IntPtr msg, int font);
         private delegate int Type_GroupMsg(int subType, int msgId, long fromGroup, long fromQQ, string fromAnonymous, IntPtr msg, int font);
@@ -243,9 +244,10 @@ namespace Launcher
             Initialize(authcode);
             return 0;
         }
+        [HandleProcessCorruptedStateExceptions]
         public KeyValuePair<int, string> GetAppInfo()
         {
-            string appinfo = AppInfo();
+            string appinfo = Marshal.PtrToStringAnsi(AppInfo());
             //string appinfo = "9,me.cqp.luohuaming.setu";
             string[] pair = appinfo.Split(',');
             if (pair.Length != 2)

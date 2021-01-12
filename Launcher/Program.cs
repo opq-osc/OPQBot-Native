@@ -13,7 +13,6 @@ namespace Launcher
         public static Client socket;
         public static PluginManagment pluginManagment;
         public static bool IgnoreProcessChecking = false;
-
         [STAThread]
         [HandleProcessCorruptedStateExceptions]
         static void Main(params string[] args)

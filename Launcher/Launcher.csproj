@@ -246,9 +246,9 @@
       <Project>{0ca93eb9-4e25-46c6-94d2-0f97137a1606}</Project>
       <Name>Jie2GG.Tool</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Sdk\Lancher.Sdk.csproj">
+    <ProjectReference Include="..\Sdk\Launcher.Sdk.csproj">
       <Project>{d7a958b3-79d9-49f8-8bb4-9619bab6ecba}</Project>
-      <Name>Lancher.Sdk</Name>
+      <Name>Launcher.Sdk</Name>
     </ProjectReference>
     <ProjectReference Include="..\SocketIO\SocketIOClient.csproj">
       <Project>{352C9BC1-F74C-4741-A09D-7227BC60C057}</Project>

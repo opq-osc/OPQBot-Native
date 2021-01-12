@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Deserizition;
 using Jie2GG.Tool.IniConfig;
@@ -45,9 +46,9 @@ namespace Launcher.Forms
                 ini.Save();
             }
         }
-
         private void button_Link_Click(object sender, EventArgs e)
         {
+            //MessageBox.Show(test());
             button_Link.Enabled = false;
             ini.Object["Config"]["QQ"] = new IValue(textBox_QQ.Text);
             ini.Object["Config"]["url"] = new IValue(textBox_URL.Text);
