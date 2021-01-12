@@ -196,7 +196,7 @@ namespace Launcher
         public void Init()
         {
             if (Directory.Exists(@"data\tmp"))
-                //Directory.Delete(@"data\tmp", true);
+                Directory.Delete(@"data\tmp", true);
             Dll.LoadLibrary("CQP.dll");
             if (MainForm.AppConfig.Count == 0)
             {
