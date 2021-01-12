@@ -164,6 +164,8 @@ namespace Launcher
         {
             try
             {
+                plugin.dll.CallFunction("Disable");
+                plugin.dll.CallFunction("Exit");
                 plugin.dll.UnLoad();
                 NotifyIconHelper.RemoveMenu(plugin.appinfo.Name);
                 Plugins.Remove(plugin);
@@ -261,7 +263,7 @@ namespace Launcher
         /// </summary>
         public void ReLoad()
         {
-            //UnLoad();
+            UnLoad();
             NotifyIconHelper.HideNotifyIcon();
             //Load();
             string path = typeof(MainForm).Assembly.Location;//获取可执行文件路径
