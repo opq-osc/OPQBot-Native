@@ -127,6 +127,7 @@ namespace Launcher.Forms
                 listBoxItem.SubItems[0].Text = (plugin.Enable ? "" : "[未启用] ") + plugin.appinfo.Name;
                 button_Disable.Text = "启用";
                 plugin.dll.CallFunction("Disable");
+                plugin.dll.CallFunction("Exit");
             }
             else
             {
@@ -135,6 +136,8 @@ namespace Launcher.Forms
                 listBoxItem.SubItems[0].Text = (plugin.Enable ? "" : "[未启用] ") + plugin.appinfo.Name;
                 button_Disable.Text = "停用";
                 plugin.dll.CallFunction("Enable");
+                plugin.dll.CallFunction("StartUp");
+
             }
             MainForm.pluginManagment.FlipPluginState(plugin);
         }
