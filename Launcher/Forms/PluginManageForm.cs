@@ -126,8 +126,10 @@ namespace Launcher.Forms
                 listBoxItem.ForeColor = Color.Gray;
                 listBoxItem.SubItems[0].Text = (plugin.Enable ? "" : "[未启用] ") + plugin.appinfo.Name;
                 button_Disable.Text = "启用";
-                plugin.dll.CallFunction("Disable");
-                plugin.dll.CallFunction("Exit");
+                if (plugin.dll.HasFunction("Disable", plugin.json))
+                    plugin.dll.CallFunction("Disable");
+                if (plugin.dll.HasFunction("Exit", plugin.json))
+                    plugin.dll.CallFunction("Exit");
             }
             else
             {
@@ -135,9 +137,10 @@ namespace Launcher.Forms
                 listBoxItem.ForeColor = Color.Black;
                 listBoxItem.SubItems[0].Text = (plugin.Enable ? "" : "[未启用] ") + plugin.appinfo.Name;
                 button_Disable.Text = "停用";
-                plugin.dll.CallFunction("Enable");
-                plugin.dll.CallFunction("StartUp");
-
+                if(plugin.dll.HasFunction("Enable",plugin.json))
+                    plugin.dll.CallFunction("Enable");
+                if (plugin.dll.HasFunction("StartUp", plugin.json))
+                    plugin.dll.CallFunction("StartUp");
             }
             MainForm.pluginManagment.FlipPluginState(plugin);
         }
