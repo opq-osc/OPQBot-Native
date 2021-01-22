@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
-using Launcher.Sdk.Cqp.Enum;
+using Deserizition;
 using Newtonsoft.Json.Linq;
 
 namespace Launcher
 {
     public class Dll : IDisposable
     {
+        #region ----dll函数 委托原型声明部分----
         [DllImport("kernel32.dll")]
         public extern static IntPtr LoadLibrary(String path);
 
@@ -65,6 +66,7 @@ namespace Launcher
         private Type_Exit Exit;
         private Type_Enable Enable;
         private Type_Disable Disable;
+        #endregion
 
         public IntPtr Load(string filepath, JObject json)
         {
@@ -73,7 +75,7 @@ namespace Launcher
                 try { hLib = LoadLibrary(filepath); }
                 catch
                 {
-                    LogHelper.WriteLine("Error", $"插件 {filepath} 载入失败,LoadLibrary :GetLastError={GetLastError()}");
+                    LogHelper.WriteLog(LogLevel.Error, "Error", $"插件 {filepath} 载入失败,LoadLibrary :GetLastError={GetLastError()}");
                 }
             }
             if (hLib != (IntPtr)0)
@@ -132,12 +134,10 @@ namespace Launcher
             }
             return (IntPtr)0;
         }
-
         public void UnLoad()
         {
             Dispose();
         }
-        
         public void Dispose()
         {
             Console.WriteLine("调用IDisposable接口");
@@ -182,54 +182,11 @@ namespace Launcher
                 hLib = IntPtr.Zero;
             }
         }
-        public bool HasFunction(string ApiName, JObject json)
-        {
-            JToken events = json["event"];
-            switch (ApiName)
-            {
-                case "PrivateMsg":
-                    return FunctionLoopJudge(1, events);
-                case "GroupMsg":
-                    return FunctionLoopJudge(2, events);
-                case "Upload":
-                    return FunctionLoopJudge(4, events);
-                case "AdminChange":
-                    return FunctionLoopJudge(5, events);
-                case "GroupMemberDecrease":
-                    return FunctionLoopJudge(6, events);
-                case "GroupMemberIncrease":
-                    return FunctionLoopJudge(7, events);
-                case "GroupBan":
-                    return FunctionLoopJudge(8, events);
-                case "FriendAdded":
-                    return FunctionLoopJudge(10, events);
-                case "FriendRequest":
-                    return FunctionLoopJudge(11, events);
-                case "GroupAddRequest":
-                    return FunctionLoopJudge(12, events);
-                case "StartUp":
-                    return FunctionLoopJudge(1001, events);
-                case "Exit":
-                    return FunctionLoopJudge(1002, events);
-                case "Enable":
-                    return FunctionLoopJudge(1003, events);
-                case "Disable":
-                    return FunctionLoopJudge(1004, events);
-                default:
-                    LogHelper.WriteLine(CQLogLevel.Error, "事件触发", "未找到或者未实现的事件");
-                    return false;
-            }
-        }
-        bool FunctionLoopJudge(int eventid, JToken events)
-        {
-            foreach (var item in JArray.Parse(events.ToString()))
-            {
-                if (item["id"].ToString() == eventid.ToString())
-                    return true;
-            }
-            return false;
-        }
-        //将要执行的函数转换为委托
+        /// <summary>
+        /// 将要执行的函数转换为委托
+        /// </summary>
+        /// <param name="APIName">函数名称</param>
+        /// <param name="t">需要转换成委托的类型</param>
         public Delegate Invoke(string APIName, Type t)
         {
             IntPtr api = GetProcAddress(hLib, APIName);
@@ -237,8 +194,6 @@ namespace Launcher
                 return null;
             return Marshal.GetDelegateForFunctionPointer(api, t);
         }
-
-        //调用库中事件
         public int DoInitialize(int authcode)
         {
             Initialize(authcode);
@@ -248,48 +203,75 @@ namespace Launcher
         public KeyValuePair<int, string> GetAppInfo()
         {
             string appinfo = Marshal.PtrToStringAnsi(AppInfo());
-            //string appinfo = "9,me.cqp.luohuaming.setu";
             string[] pair = appinfo.Split(',');
             if (pair.Length != 2)
                 throw new Exception("获取AppInfo信息失败");
             KeyValuePair<int, string> valuePair = new KeyValuePair<int, string>(Convert.ToInt32(pair[0]), pair[1]);
             return valuePair;
         }
-        public int CallFunction(string ApiName, params object[] args)
+        public int CallFunction(FunctionEnums.Functions ApiName, params object[] args)
         {
             switch (ApiName)
             {
-                case "PrivateMsg":
+                case FunctionEnums.Functions.PrivateMsg:
+                    if (PrivateMsg == null)
+                        return -1;
                     return PrivateMsg(Convert.ToInt32(args[0]), Convert.ToInt32(args[1]), Convert.ToInt64(args[2]), (IntPtr)args[3], 1);
-                case "GroupMsg":
+                case FunctionEnums.Functions.GroupMsg:
+                    if (GroupMsg == null)
+                        return -1;
                     return GroupMsg(Convert.ToInt32(args[0]), Convert.ToInt32(args[1]), Convert.ToInt64(args[2]), Convert.ToInt64(args[3])
                         , args[4].ToString(), (IntPtr)args[5], 1);
-                case "Upload":
+                case FunctionEnums.Functions.Upload:
+                    if (Upload == null)
+                        return -1;
                     return Upload(Convert.ToInt32(args[0]), Convert.ToInt32(args[1]), Convert.ToInt64(args[2]), Convert.ToInt64(args[3]), args[4].ToString());
-                case "AdminChange":
+                case FunctionEnums.Functions.AdminChange:
+                    if (AdminChange == null)
+                        return -1;
                     return AdminChange(Convert.ToInt32(args[0]), Convert.ToInt32(args[1]), Convert.ToInt64(args[2]), Convert.ToInt64(args[3]));
-                case "GroupMemberDecrease":
+                case FunctionEnums.Functions.GroupMemberDecrease:
+                    if (GroupMemberDecrease == null)
+                        return -1;
                     return GroupMemberDecrease(Convert.ToInt32(args[0]), Convert.ToInt32(args[1]), Convert.ToInt64(args[2]), Convert.ToInt64(args[3]), Convert.ToInt64(args[4]));
-                case "GroupMemberIncrease":
+                case FunctionEnums.Functions.GroupMemberIncrease:
+                    if (GroupMemberIncrease == null)
+                        return -1;
                     return GroupMemberIncrease(Convert.ToInt32(args[0]), Convert.ToInt32(args[1]), Convert.ToInt64(args[2]), Convert.ToInt64(args[3]), Convert.ToInt64(args[4]));
-                case "GroupBan":
+                case FunctionEnums.Functions.GroupBan:
+                    if (GroupBan == null)
+                        return -1;
                     return GroupBan(Convert.ToInt32(args[0]), Convert.ToInt32(args[1]), Convert.ToInt64(args[2]), Convert.ToInt64(args[3]), Convert.ToInt64(args[4]), Convert.ToInt64(args[5]));
-                case "FriendAdded":
+                case FunctionEnums.Functions.FriendAdded:
+                    if (FriendAdded == null)
+                        return -1;
                     return FriendAdded(Convert.ToInt32(args[0]), Convert.ToInt32(args[1]), Convert.ToInt64(args[2]));
-                case "FriendRequest":
+                case FunctionEnums.Functions.FriendRequest:
+                    if (FriendRequest == null)
+                        return -1;
                     return FriendRequest(Convert.ToInt32(args[0]), Convert.ToInt32(args[1]), Convert.ToInt64(args[2]), Marshal.StringToHGlobalAnsi(args[3].ToString()), args[4].ToString());
-                case "GroupAddRequest":
+                case FunctionEnums.Functions.GroupAddRequest:
+                    if (GroupAddRequest == null)
+                        return -1;
                     return GroupAddRequest(Convert.ToInt32(args[0]), Convert.ToInt32(args[1]), Convert.ToInt64(args[2]), Convert.ToInt64(args[3]), Marshal.StringToHGlobalAnsi(args[4].ToString()), args[5].ToString());
-                case "StartUp":
+                case FunctionEnums.Functions.StartUp:
+                    if (Startup == null)
+                        return -1;
                     return Startup();
-                case "Exit":
+                case FunctionEnums.Functions.Exit:
+                    if (Exit == null)
+                        return -1;
                     return Exit();
-                case "Enable":
+                case FunctionEnums.Functions.Enable:
+                    if (Enable == null)
+                        return -1;
                     return Enable();
-                case "Disable":
+                case FunctionEnums.Functions.Disable:
+                    if (Disable == null)
+                        return -1;
                     return Disable();
                 default:
-                    LogHelper.WriteLine(CQLogLevel.Error, "未找到或者未实现的事件");
+                    LogHelper.WriteLog(LogLevel.Error, "事件分发", "未找到或者未实现的事件");
                     return -1;
             }
         }

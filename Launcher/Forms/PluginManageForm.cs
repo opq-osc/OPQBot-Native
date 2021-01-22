@@ -1,4 +1,5 @@
-﻿using Launcher.Sdk.Cqp.Model;
+﻿using Deserizition;
+using Launcher.Sdk.Cqp.Model;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -126,10 +127,8 @@ namespace Launcher.Forms
                 listBoxItem.ForeColor = Color.Gray;
                 listBoxItem.SubItems[0].Text = (plugin.Enable ? "" : "[未启用] ") + plugin.appinfo.Name;
                 button_Disable.Text = "启用";
-                if (plugin.dll.HasFunction("Disable", plugin.json))
-                    plugin.dll.CallFunction("Disable");
-                if (plugin.dll.HasFunction("Exit", plugin.json))
-                    plugin.dll.CallFunction("Exit");
+                plugin.dll.CallFunction(FunctionEnums.Functions.Disable);
+                plugin.dll.CallFunction(FunctionEnums.Functions.Exit);
             }
             else
             {
@@ -137,10 +136,8 @@ namespace Launcher.Forms
                 listBoxItem.ForeColor = Color.Black;
                 listBoxItem.SubItems[0].Text = (plugin.Enable ? "" : "[未启用] ") + plugin.appinfo.Name;
                 button_Disable.Text = "停用";
-                if(plugin.dll.HasFunction("Enable",plugin.json))
-                    plugin.dll.CallFunction("Enable");
-                if (plugin.dll.HasFunction("StartUp", plugin.json))
-                    plugin.dll.CallFunction("StartUp");
+                plugin.dll.CallFunction(FunctionEnums.Functions.Enable);
+                plugin.dll.CallFunction(FunctionEnums.Functions.StartUp);
             }
             MainForm.pluginManagment.FlipPluginState(plugin);
         }
@@ -160,30 +157,32 @@ namespace Launcher.Forms
                 //筛选插件父菜单
                 var res = menu.MenuItems.Find("PluginMenu", false)[0].MenuItems.Find(plugin.appinfo.Name, false)[0];
                 ContextMenu contextMenu = new ContextMenu();
-                foreach(MenuItem item in res.MenuItems)
+                foreach (MenuItem item in res.MenuItems)
                 {
                     var b = item.CloneMenu();//必须要用clone,单纯用add会将MenuItem与原Menu的连接切断
                     b.Tag = item.Tag;//复制过来的item依旧拥有click事件,但是失去了tag
                     contextMenu.MenuItems.Add(b);
-                }    
+                }
                 //PointToClient 将鼠标位置转换为相对于控件的位置
                 //MousePosition 控件中的属性
-                contextMenu.Show(button_Menu,button_Menu.PointToClient(MousePosition));
+                contextMenu.Show(button_Menu, button_Menu.PointToClient(MousePosition));
             }
         }
 
         private void button_Dev_Click(object sender, EventArgs e)
         {
-            if(MessageBox.Show("确认进入插件测试模式吗？测试状态下，此插件将无法处理消息"
+            if (MessageBox.Show("确认进入插件测试模式吗？测试状态下，此插件将无法处理消息"
                 , "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 string pluginName = plugins[listView_PluginList.SelectedItems[0].Index].appinfo.Name;
-                if (Deserizition.Save.TestPluginsList.Any(x => x == pluginName))
+                if (Save.TestPluginsList.Any(x => x == pluginName))
                 {
                     MessageBox.Show("此插件已经处在测试模式下，不可重复添加");
                     return;
                 }
                 PluginTester pluginTester = new PluginTester(new string[] { pluginName });
+                LogHelper.WriteLog(LogLevel.Warning, "插件测试"
+                                , $"{pluginName} 插件已处于测试模式，将忽略所有框架消息");
                 pluginTester.Show();
             }
         }

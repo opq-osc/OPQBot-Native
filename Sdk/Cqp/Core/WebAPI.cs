@@ -72,7 +72,7 @@ namespace Launcher.Sdk.Cqp.Core
         public static string SendRequest(string url, string data, string origin, string type, string desc, CQLogLevel level)
         {
             string result = SendRequest(url, data);
-            CoreHelper.LogWriter(Save.logListView, (int)level, origin, type, "...", desc);
+            LogHelper.WriteLog((int)level, origin, type, "", desc);
             return result;
         }
     }

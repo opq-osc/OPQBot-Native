@@ -106,11 +106,7 @@ namespace Launcher
                         return;
                 }
                 KeyValuePair<string, string> pair = (KeyValuePair<string, string>)(sender as MenuItem).Tag;
-                PluginManagment.Plugin c;
-                if (Program.pluginManagment != null)
-                    c = Program.pluginManagment.Plugins.Find(x => x.appinfo.Name == pair.Key);//从已加载的插件寻找这个名称的插件
-                else
-                    c = MainForm.pluginManagment.Plugins.Find(x => x.appinfo.Name == pair.Key);
+                PluginManagment.Plugin c = MainForm.pluginManagment.Plugins.Find(x => x.appinfo.Name == pair.Key);//从已加载的插件寻找这个名称的插件
                 string menuname = string.Empty;
                 foreach (var item in JArray.Parse(c.json["menu"].ToString()))//遍历此插件的json的menu节点,寻找窗口函数
                 {
@@ -140,7 +136,7 @@ namespace Launcher
         }
         public static void Quit()
         {
-            MainForm.pluginManagment.CallFunction("Exit");
+            MainForm.pluginManagment.CallFunction(FunctionEnums.Functions.Exit);
             NotifyIconHelper.HideNotifyIcon();
             Environment.Exit(0);
         }

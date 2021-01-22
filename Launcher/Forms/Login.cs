@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Deserizition;
 using Jie2GG.Tool.IniConfig;
@@ -48,7 +47,6 @@ namespace Launcher.Forms
         }
         private void button_Link_Click(object sender, EventArgs e)
         {
-            //MessageBox.Show(test());
             button_Link.Enabled = false;
             ini.Object["Config"]["QQ"] = new IValue(textBox_QQ.Text);
             ini.Object["Config"]["url"] = new IValue(textBox_URL.Text);
@@ -62,10 +60,10 @@ namespace Launcher.Forms
             socket.On("connect", (fn) =>
             {
                 socket.Emit("GetWebConn",Save.curentQQ.ToString());
-                if (Save.logListView != null)                
+                if (Save.LoginStatus)
                 {
-                    CoreHelper.WriteLine("重新连接到服务器");
-                    return; 
+                    LogHelper.WriteLog("重新连接到服务器");
+                    return;
                 }
                 this.Invoke(new MethodInvoker(() =>
                 {

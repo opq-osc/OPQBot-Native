@@ -18,7 +18,7 @@ namespace Launcher.Forms
         {
             if (args.Length > 0)
             {
-                string tmp = String.Empty;
+                string tmp = string.Empty;
                 foreach (var item in args)
                 {
                     tmp += item;
@@ -86,7 +86,7 @@ namespace Launcher.Forms
             byte[] messageBytes = GB18030.GetBytes(msg + "\0");
             var messageIntptr = Marshal.AllocHGlobal(messageBytes.Length);
             Marshal.Copy(messageBytes, 0, messageIntptr, messageBytes.Length);
-            int result = BeingTestedPlugin.dll.CallFunction("GroupMsg", 2, Save.MsgList.Count + 1, Convert.ToInt64(GroupID.Text),Convert.ToInt64(QQID.Text),
+            int result = BeingTestedPlugin.dll.CallFunction(FunctionEnums.Functions.GroupMsg, 2, Save.MsgList.Count + 1, Convert.ToInt64(GroupID.Text),Convert.ToInt64(QQID.Text),
                      "", messageIntptr, 0);
             ChatTextBox.Invoke(new MethodInvoker(() =>
             {

@@ -7,8 +7,10 @@ using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using Deserizition;
 using Launcher.Forms;
+using Launcher.Pipe;
 using Launcher.Sdk.Cqp.Enum;
 using Launcher.Sdk.Cqp.Model;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Launcher
@@ -38,14 +40,19 @@ namespace Launcher
             /// 标记插件是否启用
             /// </summary>
             public bool Enable;
-            public Plugin(IntPtr iLib, AppInfo appinfo, JObject json, Dll dll, bool enable)
+            public Plugin(IntPtr iLib, AppInfo appinfo, JObject json, Dll dll, bool enable, string namedpipe)
             {
                 this.iLib = iLib;
                 this.appinfo = appinfo;
                 this.json = json;
                 this.dll = dll;
                 this.Enable = enable;
+                if(string.IsNullOrWhiteSpace(Save.NamedPipeName) && Save.MutiProcessMode)
+                {
+                    this.NamedPipe = new NamedPipeServer(namedpipe);
+                }
             }
+            public NamedPipeServer NamedPipe;
         }
         /// <summary>
         /// 从 data\plugins 文件夹下载入所有拥有同名json的dll插件，不包含子文件夹
@@ -62,7 +69,7 @@ namespace Launcher
                 if (Load(item.FullName))
                     count++;
             }
-            LogHelper.WriteLine(CQLogLevel.Info, "插件载入", $"一共加载了{count}个插件");
+            LogHelper.WriteLog(LogLevel.Info, "插件载入", $"一共加载了{count}个插件");
             NotifyIconHelper.AddManageMenu();
         }
         /// <summary>
@@ -75,24 +82,59 @@ namespace Launcher
             FileInfo plugininfo = new FileInfo(filepath);
             if (!File.Exists(plugininfo.FullName.Replace(".dll", ".json")))
             {
-                LogHelper.WriteLine(CQLogLevel.Error, "插件载入", $"插件 {plugininfo.Name} 加载失败,原因:缺少json文件");
+                switch (Save.PipeType)
+                {
+                    case PipeType.Server:
+                        break;
+                    case PipeType.Client:
+                        CQ_addLog(0, 30, Marshal.StringToHGlobalAnsi("插件载入")
+                                            , Marshal.StringToHGlobalAnsi($"插件 {plugininfo.Name} 加载失败,原因:缺少json文件"));
+                        break;
+                    case PipeType.NoPipe:
+                        LogHelper.WriteLog(LogLevel.Error, "插件载入", $"插件 {plugininfo.Name} 加载失败,原因:缺少json文件");
+                        break;
+                }
                 return false;
             }
             JObject json = JObject.Parse(File.ReadAllText(plugininfo.FullName.Replace(".dll", ".json")));
-            int authcode = new Random().Next();
+            int authcode;
+            switch (Save.PipeType)
+            {                
+                case PipeType.Client:
+                    authcode = Save.AuthCode;
+                    break;
+                case PipeType.Server:
+                case PipeType.NoPipe:
+                default:
+                    authcode = new Random().Next();
+                    break;
+            }
             Dll dll = new Dll();
             if (!Directory.Exists(@"data\tmp"))
                 Directory.CreateDirectory(@"data\tmp");
             //复制需要载入的插件至临时文件夹,可直接覆盖原dll便于插件重载
             string destpath = @"data\tmp\" + plugininfo.Name;
-            File.Copy(plugininfo.FullName, destpath, true);
-            //复制它的json
-            File.Copy(plugininfo.FullName.Replace(".dll", ".json"), destpath.Replace(".dll", ".json"), true);
-            IntPtr iLib = dll.Load(destpath, json);//将dll插件LoadLibrary,并进行函数委托的实例化
+            if (Save.PipeType != PipeType.Client)
+            {
+                File.Copy(plugininfo.FullName, destpath, true);
+                //复制它的json
+                File.Copy(plugininfo.FullName.Replace(".dll", ".json"), destpath.Replace(".dll", ".json"), true);
+            }
+            IntPtr iLib = dll.Load(destpath, json);//将dll插件LoadLibrary,并进行函数委托的实例化;
             if (iLib == (IntPtr)0)
             {
-                LogHelper.WriteLine(CQLogLevel.Error, "插件载入", $"插件 {plugininfo.Name} 加载失败,返回句柄为空,GetLastError={Dll.GetLastError()}");
-                return false;
+                switch (Save.PipeType)
+                {
+                    case PipeType.Server:
+                        break;
+                    case PipeType.Client:
+                        CQ_addLog(0, 30, Marshal.StringToHGlobalAnsi("插件载入")
+                                , Marshal.StringToHGlobalAnsi($"插件 {plugininfo.Name} 加载失败,返回句柄为空,GetLastError={Dll.GetLastError()}"));
+                        break;
+                    case PipeType.NoPipe:
+                        LogHelper.WriteLog(LogLevel.Error, "插件载入", $"插件 {plugininfo.Name} 加载失败,返回句柄为空,GetLastError={Dll.GetLastError()}");
+                        break;
+                }
             }
             //执行插件的init,分配一个authcode
             dll.DoInitialize(authcode);
@@ -102,11 +144,25 @@ namespace Launcher
                 , json["name"].ToString(), json["version"].ToString(), Convert.ToInt32(json["version_id"].ToString())
                 , json["author"].ToString(), json["description"].ToString(), authcode);
             bool enabled = GetPluginState(appInfo);//获取插件启用状态
+            if (Save.PipeType==PipeType.Server)
+            {
+                Process.Start(typeof(MainForm).Assembly.Location, $"-m {appInfotext.Value} {authcode}");
+            }
             //保存至插件列表
-            Plugins.Add(new Plugin(iLib, appInfo, json, dll, enabled));
-            LogHelper.WriteLine(CQLogLevel.InfoSuccess, "插件载入", $"插件 {appInfo.Name} 加载成功");
-
-            cq_start(Marshal.StringToHGlobalAnsi(destpath), authcode);
+            Plugins.Add(new Plugin(iLib, appInfo, json, dll, enabled, appInfotext.Value));
+            switch (Save.PipeType)
+            {
+                case PipeType.Server:
+                    break;
+                case PipeType.Client:
+                    CQ_addLog(authcode, 11, Marshal.StringToHGlobalAnsi("插件载入")
+                            , Marshal.StringToHGlobalAnsi($"插件 {appInfo.Name} 加载成功"));
+                    break;
+                case PipeType.NoPipe:
+                    LogHelper.WriteLog(LogLevel.InfoSuccess, "插件载入", $"插件 {appInfo.Name} 加载成功");
+                    cq_start(Marshal.StringToHGlobalAnsi(destpath), authcode);
+                    break;
+            }
             //将它的窗口写入托盘右键菜单
             NotifyIconHelper.LoadMenu(json);
             return true;
@@ -155,7 +211,6 @@ namespace Launcher
                     .Value<int>() == 1;
             }
         }
-
         /// <summary>
         /// 卸载插件，执行被卸载事件，从菜单移除此插件的菜单
         /// </summary>
@@ -164,17 +219,17 @@ namespace Launcher
         {
             try
             {
-                plugin.dll.CallFunction("Disable");
-                plugin.dll.CallFunction("Exit");
+                plugin.dll.CallFunction(FunctionEnums.Functions.Disable);
+                plugin.dll.CallFunction(FunctionEnums.Functions.Exit);
                 plugin.dll.UnLoad();
                 NotifyIconHelper.RemoveMenu(plugin.appinfo.Name);
                 Plugins.Remove(plugin);
-                LogHelper.WriteLine(CQLogLevel.InfoSuccess, "插件卸载", $"插件 {plugin.appinfo.Name} 卸载成功");
+                LogHelper.WriteLog(LogLevel.InfoSuccess, "插件卸载", $"插件 {plugin.appinfo.Name} 卸载成功");
                 plugin = null; GC.Collect();
             }
             catch (Exception e)
             {
-                LogHelper.WriteLine(CQLogLevel.Error, "插件卸载", e.Message, e.StackTrace);
+                LogHelper.WriteLog(LogLevel.Error, "插件卸载", e.Message, e.StackTrace);
             }
         }
         /// <summary>
@@ -206,43 +261,59 @@ namespace Launcher
                 File.WriteAllText(@"conf\states.json", MainForm.AppConfig.ToString());
             }
             Load();
-            LogHelper.WriteLine("遍历启动事件……");
-            CallFunction("StartUp");
-            CallFunction("Enable");
+            LogHelper.WriteLog("遍历启动事件……");
+            CallFunction(FunctionEnums.Functions.StartUp);
+            CallFunction(FunctionEnums.Functions.Enable);
         }
         [DllImport("CQP.dll", EntryPoint = "cq_start")]
         private static extern bool cq_start(IntPtr path, int authcode);
+        [DllImport("CQP.dll", EntryPoint = "CQ_addLog")]
+        private static extern int CQ_addLog(int authCode, int priority, IntPtr type, IntPtr msg);
         /// <summary>
         /// 核心方法调用，将前端处理的数据传递给插件对应事件处理，尝试捕获非托管插件的异常
         /// </summary>
         /// <param name="ApiName">调用的事件名称，前端统一名称，或许应该写成枚举</param>
         /// <param name="args">参数表</param>
         [HandleProcessCorruptedStateExceptions]
-        public void CallFunction(string ApiName, params object[] args)
+        public void CallFunction(FunctionEnums.Functions ApiName, params object[] args)
         {
+            JObject json = new JObject
+            {
+                new JProperty("ApiName",JsonConvert.SerializeObject(ApiName)),
+                new JProperty("Args",JsonConvert.SerializeObject(args))
+            };
             //遍历插件列表,遇到标记消息阻断则跳出
             foreach (var item in Plugins)
             {
                 Dll dll = item.dll;
-                //先看此插件有没有使用此事件
-                if (!item.Enable || !dll.HasFunction(ApiName, item.json)) continue;
+                //先看此插件是否已禁用
+                if (item.Enable is false) continue;
                 if (Save.TestPluginsList.Any(x => x == item.appinfo.Name))
                 {
-                    LogHelper.WriteLine($"{item.appinfo.Name} 插件测试中，忽略消息投递");
+                    Debug.WriteLine($"{item.appinfo.Name} 插件测试中，忽略消息投递");
                     continue;
                 }
                 try
                 {
-                    //存在事件,调用函数,返回1表示消息阻塞,跳出后续
-                    if (dll.CallFunction(ApiName, args) == 1)
+                    int result;
+                    if (Save.MutiProcessMode is true)
                     {
-                        LogHelper.WriteLine($"由 {item.appinfo.Name} 结束消息处理");
+                        result = item.NamedPipe.SendMsg(json.ToString());
+                    }
+                    else
+                    {
+                        result = dll.CallFunction(ApiName, args);
+                    }
+                    //调用函数, 返回 1 表示消息阻塞, 跳出后续
+                    if (result == 1)
+                    {
+                        LogHelper.WriteLog($"由 {item.appinfo.Name} 结束消息处理");
                         return;
                     }
                 }
                 catch (Exception e)
                 {
-                    LogHelper.WriteLine(CQLogLevel.Error, "函数执行异常", $"插件 {item.appinfo.Name} {ApiName} 函数发生错误，错误信息:{e.Message} {e.StackTrace}");
+                    LogHelper.WriteLog(LogLevel.Error, "函数执行异常", $"插件 {item.appinfo.Name} {ApiName} 函数发生错误，错误信息:{e.Message} {e.StackTrace}");
                     var b = ErrorHelper.ShowErrorDialog($"错误模块：{item.appinfo.Name}\n{ApiName} 函数发生错误，错误信息:\n{e.Message} {e.StackTrace}");
                     switch (b)
                     {
@@ -267,7 +338,7 @@ namespace Launcher
             NotifyIconHelper.HideNotifyIcon();
             //Load();
             string path = typeof(MainForm).Assembly.Location;//获取可执行文件路径
-            if(Program.IgnoreProcessChecking)
+            if (Save.IgnoreProcessChecking)
             {
                 Process.Start(path, "-i");
             }

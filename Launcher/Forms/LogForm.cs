@@ -1,6 +1,12 @@
 ﻿using Deserizition;
-using Launcher.Sdk.Cqp.Enum;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.Linq;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -14,21 +20,183 @@ namespace Launcher.Forms
         }
         #region --字段--
         public static ListView ListView_log;
-        public bool formTopMost=false;
+        public bool formTopMost = false;
+        public LogLevel LogPriority = LogLevel.InfoSend;
+        private static List<LogModel> LogLists;
+        System.Windows.Forms.Timer LogChecker = new System.Windows.Forms.Timer();
         #endregion
 
         private void LogForm_Load(object sender, EventArgs e)
         {
             ListView_log = listView_LogMain;
             comboBox_LogLevel.SelectedIndex = 1;
-            LogHelper.LogWriter(ListView_log, CQLogLevel.Info,"OPQBot框架","提示","...","成功连接到服务器");
-            Save.formFlag = true;
-            Save.logListView = listView_LogMain;
+            LogHelper.WriteLog(LogLevel.Info, "提示", "成功连接到服务器");
+            LoadLogs();
+            LogChecker.Interval = 100;
+            LogChecker.Tick += LogChecker_Tick;
+            //LogChecker.Enabled = true;
+            Thread thread = new Thread(() => { ListenLogBoardCast(); });
+            thread.Start();
+        }
+
+        private void LogChecker_Tick(object sender, EventArgs e)
+        {
+            AddLog(CheckNewLog());
+        }
+
+        private void LoadLogs()
+        {
+            listView_LogMain.Items.Clear();
+            LogLists = LogHelper.GetDisplayLogs().Where(x => x.priority <= (int)LogPriority).ToList();
+            foreach (var item in LogLists)
+            {
+                AddItem2ListView(item);
+            }
+        }
+
+        private void ListenLogBoardCast(int port = 28634)
+        {
+            using (Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+            {
+                IPEndPoint iep = new IPEndPoint(IPAddress.Any, port);
+                sock.Bind(iep);
+                EndPoint ep = iep;
+                Debug.WriteLine("开启广播侦听，端口28634...");
+                //Ready to receive…
+                while (true)
+                {
+                    byte[] data = new byte[1024];
+                    int recv = sock.ReceiveFrom(data, ref ep);
+                    string stringData = Encoding.ASCII.GetString(data, 0, recv);
+                    Debug.WriteLine("received: {0} from: {1}", stringData, ep.ToString());
+                    AddLog(LogHelper.GetLogByID(Convert.ToInt32(stringData)));
+                }
+            }
+        }
+
+        private void AddItem2ListView(LogModel item)
+        {
+            ListViewItem listViewItem = new ListViewItem();
+            listViewItem.SubItems[0].Text = LogHelper.GetTimeStampString(item.time);
+            listViewItem.SubItems.Add(item.source);
+            listViewItem.SubItems.Add(item.name);
+            listViewItem.SubItems.Add(item.detail);
+            listViewItem.SubItems.Add(item.status);
+            listViewItem.ForeColor = GetLogColor(item.priority);//消息颜色
+            listView_LogMain.Invoke(new MethodInvoker(() =>
+            {
+                listView_LogMain.Items.Add(listViewItem);
+                if (checkBox_Update.Checked)//日志自动滚动
+                {
+                    listView_LogMain.EnsureVisible(listView_LogMain.Items.Count - 1);
+                    listViewItem.Selected = true;
+                }
+            }));            
+        }
+
+        private void AddLog(LogModel model)
+        {
+            if (model == null)
+                return;
+            LogLists.Add(model);
+            AddItem2ListView(model);
+            if (LogLists.Count >= Save.LogerMaxCount)
+            {
+                LogLists.RemoveAt(0);
+                listView_LogMain.Items.RemoveAt(0);
+            }
+        }
+
+        private LogModel CheckNewLog()
+        {
+            var c = LogHelper.GetLastLog();
+            if (c.id != LogLists.Last().id && c.priority <= (int)LogPriority)
+            {
+                return c;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public static void UpdateItemStatus(int id, string msg)
+        {
+            LogModel item = LogLists.Find(x => x.id == id);
+            item.status = msg;
+            LogHelper.UpdateLogStatus(id, msg);
+            ListView_log.Items[LogLists.IndexOf(item)].SubItems[4].Text = msg;
+        }
+
+        /// <summary>
+        /// 获取日志文本颜色
+        /// </summary>
+        /// <param name="level">日志等级</param>
+        /// <returns></returns>
+        private static Color GetLogColor(LogLevel level)
+        {
+            Color LogColor;
+            switch (level)
+            {
+                case LogLevel.Debug:
+                    LogColor = Color.Gray;
+                    break;
+                case LogLevel.Error:
+                    LogColor = Color.Red;
+                    break;
+                case LogLevel.Info:
+                    LogColor = Color.Black;
+                    break;
+                case LogLevel.Fatal:
+                    LogColor = Color.DarkRed;
+                    break;
+                case LogLevel.InfoSuccess:
+                    LogColor = Color.Magenta;
+                    break;
+                case LogLevel.InfoSend:
+                    LogColor = Color.Green;
+                    break;
+                case LogLevel.InfoReceive:
+                    LogColor = Color.Blue;
+                    break;
+                case LogLevel.Warning:
+                    LogColor = Color.FromArgb(255, 165, 0);
+                    break;
+                default:
+                    LogColor = Color.Black;
+                    break;
+            }
+            return LogColor;
+        }
+        private static Color GetLogColor(int value)
+        {
+            LogLevel loglevel = (LogLevel)Enum.Parse(typeof(LogLevel), Enum.GetName(typeof(LogLevel), value));
+            return GetLogColor(loglevel);
+        }
+
+        private LogLevel GetLogPriority(int selectIndex)
+        {
+            switch (selectIndex)
+            {
+                case 0:
+                    return LogLevel.Debug;
+                case 1:
+                    return LogLevel.InfoSend;
+                case 2:
+                    return LogLevel.Warning;
+                case 3:
+                    return LogLevel.Error;
+                case 4:
+                    return LogLevel.Fatal;
+                default:
+                    return LogLevel.Info;
+            }
         }
 
         private void comboBox_LogLevel_SelectedIndexChanged(object sender, EventArgs e)
         {
-
+            LogPriority = GetLogPriority((sender as ComboBox).SelectedIndex);
+            LoadLogs();
         }
 
         private void LogForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -46,7 +214,7 @@ namespace Launcher.Forms
         {
             if ((sender as CheckBox).Checked)
             {
-                Thread thread = new Thread(()=> 
+                Thread thread = new Thread(() =>
                 {
                     label_Desc.Invoke(new MethodInvoker(() => { label_Desc.Visible = true; }));
                     Save.AutoScroll = true;

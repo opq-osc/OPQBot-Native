@@ -190,6 +190,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Dll.cs" />
+    <Compile Include="FunctionEnums.cs" />
     <Compile Include="ErrorHelper.cs" />
     <Compile Include="Forms\LogForm.cs">
       <SubType>Form</SubType>
@@ -221,8 +222,9 @@
     <Compile Include="Forms\PluginTester.Designer.cs">
       <DependentUpon>PluginTester.cs</DependentUpon>
     </Compile>
-    <Compile Include="LogHelper.cs" />
     <Compile Include="NotifyIconHelper.cs" />
+    <Compile Include="Pipe\NamedPipeClient.cs" />
+    <Compile Include="Pipe\NamedPipeServer.cs" />
     <Compile Include="PluginManagment.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="ProgressMessage.cs" />
@@ -256,6 +258,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="SQLite.Interop.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\LogForm.resx">
       <DependentUpon>LogForm.cs</DependentUpon>
     </EmbeddedResource>

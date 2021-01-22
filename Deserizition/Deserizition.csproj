@@ -55,6 +55,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="SqlSugar, Version=5.0.2.2, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\OPQBot-FakeCQPDLL\packages\SqlSugar.5.0.2.2\lib\SqlSugar.dll</HintPath>
+    </Reference>
     <Reference Include="SuperSocket.ClientEngine, Version=0.10.0.0, Culture=neutral, PublicKeyToken=ee9af13f57f00acc, processorArchitecture=MSIL">
       <HintPath>..\packages\SuperSocket.ClientEngine.Core.0.10.0\lib\net45\SuperSocket.ClientEngine.dll</HintPath>
     </Reference>
@@ -70,9 +73,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CoreHelper.cs" />
     <Compile Include="FriendsList.cs" />
     <Compile Include="GroupMemberList.cs" />
+    <Compile Include="LogHelper.cs" />
+    <Compile Include="LogModel.cs" />
     <Compile Include="ReceiveMessage.cs" />
     <Compile Include="PicMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -81,6 +85,7 @@
     <Compile Include="XMLMessage.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
