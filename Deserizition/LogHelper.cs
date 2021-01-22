@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using Newtonsoft.Json.Linq;
 using SqlSugar;
 
 namespace Deserizition
@@ -51,9 +52,9 @@ namespace Deserizition
         }
         public static string GetLogFilePath()
         {
-            if (Directory.Exists("logs") is false)
-                Directory.CreateDirectory("logs");
-            return Path.Combine(Environment.CurrentDirectory, "logs", GetLogFileName());
+            if (Directory.Exists($@"logs\{Save.curentQQ}") is false)
+                Directory.CreateDirectory($@"logs\{Save.curentQQ}");
+            return Path.Combine(Environment.CurrentDirectory, $@"logs\{Save.curentQQ}", GetLogFileName());
         }
         private static SqlSugarClient GetInstance()
         {
@@ -89,8 +90,8 @@ namespace Deserizition
         {
             DateTime time = TimeStamp2DateTime(Timestamp);
             StringBuilder sb = new StringBuilder();
-            sb.Append($"{(time.AddDays(1).Day == DateTime.Now.Day ? "昨天" : "今天")} ");
-            sb.Append($"{time:HH:mm:ss}");
+            //sb.Append($"{(time.AddDays(1).Day == DateTime.Now.Day ? "昨天" : "今天")} ");
+            sb.Append($"{time:MM/dd HH:mm:ss}");
             return sb.ToString();
         }
         /// <summary>
@@ -101,7 +102,7 @@ namespace Deserizition
         /// <param name="type">类型</param>
         /// <param name="status">处理状态</param>
         /// <param name="messages">日志内容</param>
-        public static bool WriteLog(LogLevel level, string logOrigin, string type, string status, params string[] messages)
+        public static int WriteLog(LogLevel level, string logOrigin, string type, string status, params string[] messages)
         {
             string msg = string.Empty;
             foreach (var item in messages)
@@ -110,7 +111,7 @@ namespace Deserizition
             }
             return WriteLog(level, logOrigin, type, status, msg);
         }
-        public static bool WriteLog(LogLevel level, string logOrigin, string type, string status, string messages)
+        public static int WriteLog(LogLevel level, string logOrigin, string type, string status, string messages)
         {
             LogModel model = new LogModel
             {
@@ -124,44 +125,60 @@ namespace Deserizition
             };
             return WriteLog(model);
         }
-        public static bool WriteLog(LogModel model)
+        public static int WriteLog(LogModel model)
         {
-            bool flag = false;
             using (var db = GetInstance())
             {
                 var result = db.Ado.UseTran(() =>
                 {
                     db.Insertable(model).ExecuteCommand();
                 });
-                if (result.IsSuccess)
-                {
-                    flag = result.Data;
-                }
-                else
+                if (result.IsSuccess is false)
                 {
                     throw new Exception("执行错误，发生位置 WriteLog " + result.ErrorMessage);
                 }
             }
-            SendBoradcast(GetLastLog().id);
-            return flag;
+            int logid = GetLastLog().id;
+            SendBroadcast(GetLogBroadcastContent(logid));
+            return logid;
         }
-        private static void SendBoradcast(int logid, int port = 28634)
+        private static string GetLogBroadcastContent(int logid)
+        {
+            JObject json = new JObject
+            {
+                new JProperty("Type","Log"),
+                new JProperty("QQ",Save.curentQQ),
+                new JProperty("LogID",logid),
+            };
+            return json.ToString();
+        }
+        private static string GetUpdateBroadcastContent(int logid, string msg)
+        {
+            JObject json = new JObject
+            {
+                new JProperty("Type","Update"),
+                new JProperty("QQ",Save.curentQQ),
+                new JProperty("LogID",logid),
+                new JProperty("Msg",msg)
+            };
+            return json.ToString();
+        }
+        private static void SendBroadcast(string msg, int port = 28634)
         {
             Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram,
                ProtocolType.Udp);
             IPEndPoint iep1 = new IPEndPoint(IPAddress.Broadcast, port);//255.255.255.255
-            string hostname = Dns.GetHostName();
-            byte[] data = Encoding.ASCII.GetBytes(logid.ToString());
+            byte[] data = Encoding.UTF8.GetBytes(msg);
             sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, 1);
             sock.SendTo(data, iep1);
             sock.Close();
         }
-        public static bool WriteLog(int level, string logOrigin, string type, string status, params string[] messages)
+        public static int WriteLog(int level, string logOrigin, string type, string status, params string[] messages)
         {
             LogLevel loglevel = (LogLevel)Enum.Parse(typeof(LogLevel), Enum.GetName(typeof(LogLevel), level));
             return WriteLog(loglevel, logOrigin, type, status, messages);
         }
-        public static bool WriteLog(LogLevel level, string type, string message)
+        public static int WriteLog(LogLevel level, string type, string message)
         {
             return WriteLog(level, "OPQBot框架", type, "", message);
         }
@@ -169,9 +186,9 @@ namespace Deserizition
         /// 以info为等级，"OPQBot框架"为来源，"提示"为类型写出一条日志
         /// </summary>
         /// <param name="messages">日志内容</param>
-        public static bool WriteLog(string messages)
+        public static int WriteLog(string messages, string status = "")
         {
-            return WriteLog(LogLevel.Info, "OPQBot框架", "提示", "", messages);
+            return WriteLog(LogLevel.Info, "OPQBot框架", "提示", status, messages);
         }
 
         public static LogModel GetLogByID(int id)
@@ -192,7 +209,7 @@ namespace Deserizition
                 }
             }
         }
-        public static bool UpdateLogStatus(int id, string status)
+        public static void UpdateLogStatus(int id, string status)
         {
             using (var db = GetInstance())
             {
@@ -203,7 +220,7 @@ namespace Deserizition
                 });
                 if (result.IsSuccess)
                 {
-                    return result.Data;
+                    SendBroadcast(GetUpdateBroadcastContent(id, status));
                 }
                 else
                 {
@@ -211,13 +228,13 @@ namespace Deserizition
                 }
             }
         }
-        public static List<LogModel> GetDisplayLogs()
+        public static List<LogModel> GetDisplayLogs(int priority)
         {
             using (var db = GetInstance())
             {
                 var result = db.Ado.UseTran(() =>
                 {
-                    var c = db.SqlQueryable<LogModel>($"select * from log order by id desc limit {Save.LogerMaxCount}").ToList();
+                    var c = db.SqlQueryable<LogModel>($"select * from log where priority>= {priority} order by id desc limit {Save.LogerMaxCount}").ToList();
                     c.Reverse();
                     return c;
                 });

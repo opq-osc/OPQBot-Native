@@ -1,4 +1,5 @@
 ﻿using Deserizition;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -21,9 +22,8 @@ namespace Launcher.Forms
         #region --字段--
         public static ListView ListView_log;
         public bool formTopMost = false;
-        public LogLevel LogPriority = LogLevel.InfoSend;
+        public LogLevel LogPriority = LogLevel.Info;
         private static List<LogModel> LogLists;
-        System.Windows.Forms.Timer LogChecker = new System.Windows.Forms.Timer();
         #endregion
 
         private void LogForm_Load(object sender, EventArgs e)
@@ -32,22 +32,14 @@ namespace Launcher.Forms
             comboBox_LogLevel.SelectedIndex = 1;
             LogHelper.WriteLog(LogLevel.Info, "提示", "成功连接到服务器");
             LoadLogs();
-            LogChecker.Interval = 100;
-            LogChecker.Tick += LogChecker_Tick;
-            //LogChecker.Enabled = true;
             Thread thread = new Thread(() => { ListenLogBoardCast(); });
             thread.Start();
-        }
-
-        private void LogChecker_Tick(object sender, EventArgs e)
-        {
-            AddLog(CheckNewLog());
         }
 
         private void LoadLogs()
         {
             listView_LogMain.Items.Clear();
-            LogLists = LogHelper.GetDisplayLogs().Where(x => x.priority <= (int)LogPriority).ToList();
+            LogLists = LogHelper.GetDisplayLogs((int)LogPriority);
             foreach (var item in LogLists)
             {
                 AddItem2ListView(item);
@@ -61,15 +53,26 @@ namespace Launcher.Forms
                 IPEndPoint iep = new IPEndPoint(IPAddress.Any, port);
                 sock.Bind(iep);
                 EndPoint ep = iep;
-                Debug.WriteLine("开启广播侦听，端口28634...");
+                Debug.WriteLine($"开启广播侦听，端口{port}...");
                 //Ready to receive…
                 while (true)
                 {
                     byte[] data = new byte[1024];
                     int recv = sock.ReceiveFrom(data, ref ep);
-                    string stringData = Encoding.ASCII.GetString(data, 0, recv);
+                    string stringData = Encoding.UTF8.GetString(data, 0, recv);
                     Debug.WriteLine("received: {0} from: {1}", stringData, ep.ToString());
-                    AddLog(LogHelper.GetLogByID(Convert.ToInt32(stringData)));
+                    JObject json = JObject.Parse(stringData);
+                    if (json["QQ"].Value<long>() != Save.curentQQ)
+                        continue;
+                    switch (json["Type"].ToString())
+                    {
+                        case "Log":
+                            AddLog(LogHelper.GetLogByID(Convert.ToInt32(json["LogID"].ToString())));
+                            break;
+                        case "Update":
+                            UpdateItemStatus(Convert.ToInt32(json["LogID"].ToString()), json["Msg"].ToString());
+                            break;
+                    }
                 }
             }
         }
@@ -96,36 +99,25 @@ namespace Launcher.Forms
 
         private void AddLog(LogModel model)
         {
-            if (model == null)
+            if (model == null || model.priority<(int)LogPriority)
                 return;
             LogLists.Add(model);
             AddItem2ListView(model);
             if (LogLists.Count >= Save.LogerMaxCount)
             {
                 LogLists.RemoveAt(0);
-                listView_LogMain.Items.RemoveAt(0);
+                listView_LogMain.Invoke(new MethodInvoker(() => { listView_LogMain.Items.RemoveAt(0); }));
             }
         }
 
-        private LogModel CheckNewLog()
-        {
-            var c = LogHelper.GetLastLog();
-            if (c.id != LogLists.Last().id && c.priority <= (int)LogPriority)
-            {
-                return c;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public static void UpdateItemStatus(int id, string msg)
+        private void UpdateItemStatus(int id, string msg)
         {
             LogModel item = LogLists.Find(x => x.id == id);
             item.status = msg;
-            LogHelper.UpdateLogStatus(id, msg);
-            ListView_log.Items[LogLists.IndexOf(item)].SubItems[4].Text = msg;
+            listView_LogMain.Invoke(new MethodInvoker(() =>
+            {
+                listView_LogMain.Items[LogLists.IndexOf(item)].SubItems[4].Text = msg;
+            }));
         }
 
         /// <summary>
@@ -181,7 +173,7 @@ namespace Launcher.Forms
                 case 0:
                     return LogLevel.Debug;
                 case 1:
-                    return LogLevel.InfoSend;
+                    return LogLevel.Info;
                 case 2:
                     return LogLevel.Warning;
                 case 3:

@@ -136,7 +136,9 @@ namespace Launcher
         }
         public static void Quit()
         {
+            MainForm.pluginManagment.CallFunction(FunctionEnums.Functions.Disable);
             MainForm.pluginManagment.CallFunction(FunctionEnums.Functions.Exit);
+            MainForm.pluginManagment.UnLoad();
             NotifyIconHelper.HideNotifyIcon();
             Environment.Exit(0);
         }

@@ -325,12 +325,12 @@ namespace Launcher.Forms
                     Dll.AddMsgToSave(new Deserizition.Message(Save.MsgList.Count + 1, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message));
                     return;
                 }
-                LogHelper.WriteLog(LogLevel.InfoReceive, "OPQBot框架", "[↓]收到好友消息", "", $"来源QQ:{data.FromUin} {message}");
+                int logid = LogHelper.WriteLog(LogLevel.InfoReceive, "OPQBot框架", "[↓]收到好友消息", "处理中...", $"来源QQ:{data.FromUin} {message}");
                 var c = new Deserizition.Message(Save.MsgList.Count + 1, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message);
                 Dll.AddMsgToSave(c);
                 pluginManagment.CallFunction(FunctionEnums.Functions.PrivateMsg, 11, Save.MsgList.Count + 1, data.FromUin, Marshal.StringToHGlobalAnsi(message), 0);
                 stopwatch.Stop();
-                LogHelper.WriteLog($"耗时 {stopwatch.ElapsedMilliseconds} ms");
+                LogHelper.UpdateLogStatus(logid, $"√ {stopwatch.ElapsedMilliseconds} ms");
             }); task.Start();
         }
         /// <summary>
@@ -355,10 +355,11 @@ namespace Launcher.Forms
                     BinaryWriterExpand.Write_Ex(binaryWriter, fileupload["FileName"].ToString());
                     BinaryWriterExpand.Write_Ex(binaryWriter, Convert.ToInt64(fileupload["FileSize"].ToString()));
                     BinaryWriterExpand.Write_Ex(binaryWriter, 0);
-                    pluginManagment.CallFunction(FunctionEnums.Functions.Upload, 1, GetTimeStamp(),
-      data.FromGroupId, data.FromUserId, Convert.ToBase64String(stream.ToArray()));
-                    LogHelper.WriteLog(LogLevel.InfoReceive, "OPQBot框架", "文件上传", "", $"来源群:{data.FromGroupId}({data.FromGroupName}) 来源QQ:{data.FromUserId}({data.FromNickName}) " +
-                        $"文件名:{fileupload["FileName"]} 大小:{Convert.ToDouble(fileupload["FileSize"]) / 1000}KB FileID:{fileupload["FileID"]}");
+                    pluginManagment.CallFunction(FunctionEnums.Functions.Upload, 1, GetTimeStamp(), data.FromGroupId,
+                                                 data.FromUserId, Convert.ToBase64String(stream.ToArray()));
+                    stopwatch.Stop();
+                    LogHelper.WriteLog(LogLevel.InfoReceive, "OPQBot框架", "文件上传", $"√ {stopwatch.ElapsedMilliseconds} ms", $"来源群:{data.FromGroupId}({data.FromGroupName}) 来源QQ:{data.FromUserId}({data.FromNickName}) " +
+                        $"文件名:{fileupload["FileName"]} 大小:{Convert.ToDouble(fileupload["FileSize"]) / 1000}KB FileID:{fileupload["FileID"]}");                    
                     return;
                 }
                 string message = ProgressMessage.Start(groupMessage);
@@ -371,7 +372,7 @@ namespace Launcher.Forms
                     Dll.AddMsgToSave(new Deserizition.Message(Save.MsgList.Count + 1, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message));
                     return;
                 }
-                LogHelper.WriteLog(LogLevel.InfoReceive, "OPQBot框架", "[↓]收到消息", "", $"来源群:{data.FromGroupId}({data.FromGroupName}) 来源QQ:{data.FromUserId}({data.FromNickName}) {message}");
+                int logid = LogHelper.WriteLog(LogLevel.InfoReceive, "OPQBot框架", "[↓]收到消息", "处理中...", $"来源群:{data.FromGroupId}({data.FromGroupName}) 来源QQ:{data.FromUserId}({data.FromNickName}) {message}");
                 var c = new Deserizition.Message(Save.MsgList.Count + 1, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message);
                 Dll.AddMsgToSave(c);//保存消息到消息列表
                 byte[] messageBytes = GB18030.GetBytes(message + "\0");
@@ -383,7 +384,7 @@ namespace Launcher.Forms
                 Marshal.FreeHGlobal(messageIntptr);
                 GC.Collect();
                 stopwatch.Stop();
-                LogHelper.WriteLog($"耗时 {stopwatch.ElapsedMilliseconds} ms");
+                LogHelper.UpdateLogStatus(logid, $"√ {stopwatch.ElapsedMilliseconds} ms");
             }); task.Start();
         }
         /// <summary>
@@ -395,6 +396,9 @@ namespace Launcher.Forms
             {
                 JObject events = JObject.Parse(((JSONMessage)fn).MessageText);
                 Requests request = new Requests();
+                Stopwatch sw = new Stopwatch();
+                string logMsg = string.Empty;
+                sw.Start();
                 switch (events["CurrentPacket"]["Data"]["EventName"].ToString())
                 {
                     case "ON_EVENT_GROUP_JOIN"://入群事件 _eventSystem_GroupMemberIncrease id=7
@@ -407,7 +411,7 @@ namespace Launcher.Forms
                         GroupJoin_InviteUin = Convert.ToInt64(GroupJoin_data["InviteUin"].ToString());
                         if (GroupJoin_JoinUin != Save.curentQQ)
                             pluginManagment.CallFunction(FunctionEnums.Functions.GroupMemberIncrease, 1, GetTimeStamp(), GroupJoin_JoinGroup, 10000, GroupJoin_JoinUin);
-                        LogHelper.WriteLog($"入群事件 群{GroupJoin_JoinGroup}加入{GroupJoin_JoinUserName}({GroupJoin_JoinUin})");
+                        logMsg = $"入群事件 群{GroupJoin_JoinGroup}加入{GroupJoin_JoinUserName}({GroupJoin_JoinUin})";
                         break;
                     case "ON_EVENT_GROUP_EXIT"://退群事件 _eventSystem_GroupMemberDecrease id=6
                         long GroupExit_FromUin, GroupExit_UserID;
@@ -415,7 +419,7 @@ namespace Launcher.Forms
                         GroupExit_FromUin = Convert.ToInt64(GroupExit_data["EventMsg"]["FromUin"].ToString());
                         GroupExit_UserID = Convert.ToInt64(GroupExit_data["EventData"]["UserID"].ToString());
                         pluginManagment.CallFunction(FunctionEnums.Functions.GroupMemberDecrease, 1, GetTimeStamp(), GroupExit_FromUin, 10000, GroupExit_UserID);
-                        LogHelper.WriteLog($"退群事件 {GroupExit_UserID}退出群{GroupExit_FromUin} ");
+                        logMsg = $"退群事件 {GroupExit_UserID}退出群{GroupExit_FromUin}";
                         break;
                     case "ON_EVENT_GROUP_ADMIN"://群管变动事件 _eventSystem_GroupAdmin id=5
                         long GroupAdmin_GroupID, GroupAdmin_UserID, GroupAdmin_Flag;
@@ -424,7 +428,7 @@ namespace Launcher.Forms
                         GroupAdmin_UserID = Convert.ToInt64(GroupAdmin_data["UserID"].ToString());
                         GroupAdmin_Flag = Convert.ToInt64(GroupAdmin_data["Flag"].ToString());
                         pluginManagment.CallFunction(FunctionEnums.Functions.AdminChange, 1, GetTimeStamp(), GroupAdmin_GroupID, GroupAdmin_UserID);
-                        LogHelper.WriteLog($"群管理员变动事件 {GroupAdmin_UserID}{(GroupAdmin_Flag == 1 ? "升为" : "消去")}群{GroupAdmin_GroupID}的管理员");
+                        logMsg = $"群管理员变动事件 {GroupAdmin_UserID}{(GroupAdmin_Flag == 1 ? "升为" : "消去")}群{GroupAdmin_GroupID}的管理员";
                         break;
                     case "ON_EVENT_GROUP_ADMINSYSNOTIFY"://加群请求事件 _eventRequest_AddGroup id=12
                         request.type = "GroupRequest";
@@ -441,9 +445,9 @@ namespace Launcher.Forms
                         GroupRequest_GroupName = GroupRequest_extdata["GroupName"].ToString();
                         GroupRequest_InviteName = GroupRequest_extdata["InviteName"].ToString();
                         pluginManagment.CallFunction(FunctionEnums.Functions.GroupAddRequest, 1, GetTimeStamp(), GroupRequest_GroupId, GroupRequest_Who, Marshal.StringToHGlobalAnsi(""), "");
-                        LogHelper.WriteLog($"加群请求事件 {GroupRequest_WhoName}({GroupRequest_Who})" +
+                        logMsg = $"加群请求事件 {GroupRequest_WhoName}({GroupRequest_Who})" +
                             $" {(GroupRequest_InviteUin != 0 ? $"受{GroupRequest_InviteName}({GroupRequest_InviteUin})邀请" : "")}" +
-                            $"加入群{GroupRequest_GroupName}({GroupRequest_GroupId})");
+                            $"加入群{GroupRequest_GroupName}({GroupRequest_GroupId})";
                         break;
                     case "ON_EVENT_FRIEND_ADD"://好友请求事件 _eventRequest_AddFriend id=11
                         request.type = "FriendRequest";
@@ -456,14 +460,14 @@ namespace Launcher.Forms
                         FriendRequest_Content = FriendRequest_data["Content"].ToString();
                         FriendRequest_UserID = Convert.ToInt64(FriendRequest_data["UserID"].ToString());
                         pluginManagment.CallFunction(FunctionEnums.Functions.FriendRequest, 1, GetTimeStamp(), FriendRequest_UserID, Marshal.StringToHGlobalAnsi(FriendRequest_Content), "");
-                        LogHelper.WriteLog($"好友请求事件 QQ号:{FriendRequest_UserID} 验证信息:{FriendRequest_Content}");
+                        logMsg=$"好友请求事件 QQ号:{FriendRequest_UserID} 验证信息:{FriendRequest_Content}";
                         break;
                     case "ON_EVENT_NOTIFY_PUSHADDFRD"://好友添加完成事件 _eventFriend_Add id=10
                         long FriendAdded_UserID;
                         JToken FriendAdded_data = events["CurrentPacket"]["Data"]["EventData"];
                         FriendAdded_UserID = Convert.ToInt64(FriendAdded_data["UserID"].ToString());
                         pluginManagment.CallFunction(FunctionEnums.Functions.FriendAdded, 1, GetTimeStamp(), FriendAdded_UserID);
-                        LogHelper.WriteLog($"好友添加完成事件 与{FriendAdded_UserID}成为了好友");
+                        logMsg = $"好友添加完成事件 与{FriendAdded_UserID}成为了好友";
                         break;
                     case "ON_EVENT_GROUP_SHUT"://群禁言事件 _eventSystem_GroupBan id=8
                         long GroupShut_groupid, GroupShut_qqid, GroupShut_shuttime;
@@ -473,13 +477,15 @@ namespace Launcher.Forms
                         GroupShut_shuttime = Convert.ToInt64(GroupShut_data["ShutTime"].ToString());
                         pluginManagment.CallFunction(FunctionEnums.Functions.GroupBan, (GroupShut_shuttime == 0 ? 1 : 2)
                             , GetTimeStamp(), GroupShut_groupid, 10001, GroupShut_qqid, GroupShut_shuttime);
-                        LogHelper.WriteLog($"群 {GroupShut_groupid} UserID {GroupShut_qqid} 禁言时间 {GroupShut_shuttime}秒");
+                        logMsg = $"群 {GroupShut_groupid} UserID {GroupShut_qqid} 禁言时间 {GroupShut_shuttime}秒";
                         break;
                     case "ON_EVENT_QQ_NETWORK_CHANGE":
                         TryCount++;
-                        LogHelper.WriteLog($"与服务器连接断开，第{TryCount}次尝试重连");
+                        logMsg = $"与服务器连接断开，第 {TryCount} 次尝试重连";
                         break;
                 }
+                sw.Stop();
+                LogHelper.WriteLog(logMsg, $"√ {sw.ElapsedMilliseconds} ms");
             }); task.Start();
         }
         /// <summary>

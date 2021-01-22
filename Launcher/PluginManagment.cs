@@ -8,7 +8,6 @@ using System.Runtime.InteropServices;
 using Deserizition;
 using Launcher.Forms;
 using Launcher.Pipe;
-using Launcher.Sdk.Cqp.Enum;
 using Launcher.Sdk.Cqp.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -184,9 +183,8 @@ namespace Launcher
         /// <param name="appInfo">需要获取的Appinfo</param>
         private bool GetPluginState(AppInfo appInfo)
         {
-            JArray statesArray = MainForm.AppConfig["states"] as JArray;
             //没有states键,新建一个
-            if (statesArray == null)
+            if (!(MainForm.AppConfig["states"] is JArray statesArray))
             {
                 var b = new JProperty("states", new JArray());
                 MainForm.AppConfig.Add(b);
@@ -237,6 +235,7 @@ namespace Launcher
         /// </summary>
         public void UnLoad()
         {
+            LogHelper.WriteLog("开始卸载插件...");
             int max = Plugins.Count;
             for (int i = 0; i < max; i++)
             {
@@ -245,6 +244,7 @@ namespace Launcher
                 item.dll.Dispose();
                 GC.Collect();
             }
+            LogHelper.WriteLog("插件卸载完毕，框架正在退出...");
         }
         //写在构造函数是不是还好点?
         /// <summary>

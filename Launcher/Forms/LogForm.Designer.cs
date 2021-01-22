@@ -83,7 +83,7 @@
             // columnHeader4
             // 
             this.columnHeader4.Text = "内容";
-            this.columnHeader4.Width = 417;
+            this.columnHeader4.Width = 410;
             // 
             // columnHeader5
             // 
