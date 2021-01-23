@@ -48,7 +48,17 @@ namespace Deserizition
     {
         public static string GetLogFileName()
         {
-            return $"logv2_{DateTime.Now:yyMMdd}.db";
+            var fileinfo = new DirectoryInfo($@"logs\{Save.curentQQ}").GetFiles("*.db");
+            string filename = "";
+            foreach (var item in fileinfo)
+            {
+                if (item.Name.StartsWith($"logv2_{DateTime.Now:yyMM}"))
+                {
+                    filename = item.Name;
+                    break;
+                }
+            }
+            return string.IsNullOrWhiteSpace(filename) ? $"logv2_{DateTime.Now:yyMMdd}.db" : filename;
         }
         public static string GetLogFilePath()
         {
@@ -75,7 +85,7 @@ namespace Deserizition
                 db.DbMaintenance.CreateDatabase(DBPath);
                 db.CodeFirst.InitTables(typeof(LogModel));
             }
-            WriteLog(LogLevel.InfoSuccess, "OPQBot框架", "运行日志", "", $"日志数据库初始化完毕{DateTime.Now:yyMMdd}。");
+            WriteLog(LogLevel.InfoSuccess, "OPQBot框架", "运行日志", $"日志数据库初始化完毕{DateTime.Now:yyMMdd}。");
         }
         public static long GetTimeStamp()
         {
@@ -94,24 +104,7 @@ namespace Deserizition
             sb.Append($"{time:MM/dd HH:mm:ss}");
             return sb.ToString();
         }
-        /// <summary>
-        /// 写一条日志
-        /// </summary>
-        /// <param name="level">日志等级</param>
-        /// <param name="logOrigin">消息来源</param>
-        /// <param name="type">类型</param>
-        /// <param name="status">处理状态</param>
-        /// <param name="messages">日志内容</param>
-        public static int WriteLog(LogLevel level, string logOrigin, string type, string status, params string[] messages)
-        {
-            string msg = string.Empty;
-            foreach (var item in messages)
-            {
-                msg += item;
-            }
-            return WriteLog(level, logOrigin, type, status, msg);
-        }
-        public static int WriteLog(LogLevel level, string logOrigin, string type, string status, string messages)
+        public static int WriteLog(LogLevel level, string logOrigin, string type, string messages, string status = "")
         {
             LogModel model = new LogModel
             {
@@ -173,14 +166,14 @@ namespace Deserizition
             sock.SendTo(data, iep1);
             sock.Close();
         }
-        public static int WriteLog(int level, string logOrigin, string type, string status, params string[] messages)
+        public static int WriteLog(int level, string logOrigin, string type, string messages, string status = "")
         {
             LogLevel loglevel = (LogLevel)Enum.Parse(typeof(LogLevel), Enum.GetName(typeof(LogLevel), level));
-            return WriteLog(loglevel, logOrigin, type, status, messages);
+            return WriteLog(loglevel, logOrigin, type, messages, status);
         }
-        public static int WriteLog(LogLevel level, string type, string message)
+        public static int WriteLog(LogLevel level, string type, string message, string status = "")
         {
-            return WriteLog(level, "OPQBot框架", type, "", message);
+            return WriteLog(level, "OPQBot框架", type, message, status);
         }
         /// <summary>
         /// 以info为等级，"OPQBot框架"为来源，"提示"为类型写出一条日志
@@ -188,7 +181,7 @@ namespace Deserizition
         /// <param name="messages">日志内容</param>
         public static int WriteLog(string messages, string status = "")
         {
-            return WriteLog(LogLevel.Info, "OPQBot框架", "提示", status, messages);
+            return WriteLog(LogLevel.Info, "OPQBot框架", "提示", messages, status);
         }
 
         public static LogModel GetLogByID(int id)

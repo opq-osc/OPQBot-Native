@@ -58,6 +58,8 @@ namespace Launcher
         /// </summary>
         public void Load()
         {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             string path = Path.Combine(Environment.CurrentDirectory, "data", "plugins");
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
@@ -68,7 +70,8 @@ namespace Launcher
                 if (Load(item.FullName))
                     count++;
             }
-            LogHelper.WriteLog(LogLevel.Info, "插件载入", $"一共加载了{count}个插件");
+            sw.Stop();
+            LogHelper.WriteLog(LogLevel.Info, "插件载入", $"一共加载了{count}个插件",$"√ {sw.ElapsedMilliseconds} ms");
             NotifyIconHelper.AddManageMenu();
         }
         /// <summary>

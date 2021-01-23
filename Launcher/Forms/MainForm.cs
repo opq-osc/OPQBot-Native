@@ -325,7 +325,7 @@ namespace Launcher.Forms
                     Dll.AddMsgToSave(new Deserizition.Message(Save.MsgList.Count + 1, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message));
                     return;
                 }
-                int logid = LogHelper.WriteLog(LogLevel.InfoReceive, "OPQBot框架", "[↓]收到好友消息", "处理中...", $"来源QQ:{data.FromUin} {message}");
+                int logid = LogHelper.WriteLog(LogLevel.InfoReceive, "OPQBot框架", "[↓]收到好友消息", $"来源QQ:{data.FromUin} {message}", "处理中...");
                 var c = new Deserizition.Message(Save.MsgList.Count + 1, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message);
                 Dll.AddMsgToSave(c);
                 pluginManagment.CallFunction(FunctionEnums.Functions.PrivateMsg, 11, Save.MsgList.Count + 1, data.FromUin, Marshal.StringToHGlobalAnsi(message), 0);
@@ -358,8 +358,8 @@ namespace Launcher.Forms
                     pluginManagment.CallFunction(FunctionEnums.Functions.Upload, 1, GetTimeStamp(), data.FromGroupId,
                                                  data.FromUserId, Convert.ToBase64String(stream.ToArray()));
                     stopwatch.Stop();
-                    LogHelper.WriteLog(LogLevel.InfoReceive, "OPQBot框架", "文件上传", $"√ {stopwatch.ElapsedMilliseconds} ms", $"来源群:{data.FromGroupId}({data.FromGroupName}) 来源QQ:{data.FromUserId}({data.FromNickName}) " +
-                        $"文件名:{fileupload["FileName"]} 大小:{Convert.ToDouble(fileupload["FileSize"]) / 1000}KB FileID:{fileupload["FileID"]}");                    
+                    LogHelper.WriteLog(LogLevel.InfoReceive, "OPQBot框架", "文件上传", $"来源群:{data.FromGroupId}({data.FromGroupName}) 来源QQ:{data.FromUserId}({data.FromNickName}) " +
+                        $"文件名:{fileupload["FileName"]} 大小:{Convert.ToDouble(fileupload["FileSize"]) / 1000}KB FileID:{fileupload["FileID"]}", $"√ {stopwatch.ElapsedMilliseconds} ms");                    
                     return;
                 }
                 string message = ProgressMessage.Start(groupMessage);
@@ -372,7 +372,7 @@ namespace Launcher.Forms
                     Dll.AddMsgToSave(new Deserizition.Message(Save.MsgList.Count + 1, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message));
                     return;
                 }
-                int logid = LogHelper.WriteLog(LogLevel.InfoReceive, "OPQBot框架", "[↓]收到消息", "处理中...", $"来源群:{data.FromGroupId}({data.FromGroupName}) 来源QQ:{data.FromUserId}({data.FromNickName}) {message}");
+                int logid = LogHelper.WriteLog(LogLevel.InfoReceive, "OPQBot框架", "[↓]收到消息", $"来源群:{data.FromGroupId}({data.FromGroupName}) 来源QQ:{data.FromUserId}({data.FromNickName}) {message}", "处理中...");
                 var c = new Deserizition.Message(Save.MsgList.Count + 1, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message);
                 Dll.AddMsgToSave(c);//保存消息到消息列表
                 byte[] messageBytes = GB18030.GetBytes(message + "\0");

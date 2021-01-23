@@ -139,7 +139,7 @@ namespace Launcher
             MainForm.pluginManagment.CallFunction(FunctionEnums.Functions.Disable);
             MainForm.pluginManagment.CallFunction(FunctionEnums.Functions.Exit);
             MainForm.pluginManagment.UnLoad();
-            NotifyIconHelper.HideNotifyIcon();
+            HideNotifyIcon();
             Environment.Exit(0);
         }
         public static void AddManageMenu()
