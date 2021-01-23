@@ -186,7 +186,15 @@ namespace Launcher.Forms
 
         private void comboBox_LogLevel_SelectedIndexChanged(object sender, EventArgs e)
         {
-            LogPriority = GetLogPriority((sender as ComboBox).SelectedIndex);
+            var t = GetLogPriority((sender as ComboBox).SelectedIndex);
+            if (t == LogPriority)
+            {
+                return;
+            }
+            else
+            {
+                LogPriority = t;
+            }
             LoadLogs();
         }
 

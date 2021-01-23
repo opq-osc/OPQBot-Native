@@ -278,7 +278,7 @@ namespace Launcher
         /// <param name="ApiName">调用的事件名称，前端统一名称，或许应该写成枚举</param>
         /// <param name="args">参数表</param>
         [HandleProcessCorruptedStateExceptions]
-        public void CallFunction(FunctionEnums.Functions ApiName, params object[] args)
+        public int CallFunction(FunctionEnums.Functions ApiName, params object[] args)
         {
             JObject json = new JObject
             {
@@ -310,9 +310,8 @@ namespace Launcher
                     //调用函数, 返回 1 表示消息阻塞, 跳出后续
                     if (result == 1)
                     {
-                        LogHelper.WriteLog($"由 {item.appinfo.Name} 结束消息处理");
-                        return;
-                    }
+                        return Plugins.IndexOf(item);
+                    }                    
                 }
                 catch (Exception e)
                 {
@@ -328,8 +327,10 @@ namespace Launcher
                             Environment.Exit(0);
                             break;
                     }
+                    return -1;
                 }
             }
+            return 0;
         }
         /// <summary>
         /// 重载应用

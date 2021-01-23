@@ -85,7 +85,7 @@ namespace Deserizition
                 db.DbMaintenance.CreateDatabase(DBPath);
                 db.CodeFirst.InitTables(typeof(LogModel));
             }
-            WriteLog(LogLevel.InfoSuccess, "OPQBot框架", "运行日志", $"日志数据库初始化完毕{DateTime.Now:yyMMdd}。");
+            WriteLog(LogLevel.InfoSuccess, "运行日志", $"日志数据库初始化完毕{DateTime.Now:yyMMdd}。");
         }
         public static long GetTimeStamp()
         {
