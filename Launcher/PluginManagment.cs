@@ -310,7 +310,7 @@ namespace Launcher
                     //调用函数, 返回 1 表示消息阻塞, 跳出后续
                     if (result == 1)
                     {
-                        return Plugins.IndexOf(item);
+                        return Plugins.IndexOf(item)+1;
                     }                    
                 }
                 catch (Exception e)

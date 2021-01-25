@@ -331,9 +331,9 @@ namespace Launcher.Forms
                 int pluginid = pluginManagment.CallFunction(FunctionEnums.Functions.PrivateMsg, 11, Save.MsgList.Count + 1, data.FromUin, Marshal.StringToHGlobalAnsi(message), 0);
                 stopwatch.Stop();
                 string updatemsg = $"√ {stopwatch.ElapsedMilliseconds} ms";
-                if (pluginid != -1)
+                if (pluginid > 0)
                 {
-                    updatemsg += $"(由 {pluginManagment.Plugins[pluginid].appinfo.Name} 结束消息处理)";
+                    updatemsg += $"(由 {pluginManagment.Plugins[pluginid+1].appinfo.Name} 结束消息处理)";
                 }
                 LogHelper.UpdateLogStatus(logid, updatemsg);
             }); task.Start();
@@ -390,7 +390,7 @@ namespace Launcher.Forms
                 GC.Collect();
                 stopwatch.Stop();
                 string updatemsg = $"√ {stopwatch.ElapsedMilliseconds} ms";
-                if (pluginid != -1)
+                if (pluginid > 0)
                 {
                     updatemsg += $"(由 {pluginManagment.Plugins[pluginid].appinfo.Name} 结束消息处理)";
                 }
@@ -497,7 +497,7 @@ namespace Launcher.Forms
                 }
                 sw.Stop();
                 string updatemsg = $"√ {sw.ElapsedMilliseconds} ms";
-                if (pluginid != -1)
+                if (pluginid > 0)
                 {
                     updatemsg += $"(由 {pluginManagment.Plugins[pluginid].appinfo.Name} 结束消息处理)";
                 }
