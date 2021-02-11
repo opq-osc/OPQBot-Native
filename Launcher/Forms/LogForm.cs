@@ -108,6 +108,17 @@ namespace Launcher.Forms
                 LogLists.RemoveAt(0);
                 listView_LogMain.Invoke(new MethodInvoker(() => { listView_LogMain.Items.RemoveAt(0); }));
             }
+            switch (Value2Enum(model.priority))
+            {
+                case LogLevel.Warning:
+                    NotifyIconHelper._NotifyIcon.ShowBalloonTip(2000, model.source, model.detail, ToolTipIcon.Warning);
+                    break;
+                case LogLevel.Error:
+                    NotifyIconHelper._NotifyIcon.ShowBalloonTip(2000, model.source, model.detail, ToolTipIcon.Error);
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void UpdateItemStatus(int id, string msg)
@@ -162,10 +173,13 @@ namespace Launcher.Forms
         }
         private static Color GetLogColor(int value)
         {
-            LogLevel loglevel = (LogLevel)Enum.Parse(typeof(LogLevel), Enum.GetName(typeof(LogLevel), value));
+            LogLevel loglevel = Value2Enum(value);
             return GetLogColor(loglevel);
         }
-
+        private static LogLevel Value2Enum(int value)
+        {
+            return (LogLevel)Enum.Parse(typeof(LogLevel), Enum.GetName(typeof(LogLevel), value));
+        }
         private LogLevel GetLogPriority(int selectIndex)
         {
             switch (selectIndex)

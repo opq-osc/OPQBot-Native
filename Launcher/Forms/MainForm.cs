@@ -330,7 +330,7 @@ namespace Launcher.Forms
                 Dll.AddMsgToSave(c);
                 int pluginid = pluginManagment.CallFunction(FunctionEnums.Functions.PrivateMsg, 11, Save.MsgList.Count + 1, data.FromUin, Marshal.StringToHGlobalAnsi(message), 0);
                 stopwatch.Stop();
-                string updatemsg = $"√ {stopwatch.ElapsedMilliseconds} ms";
+                string updatemsg = $"√ {stopwatch.ElapsedMilliseconds / (double)1000:f2} ms";
                 if (pluginid > 0)
                 {
                     updatemsg += $"(由 {pluginManagment.Plugins[pluginid+1].appinfo.Name} 结束消息处理)";
@@ -364,7 +364,7 @@ namespace Launcher.Forms
                                                  data.FromUserId, Convert.ToBase64String(stream.ToArray()));
                     stopwatch.Stop();
                     LogHelper.WriteLog(LogLevel.InfoReceive, "OPQBot框架", "文件上传", $"来源群:{data.FromGroupId}({data.FromGroupName}) 来源QQ:{data.FromUserId}({data.FromNickName}) " +
-                        $"文件名:{fileupload["FileName"]} 大小:{Convert.ToDouble(fileupload["FileSize"]) / 1000}KB FileID:{fileupload["FileID"]}", $"√ {stopwatch.ElapsedMilliseconds} ms");                    
+                        $"文件名:{fileupload["FileName"]} 大小:{Convert.ToDouble(fileupload["FileSize"]) / 1000}KB FileID:{fileupload["FileID"]}", $"√ {stopwatch.ElapsedMilliseconds/ (double)1000:f2} ms");                    
                     return;
                 }
                 string message = ProgressMessage.Start(groupMessage);
@@ -389,7 +389,7 @@ namespace Launcher.Forms
                 Marshal.FreeHGlobal(messageIntptr);
                 GC.Collect();
                 stopwatch.Stop();
-                string updatemsg = $"√ {stopwatch.ElapsedMilliseconds} ms";
+                string updatemsg = $"√ {stopwatch.ElapsedMilliseconds/ (double)1000:f2} s";
                 if (pluginid > 0)
                 {
                     updatemsg += $"(由 {pluginManagment.Plugins[pluginid].appinfo.Name} 结束消息处理)";
@@ -496,7 +496,7 @@ namespace Launcher.Forms
                         break;
                 }
                 sw.Stop();
-                string updatemsg = $"√ {sw.ElapsedMilliseconds} ms";
+                string updatemsg = $"√ {sw.ElapsedMilliseconds/ (double)1000:f2} ms";
                 if (pluginid > 0)
                 {
                     updatemsg += $"(由 {pluginManagment.Plugins[pluginid].appinfo.Name} 结束消息处理)";
