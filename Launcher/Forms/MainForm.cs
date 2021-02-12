@@ -333,7 +333,7 @@ namespace Launcher.Forms
                 string updatemsg = $"√ {stopwatch.ElapsedMilliseconds / (double)1000:f2} ms";
                 if (pluginid > 0)
                 {
-                    updatemsg += $"(由 {pluginManagment.Plugins[pluginid+1].appinfo.Name} 结束消息处理)";
+                    updatemsg += $"(由 {pluginManagment.Plugins[pluginid - 1].appinfo.Name} 结束消息处理)";
                 }
                 LogHelper.UpdateLogStatus(logid, updatemsg);
             }); task.Start();
@@ -364,7 +364,7 @@ namespace Launcher.Forms
                                                  data.FromUserId, Convert.ToBase64String(stream.ToArray()));
                     stopwatch.Stop();
                     LogHelper.WriteLog(LogLevel.InfoReceive, "OPQBot框架", "文件上传", $"来源群:{data.FromGroupId}({data.FromGroupName}) 来源QQ:{data.FromUserId}({data.FromNickName}) " +
-                        $"文件名:{fileupload["FileName"]} 大小:{Convert.ToDouble(fileupload["FileSize"]) / 1000}KB FileID:{fileupload["FileID"]}", $"√ {stopwatch.ElapsedMilliseconds/ (double)1000:f2} ms");                    
+                        $"文件名:{fileupload["FileName"]} 大小:{Convert.ToDouble(fileupload["FileSize"]) / 1000}KB FileID:{fileupload["FileID"]}", $"√ {stopwatch.ElapsedMilliseconds / (double)1000:f2} ms");
                     return;
                 }
                 string message = ProgressMessage.Start(groupMessage);
@@ -389,10 +389,10 @@ namespace Launcher.Forms
                 Marshal.FreeHGlobal(messageIntptr);
                 GC.Collect();
                 stopwatch.Stop();
-                string updatemsg = $"√ {stopwatch.ElapsedMilliseconds/ (double)1000:f2} s";
+                string updatemsg = $"√ {stopwatch.ElapsedMilliseconds / (double)1000:f2} s";
                 if (pluginid > 0)
                 {
-                    updatemsg += $"(由 {pluginManagment.Plugins[pluginid].appinfo.Name} 结束消息处理)";
+                    updatemsg += $"(由 {pluginManagment.Plugins[pluginid - 1].appinfo.Name} 结束消息处理)";
                 }
                 LogHelper.UpdateLogStatus(logid, updatemsg);
             }); task.Start();
@@ -471,7 +471,7 @@ namespace Launcher.Forms
                         FriendRequest_Content = FriendRequest_data["Content"].ToString();
                         FriendRequest_UserID = Convert.ToInt64(FriendRequest_data["UserID"].ToString());
                         pluginid = pluginManagment.CallFunction(FunctionEnums.Functions.FriendRequest, 1, GetTimeStamp(), FriendRequest_UserID, Marshal.StringToHGlobalAnsi(FriendRequest_Content), "");
-                        logMsg=$"好友请求事件 QQ号:{FriendRequest_UserID} 验证信息:{FriendRequest_Content}";
+                        logMsg = $"好友请求事件 QQ号:{FriendRequest_UserID} 验证信息:{FriendRequest_Content}";
                         break;
                     case "ON_EVENT_NOTIFY_PUSHADDFRD"://好友添加完成事件 _eventFriend_Add id=10
                         long FriendAdded_UserID;
@@ -496,10 +496,10 @@ namespace Launcher.Forms
                         break;
                 }
                 sw.Stop();
-                string updatemsg = $"√ {sw.ElapsedMilliseconds/ (double)1000:f2} ms";
+                string updatemsg = $"√ {sw.ElapsedMilliseconds / (double)1000:f2} ms";
                 if (pluginid > 0)
                 {
-                    updatemsg += $"(由 {pluginManagment.Plugins[pluginid].appinfo.Name} 结束消息处理)";
+                    updatemsg += $"(由 {pluginManagment.Plugins[pluginid - 1].appinfo.Name} 结束消息处理)";
                 }
                 if (string.IsNullOrWhiteSpace(logMsg) is false)
                     LogHelper.WriteLog(logMsg, updatemsg);
