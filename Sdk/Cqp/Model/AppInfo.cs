@@ -35,7 +35,7 @@ namespace Launcher.Sdk.Cqp.Model
 		/// <summary>
 		/// 获取当前应用的版本号
 		/// </summary>
-		public Version Version { get; private set; }
+		public string Version { get; private set; }
 
 		/// <summary>
 		/// 获取当前应用的顺序版本
@@ -77,7 +77,7 @@ namespace Launcher.Sdk.Cqp.Model
 			this.ResultCode = resCode;
 			this.ApiVersion = apiVer;
 			this.Name = name;
-			this.Version = new Version (version);
+			this.Version =version;
 			this.VersionId = versionId;
 			this.Author = author;
 			this.Description = description;
