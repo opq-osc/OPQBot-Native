@@ -92,6 +92,8 @@ namespace Launcher
                 Directory.CreateDirectory(@"data\tmp");
             //复制需要载入的插件至临时文件夹,可直接覆盖原dll便于插件重载
             string destpath = @"data\tmp\" + plugininfo.Name;
+            File.Copy(plugininfo.FullName, destpath, true);
+            //复制它的json
             File.Copy(plugininfo.FullName.Replace(".dll", ".json"), destpath.Replace(".dll", ".json"), true);
 
             IntPtr iLib = dll.Load(destpath, json);//将dll插件LoadLibrary,并进行函数委托的实例化;
@@ -206,17 +208,11 @@ namespace Launcher
         public void UnLoad()
         {
             LogHelper.WriteLog("开始卸载插件...");
-            LogHelper.WriteLog("遍历禁用事件...");
-            CallFunction(FunctionEnums.Functions.Disable);
-            LogHelper.WriteLog("遍历退出事件...");
-            CallFunction(FunctionEnums.Functions.Exit);
             foreach(var item in AppDomainSave)
             {
                 var c = Plugins.Find(x => x.iLib == item.Key);
-                string pluginName = c.appinfo.Name;
-                c.dll.UnLoad();
+                UnLoad(c);
                 AppDomain.Unload(item.Value);
-                LogHelper.WriteLog($"插件 {pluginName} 已完成卸载");
             }
             Plugins.Clear();
             AppDomainSave.Clear();

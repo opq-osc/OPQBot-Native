@@ -208,7 +208,10 @@ namespace Launcher
                 {
                     IntPtr api = GetProcAddress(hLib, APIName);
                     if (api == (IntPtr)0)
-                        returnValue = null;
+                    {
+                        returnValue = null; 
+                        return; 
+                    }
                     returnValue = Marshal.GetDelegateForFunctionPointer(api, t);
                 });
                 return returnValue;
