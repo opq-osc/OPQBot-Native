@@ -103,7 +103,7 @@ namespace Launcher.Forms
             label_Author.Text = appinfo.Author;
             label_Version.Text = appinfo.Version.ToString();
             label_Description.Text = appinfo.Description;
-            JObject json = plugin.json;
+            JObject json = JObject.Parse(plugin.json);
             label_Auth.Text = $"需要以下权限（{JArray.Parse(json["auth"].ToString()).Count}个）";
             foreach (var item in (JArray)json["auth"])
                 listBox_Auth.Items.Add(ChineseName[Convert.ToInt32(item.ToString())]);

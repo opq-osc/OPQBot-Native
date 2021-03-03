@@ -15,7 +15,7 @@ namespace Launcher
     /// </summary>
     public static class NotifyIconHelper
     {
-        public static NotifyIcon _NotifyIcon;
+        public static NotifyIcon _NotifyIcon { get; set; }
         public static void Init()
         {
             _NotifyIcon.Icon = new Icon(Assembly.GetEntryAssembly().GetManifestResourceStream("Launcher.Resources.Icon.ico"));
@@ -108,7 +108,7 @@ namespace Launcher
                 KeyValuePair<string, string> pair = (KeyValuePair<string, string>)(sender as MenuItem).Tag;
                 PluginManagment.Plugin c = MainForm.pluginManagment.Plugins.Find(x => x.appinfo.Name == pair.Key);//从已加载的插件寻找这个名称的插件
                 string menuname = string.Empty;
-                foreach (var item in JArray.Parse(c.json["menu"].ToString()))//遍历此插件的json的menu节点,寻找窗口函数
+                foreach (var item in JArray.Parse(JObject.Parse(c.json)["menu"].ToString()))//遍历此插件的json的menu节点,寻找窗口函数
                 {
                     if (item["name"].ToString() == pair.Value)
                     { menuname = item["function"].ToString(); break; }

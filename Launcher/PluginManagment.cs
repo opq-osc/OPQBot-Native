@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Deserizition;
 using Launcher.Forms;
 using Launcher.Pipe;
@@ -19,8 +21,9 @@ namespace Launcher
     /// </summary>
     public class PluginManagment
     {
-        public List<Plugin> Plugins = new List<Plugin>();
-        public class Plugin
+        public List<Plugin> Plugins { get; set; } = new List<Plugin>();
+        public static Dictionary<IntPtr, AppDomain> AppDomainSave { get; set; } = new Dictionary<IntPtr, AppDomain>();
+        public class Plugin : MarshalByRefObject
         {
             /// <summary>
             /// 内存句柄
@@ -33,20 +36,20 @@ namespace Launcher
             /// <summary>
             /// 插件的json部分,包含名称、描述、函数入口以及窗口名称部分
             /// </summary>
-            public JObject json;
+            public string json;
             public Dll dll;
             /// <summary>
             /// 标记插件是否启用
             /// </summary>
             public bool Enable;
-            public Plugin(IntPtr iLib, AppInfo appinfo, JObject json, Dll dll, bool enable, string namedpipe)
+            public Plugin(IntPtr iLib, AppInfo appinfo, string json, Dll dll, bool enable, string namedpipe)
             {
                 this.iLib = iLib;
                 this.appinfo = appinfo;
                 this.json = json;
                 this.dll = dll;
                 this.Enable = enable;
-                if(string.IsNullOrWhiteSpace(Save.NamedPipeName) && Save.MutiProcessMode)
+                if (string.IsNullOrWhiteSpace(Save.NamedPipeName) && Save.MutiProcessMode)
                 {
                     this.NamedPipe = new NamedPipeServer(namedpipe);
                 }
@@ -71,7 +74,7 @@ namespace Launcher
                     count++;
             }
             sw.Stop();
-            LogHelper.WriteLog(LogLevel.Info, "插件载入", $"一共加载了{count}个插件",$"√ {sw.ElapsedMilliseconds} ms");
+            LogHelper.WriteLog(LogLevel.Info, "插件载入", $"一共加载了{count}个插件", $"√ {sw.ElapsedMilliseconds} ms");
             NotifyIconHelper.AddManageMenu();
         }
         /// <summary>
@@ -101,7 +104,7 @@ namespace Launcher
             JObject json = JObject.Parse(File.ReadAllText(plugininfo.FullName.Replace(".dll", ".json")));
             int authcode;
             switch (Save.PipeType)
-            {                
+            {
                 case PipeType.Client:
                     authcode = Save.AuthCode;
                     break;
@@ -123,6 +126,19 @@ namespace Launcher
                 File.Copy(plugininfo.FullName.Replace(".dll", ".json"), destpath.Replace(".dll", ".json"), true);
             }
             IntPtr iLib = dll.Load(destpath, json);//将dll插件LoadLibrary,并进行函数委托的实例化;
+
+            AppDomainSetup ads = new AppDomainSetup
+            {
+
+                ApplicationBase = AppDomain.CurrentDomain.BaseDirectory,
+                DisallowBindingRedirects = false,
+                DisallowCodeDownload = true,
+                ConfigurationFile = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile
+            };
+            AppDomain newappDomain = AppDomain.CreateDomain(iLib.ToString(), null, ads);
+            AppDomainSave.Add(iLib, newappDomain);
+            Proxy.Init(iLib, json);
+
             if (iLib == (IntPtr)0)
             {
                 switch (Save.PipeType)
@@ -146,12 +162,20 @@ namespace Launcher
                 , json["name"].ToString(), json["version"].ToString(), Convert.ToInt32(json["version_id"].ToString())
                 , json["author"].ToString(), json["description"].ToString(), authcode);
             bool enabled = GetPluginState(appInfo);//获取插件启用状态
-            if (Save.PipeType==PipeType.Server)
+            if (Save.PipeType == PipeType.Server)
             {
                 Process.Start(typeof(MainForm).Assembly.Location, $"-m {appInfotext.Value} {authcode}");
             }
             //保存至插件列表
-            Plugins.Add(new Plugin(iLib, appInfo, json, dll, enabled, appInfotext.Value));
+            Plugin plugin = (Plugin)newappDomain.CreateInstanceAndUnwrap(typeof(Plugin).Assembly.FullName
+                , typeof(Plugin).FullName
+                , false
+                , BindingFlags.CreateInstance
+                , null
+                , new object[] { iLib, appInfo, json.ToString(), dll, enabled, appInfotext.Value }
+                , null, null);
+            Plugins.Add(plugin);
+
             switch (Save.PipeType)
             {
                 case PipeType.Server:
@@ -310,24 +334,28 @@ namespace Launcher
                     //调用函数, 返回 1 表示消息阻塞, 跳出后续
                     if (result == 1)
                     {
-                        return Plugins.IndexOf(item)+1;
-                    }                    
+                        return Plugins.IndexOf(item) + 1;
+                    }
                 }
                 catch (Exception e)
                 {
                     LogHelper.WriteLog(LogLevel.Error, "函数执行异常", $"插件 {item.appinfo.Name} {ApiName} 函数发生错误，错误信息:{e.Message} {e.StackTrace}");
-                    var b = ErrorHelper.ShowErrorDialog($"错误模块：{item.appinfo.Name}\n{ApiName} 函数发生错误，错误信息:\n{e.Message} {e.StackTrace}");
-                    switch (b)
+                    Thread thread = new Thread(()=> 
                     {
-                        case ErrorHelper.TaskDialogResult.ReloadApp:
-                            ReLoad();
-                            break;
-                        case ErrorHelper.TaskDialogResult.Exit:
-                            NotifyIconHelper.HideNotifyIcon();
-                            Environment.Exit(0);
-                            break;
-                    }
-                    return -1;
+                        var b = ErrorHelper.ShowErrorDialog($"错误模块：{item.appinfo.Name}\n{ApiName} 函数发生错误，错误信息:\n{e.Message} {e.StackTrace}");
+                        switch (b)
+                        {
+                            case ErrorHelper.TaskDialogResult.ReloadApp:
+                                ReLoad();
+                                break;
+                            case ErrorHelper.TaskDialogResult.Exit:
+                                NotifyIconHelper.HideNotifyIcon();
+                                Environment.Exit(0);
+                                break;
+                        }
+                        //报错误但仍继续执行
+                    });
+                    thread.Start();
                 }
             }
             return 0;

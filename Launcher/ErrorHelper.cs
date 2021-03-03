@@ -25,7 +25,7 @@ namespace Launcher
                 CommandButtons = new string[] { "复制错误详情信息", "重新载入应用", "忽略此次错误\n如果此问题频繁出现，可停用所有应用便于排查", "关闭 OPQBot-Native" },
                 MainIcon = VistaTaskDialogIcon.BigError
             };
-            System.Media.SystemSounds.Hand.Play();
+            //System.Media.SystemSounds.Hand.Play();
             var res = TaskDialog.Show(config);
             switch (res.CommandButtonResult)
             {

@@ -45,7 +45,7 @@ namespace Launcher.Forms
             }
         }
 
-        private void ListenLogBoardCast(int port = 28634)
+        private void ListenLogBoardCast(int port = 28635)
         {
             //TODO: 多程序运行时考虑
             using (Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
