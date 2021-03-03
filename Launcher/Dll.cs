@@ -318,7 +318,6 @@ namespace Launcher
             {
                 CurrentDomain.DoCallBack(() =>
                 {
-                    //FreeLibrary(hLib);
                     FreeLibrary(hLib);
                 });
             }
@@ -352,6 +351,7 @@ namespace Launcher
         public static void FreeLibrary(IntPtr dll)
         {
             DelegateSave[dll].CallFreeLibrary(dll);
+            DelegateSave.Remove(dll);
         }
     }
 }
