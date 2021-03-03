@@ -132,7 +132,11 @@ namespace Launcher
         public static void RemoveMenu(string pluginName)
         {
             var item = _NotifyIcon.ContextMenu.MenuItems.Find(pluginName, true).First();
-            _NotifyIcon.ContextMenu.MenuItems[0].MenuItems.Remove(item);
+            _NotifyIcon.ContextMenu.MenuItems[2].MenuItems.Remove(item);
+        }
+        public static void ClearAppMenu()
+        {
+            _NotifyIcon.ContextMenu.MenuItems[2].MenuItems.Clear();
         }
         public static void Quit()
         {

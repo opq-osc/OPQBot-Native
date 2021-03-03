@@ -192,7 +192,6 @@ namespace Launcher
                 plugin.dll.CallFunction(FunctionEnums.Functions.Disable);
                 plugin.dll.CallFunction(FunctionEnums.Functions.Exit);
                 plugin.dll.UnLoad();
-                NotifyIconHelper.RemoveMenu(plugin.appinfo.Name);
                 Plugins.Remove(plugin);
                 LogHelper.WriteLog(LogLevel.InfoSuccess, "插件卸载", $"插件 {plugin.appinfo.Name} 卸载成功");
                 plugin = null; GC.Collect();
@@ -208,6 +207,7 @@ namespace Launcher
         public void UnLoad()
         {
             LogHelper.WriteLog("开始卸载插件...");
+            NotifyIconHelper.ClearAppMenu();
             foreach(var item in AppDomainSave)
             {
                 var c = Plugins.Find(x => x.iLib == item.Key);
