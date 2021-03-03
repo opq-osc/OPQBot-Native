@@ -24,6 +24,10 @@ namespace Launcher
         public static Dictionary<IntPtr, AppDomain> AppDomainSave { get; set; } = new Dictionary<IntPtr, AppDomain>();
         public class Plugin : MarshalByRefObject
         {
+            public override object InitializeLifetimeService()
+            {
+                return null;
+            }
             /// <summary>
             /// 内存句柄
             /// </summary>

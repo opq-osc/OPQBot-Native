@@ -94,6 +94,11 @@ namespace Launcher
         public static Dictionary<IntPtr, Transform> DelegateSave { get; set; } = new Dictionary<IntPtr, Transform>();
         public class Transform : MarshalByRefObject
         {
+            public override object InitializeLifetimeService()
+            {
+                return null;
+            }
+
             public Transform(AppDomain currentDomain)
             {
                 CurrentDomain = currentDomain;
