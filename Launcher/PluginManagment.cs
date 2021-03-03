@@ -9,7 +9,6 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Deserizition;
 using Launcher.Forms;
-using Launcher.Pipe;
 using Launcher.Sdk.Cqp.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -49,12 +48,7 @@ namespace Launcher
                 this.json = json;
                 this.dll = dll;
                 this.Enable = enable;
-                if (string.IsNullOrWhiteSpace(Save.NamedPipeName) && Save.MutiProcessMode)
-                {
-                    this.NamedPipe = new NamedPipeServer(namedpipe);
-                }
             }
-            public NamedPipeServer NamedPipe;
         }
         /// <summary>
         /// 从 data\plugins 文件夹下载入所有拥有同名json的dll插件，不包含子文件夹
@@ -87,44 +81,19 @@ namespace Launcher
             FileInfo plugininfo = new FileInfo(filepath);
             if (!File.Exists(plugininfo.FullName.Replace(".dll", ".json")))
             {
-                switch (Save.PipeType)
-                {
-                    case PipeType.Server:
-                        break;
-                    case PipeType.Client:
-                        CQ_addLog(0, 30, Marshal.StringToHGlobalAnsi("插件载入")
-                                            , Marshal.StringToHGlobalAnsi($"插件 {plugininfo.Name} 加载失败,原因:缺少json文件"));
-                        break;
-                    case PipeType.NoPipe:
-                        LogHelper.WriteLog(LogLevel.Error, "插件载入", $"插件 {plugininfo.Name} 加载失败,原因:缺少json文件");
-                        break;
-                }
+                LogHelper.WriteLog(LogLevel.Error, "插件载入", $"插件 {plugininfo.Name} 加载失败,原因:缺少json文件");
                 return false;
             }
+
             JObject json = JObject.Parse(File.ReadAllText(plugininfo.FullName.Replace(".dll", ".json")));
-            int authcode;
-            switch (Save.PipeType)
-            {
-                case PipeType.Client:
-                    authcode = Save.AuthCode;
-                    break;
-                case PipeType.Server:
-                case PipeType.NoPipe:
-                default:
-                    authcode = new Random().Next();
-                    break;
-            }
+            int authcode = new Random().Next();
             Dll dll = new Dll();
             if (!Directory.Exists(@"data\tmp"))
                 Directory.CreateDirectory(@"data\tmp");
             //复制需要载入的插件至临时文件夹,可直接覆盖原dll便于插件重载
             string destpath = @"data\tmp\" + plugininfo.Name;
-            if (Save.PipeType != PipeType.Client)
-            {
-                File.Copy(plugininfo.FullName, destpath, true);
-                //复制它的json
-                File.Copy(plugininfo.FullName.Replace(".dll", ".json"), destpath.Replace(".dll", ".json"), true);
-            }
+            File.Copy(plugininfo.FullName.Replace(".dll", ".json"), destpath.Replace(".dll", ".json"), true);
+
             IntPtr iLib = dll.Load(destpath, json);//将dll插件LoadLibrary,并进行函数委托的实例化;
 
             AppDomainSetup ads = new AppDomainSetup
@@ -141,18 +110,7 @@ namespace Launcher
 
             if (iLib == (IntPtr)0)
             {
-                switch (Save.PipeType)
-                {
-                    case PipeType.Server:
-                        break;
-                    case PipeType.Client:
-                        CQ_addLog(0, 30, Marshal.StringToHGlobalAnsi("插件载入")
-                                , Marshal.StringToHGlobalAnsi($"插件 {plugininfo.Name} 加载失败,返回句柄为空,GetLastError={Dll.GetLastError()}"));
-                        break;
-                    case PipeType.NoPipe:
-                        LogHelper.WriteLog(LogLevel.Error, "插件载入", $"插件 {plugininfo.Name} 加载失败,返回句柄为空,GetLastError={Dll.GetLastError()}");
-                        break;
-                }
+                LogHelper.WriteLog(LogLevel.Error, "插件载入", $"插件 {plugininfo.Name} 加载失败,返回句柄为空,GetLastError={Dll.GetLastError()}");
             }
             //执行插件的init,分配一个authcode
             dll.DoInitialize(authcode);
@@ -162,10 +120,6 @@ namespace Launcher
                 , json["name"].ToString(), json["version"].ToString(), Convert.ToInt32(json["version_id"].ToString())
                 , json["author"].ToString(), json["description"].ToString(), authcode);
             bool enabled = GetPluginState(appInfo);//获取插件启用状态
-            if (Save.PipeType == PipeType.Server)
-            {
-                Process.Start(typeof(MainForm).Assembly.Location, $"-m {appInfotext.Value} {authcode}");
-            }
             //保存至插件列表
             Plugin plugin = (Plugin)newappDomain.CreateInstanceAndUnwrap(typeof(Plugin).Assembly.FullName
                 , typeof(Plugin).FullName
@@ -176,19 +130,8 @@ namespace Launcher
                 , null, null);
             Plugins.Add(plugin);
 
-            switch (Save.PipeType)
-            {
-                case PipeType.Server:
-                    break;
-                case PipeType.Client:
-                    CQ_addLog(authcode, 11, Marshal.StringToHGlobalAnsi("插件载入")
-                            , Marshal.StringToHGlobalAnsi($"插件 {appInfo.Name} 加载成功"));
-                    break;
-                case PipeType.NoPipe:
-                    LogHelper.WriteLog(LogLevel.InfoSuccess, "插件载入", $"插件 {appInfo.Name} 加载成功");
-                    cq_start(Marshal.StringToHGlobalAnsi(destpath), authcode);
-                    break;
-            }
+            LogHelper.WriteLog(LogLevel.InfoSuccess, "插件载入", $"插件 {appInfo.Name} 加载成功");
+            cq_start(Marshal.StringToHGlobalAnsi(destpath), authcode);
             //将它的窗口写入托盘右键菜单
             NotifyIconHelper.LoadMenu(json);
             return true;
@@ -263,15 +206,22 @@ namespace Launcher
         public void UnLoad()
         {
             LogHelper.WriteLog("开始卸载插件...");
-            int max = Plugins.Count;
-            for (int i = 0; i < max; i++)
+            LogHelper.WriteLog("遍历禁用事件...");
+            CallFunction(FunctionEnums.Functions.Disable);
+            LogHelper.WriteLog("遍历退出事件...");
+            CallFunction(FunctionEnums.Functions.Exit);
+            foreach(var item in AppDomainSave)
             {
-                Plugin item = Plugins[0];
-                UnLoad(item);
-                item.dll.Dispose();
-                GC.Collect();
+                var c = Plugins.Find(x => x.iLib == item.Key);
+                string pluginName = c.appinfo.Name;
+                c.dll.UnLoad();
+                AppDomain.Unload(item.Value);
+                LogHelper.WriteLog($"插件 {pluginName} 已完成卸载");
             }
-            LogHelper.WriteLog("插件卸载完毕，框架正在退出...");
+            Plugins.Clear();
+            AppDomainSave.Clear();
+            GC.Collect();
+            LogHelper.WriteLog("插件卸载完毕");
         }
         //写在构造函数是不是还好点?
         /// <summary>
@@ -322,15 +272,7 @@ namespace Launcher
                 }
                 try
                 {
-                    int result;
-                    if (Save.MutiProcessMode is true)
-                    {
-                        result = item.NamedPipe.SendMsg(json.ToString());
-                    }
-                    else
-                    {
-                        result = dll.CallFunction(ApiName, args);
-                    }
+                    int result = dll.CallFunction(ApiName, args);
                     //调用函数, 返回 1 表示消息阻塞, 跳出后续
                     if (result == 1)
                     {
@@ -362,23 +304,14 @@ namespace Launcher
         }
         /// <summary>
         /// 重载应用
-        /// 未找到去除文件占用的方法，只能重启程序来实现重载了
         /// </summary>
         public void ReLoad()
         {
             UnLoad();
-            NotifyIconHelper.HideNotifyIcon();
-            //Load();
-            string path = typeof(MainForm).Assembly.Location;//获取可执行文件路径
-            if (Save.IgnoreProcessChecking)
-            {
-                Process.Start(path, "-i");
-            }
-            else
-            {
-                Process.Start(path, "-r");//再次运行程序
-            }
-            Environment.Exit(0);//关闭当前程序
+            Load();
+            LogHelper.WriteLog("遍历启动事件……");
+            CallFunction(FunctionEnums.Functions.StartUp);
+            CallFunction(FunctionEnums.Functions.Enable);
         }
     }
 }

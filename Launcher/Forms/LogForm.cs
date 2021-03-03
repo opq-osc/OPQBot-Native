@@ -45,15 +45,25 @@ namespace Launcher.Forms
             }
         }
 
-        private void ListenLogBoardCast(int port = 28635)
+        private void ListenLogBoardCast()
         {
-            //TODO: 多程序运行时考虑
             using (Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
             {
-                IPEndPoint iep = new IPEndPoint(IPAddress.Any, port);
-                sock.Bind(iep);
+                IPEndPoint iep = null;
+                iep = new IPEndPoint(IPAddress.Any, Save.BoardCastPort);
+                try
+                {
+                    sock.Bind(iep);
+                }
+                catch (SocketException e)
+                {
+                    Debug.WriteLine($"{Save.BoardCastPort} 端口已被占用，+1");
+                    Save.BoardCastPort++;
+                    iep = new IPEndPoint(IPAddress.Any, Save.BoardCastPort);
+                    sock.Bind(iep);
+                }
                 EndPoint ep = iep;
-                Debug.WriteLine($"开启广播侦听，端口{port}...");
+                Debug.WriteLine($"开启广播侦听，端口{Save.BoardCastPort}...");
                 //Ready to receive…
                 while (true)
                 {

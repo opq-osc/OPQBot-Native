@@ -231,8 +231,6 @@
       <DependentUpon>PluginTester.cs</DependentUpon>
     </Compile>
     <Compile Include="NotifyIconHelper.cs" />
-    <Compile Include="Pipe\NamedPipeClient.cs" />
-    <Compile Include="Pipe\NamedPipeServer.cs" />
     <Compile Include="PluginManagment.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="ProgressMessage.cs" />

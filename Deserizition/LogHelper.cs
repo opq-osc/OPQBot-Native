@@ -156,11 +156,11 @@ namespace Deserizition
             };
             return json.ToString();
         }
-        private static void SendBroadcast(string msg, int port = 28634)
+        private static void SendBroadcast(string msg)
         {
             Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram,
                ProtocolType.Udp);
-            IPEndPoint iep1 = new IPEndPoint(IPAddress.Broadcast, port);//255.255.255.255
+            IPEndPoint iep1 = new IPEndPoint(IPAddress.Broadcast, Save.BoardCastPort);//255.255.255.255
             byte[] data = Encoding.UTF8.GetBytes(msg);
             sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, 1);
             sock.SendTo(data, iep1);

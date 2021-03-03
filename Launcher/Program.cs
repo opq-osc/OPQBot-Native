@@ -5,7 +5,6 @@ using System.Threading;
 using System.Windows.Forms;
 using Deserizition;
 using Launcher.Forms;
-using Launcher.Pipe;
 
 namespace Launcher
 {
@@ -32,12 +31,6 @@ namespace Launcher
                 Save.IgnoreProcessChecking = true;
                 //Do nothing. Ignore Process Checking
             }
-            else if(args.Length==3 && args[0]=="-m" && !string.IsNullOrWhiteSpace(args[1]))
-            {
-                Save.NamedPipeName = args[1];
-                Save.PipeType = PipeType.Client;
-                Save.AuthCode = Convert.ToInt32(args[2]);
-            }
             else
             {
                 if (process.Length != 1)
@@ -46,14 +39,6 @@ namespace Launcher
                     return;
                 }
             }            
-            if(Save.MutiProcessMode is false)
-            {
-                Save.PipeType = PipeType.NoPipe;
-            }
-            else if (args.Length != 3 || args[0] != "-m")
-            {
-                Save.PipeType = PipeType.Server;
-            }
             Application.SetCompatibleTextRenderingDefault(false);
             Application.EnableVisualStyles();
             //异常捕获
@@ -61,17 +46,7 @@ namespace Launcher
             Application.ThreadException += Application_ThreadException;
             //未处理的异常捕获
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-            switch (Save.PipeType)
-            {
-                case PipeType.NoPipe:
-                case PipeType.Server:                                     
-                    Application.Run(new Login());
-                    break;
-                case PipeType.Client://进程分离模式中不需要窗口，使用命名管道传递消息
-                    NamedPipeClient client = new NamedPipeClient();
-                    client.ReceiveMsg();
-                    break;
-            }
+            Application.Run(new Login());
         }
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {

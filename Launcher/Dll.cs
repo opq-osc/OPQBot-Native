@@ -55,32 +55,7 @@ namespace Launcher
         }
         public void Dispose()
         {
-            Console.WriteLine("调用IDisposable接口");
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        ~Dll()
-        {
-            //Console.WriteLine("调用析构");
-            //Dispose(false);
-        }
-        private void Dispose(bool flag)
-        {
-            if (flag)
-            {
-                Proxy.RemoveDll(hLib);
-            }
-            if (hLib != IntPtr.Zero)
-            {
-                IntPtr c;
-                do
-                {
-                    if (!FreeLibrary(hLib))
-                        Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
-                    c = GetProcAddress(hLib, "AppInfo");
-                } while (c != IntPtr.Zero);
-                hLib = IntPtr.Zero;
-            }
+            Proxy.FreeLibrary(hLib);
         }
         /// <summary>
         /// 将要执行的函数转换为委托
@@ -218,6 +193,8 @@ namespace Launcher
             }
             [DllImport("kernel32.dll")]
             private extern static IntPtr GetProcAddress(IntPtr lib, String funcName);
+            [DllImport("kernel32.dll")]
+            private extern static bool FreeLibrary(IntPtr lib);
 
             /// <summary>
             /// 将要执行的函数转换为委托
@@ -334,6 +311,14 @@ namespace Launcher
                 CurrentDomain.DoCallBack(() => { returnvalue = Initialize(authCode); });
                 return returnvalue;
             }
+            public void CallFreeLibrary(IntPtr hLib)
+            {
+                CurrentDomain.DoCallBack(() =>
+                {
+                    //FreeLibrary(hLib);
+                    FreeLibrary(hLib);
+                });
+            }
         }
         public static int CallFunction(IntPtr dll, FunctionEnums.Functions api, params object[] args)
         {
@@ -361,11 +346,9 @@ namespace Launcher
             transform.Init(hLib, json.ToString());
             DelegateSave.Add(hLib, transform);
         }
-        public static void RemoveDll(IntPtr dll)
+        public static void FreeLibrary(IntPtr dll)
         {
-            DelegateSave[dll] = null;
-            GC.Collect();
-            DelegateSave.Remove(dll);
+            DelegateSave[dll].CallFreeLibrary(dll);
         }
     }
 }

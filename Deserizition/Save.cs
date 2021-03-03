@@ -62,17 +62,8 @@ namespace Deserizition
         /// 忽略进程重复检查
         /// </summary>
         public static bool IgnoreProcessChecking { get; set; } = false;
-        /// <summary>
-        /// 进程分离模式
-        /// </summary>
-        public static bool MutiProcessMode { get; set; } = false;
-        /// <summary>
-        /// 命名管道名称，用于应用进程分离
-        /// </summary>
-        public static string NamedPipeName { get; set; }
-        public static int AuthCode { get; set; }
-        public static PipeType PipeType { get; set; } = PipeType.NoPipe;
         public static int LogerMaxCount { get; set; } = 500;
+        public static int BoardCastPort { get; set; } = 28634;
         public static bool LoginStatus { get; set; } = false;
     }
     public enum PipeType
