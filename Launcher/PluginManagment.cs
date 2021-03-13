@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Windows.Forms;
 using Deserizition;
 using Launcher.Forms;
 using Launcher.Sdk.Cqp.Model;
@@ -142,6 +143,12 @@ namespace Launcher
             NotifyIconHelper.LoadMenu(json);
             return true;
         }
+
+        private void NewappDomain_FirstChanceException(object sender, FirstChanceExceptionEventArgs e)
+        {
+            Console.WriteLine();
+        }
+
         /// <summary>
         /// 翻转插件启用状态
         /// </summary>

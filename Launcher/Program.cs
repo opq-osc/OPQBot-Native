@@ -38,7 +38,7 @@ namespace Launcher
                     MessageBox.Show("已经启动了一个程序");
                     return;
                 }
-            }            
+            }
             Application.SetCompatibleTextRenderingDefault(false);
             Application.EnableVisualStyles();
             //异常捕获
@@ -48,11 +48,11 @@ namespace Launcher
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             Application.Run(new Login());
         }
-        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        public static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             if (e.ExceptionObject is Exception ex)
             {
-                var b = ErrorHelper.ShowErrorDialog($"{ex.Message}\n{ex.StackTrace}");
+                var b = ErrorHelper.ShowErrorDialog($"{ex.Message}\n{ex.StackTrace}", false);
                 if (b == ErrorHelper.TaskDialogResult.ReloadApp)
                 {
                     MainForm.pluginManagment.ReLoad();
@@ -61,10 +61,15 @@ namespace Launcher
                 {
                     Environment.Exit(0);
                 }
+                else if (b == ErrorHelper.TaskDialogResult.Restart)
+                {
+                    string path = typeof(MainForm).Assembly.Location;
+                    Process.Start(path, $"-r");
+                }
             }
         }
 
-        private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
+        public static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
         {
             if (e.Exception != null)
             {
