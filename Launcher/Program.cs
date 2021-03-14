@@ -65,6 +65,8 @@ namespace Launcher
                 {
                     string path = typeof(MainForm).Assembly.Location;
                     Process.Start(path, $"-r");
+                    NotifyIconHelper.HideNotifyIcon();
+                    Environment.Exit(0);
                 }
             }
         }
