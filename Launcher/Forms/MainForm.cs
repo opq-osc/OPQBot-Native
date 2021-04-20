@@ -491,9 +491,22 @@ namespace Launcher.Forms
                         Save.TryCount++;
                         logMsg = $"与服务器连接断开，第 {Save.TryCount} 次尝试重连";
                         break;
+                    case "ON_EVENT_GROUP_REVOKE":
+                        long GroupID, QQID, MsgID;
+                        GroupID = Convert.ToInt64(events["CurrentPacket"]["Data"]["EventData"]["GroupID"].ToString());
+                        QQID = Convert.ToInt64(events["CurrentPacket"]["Data"]["EventData"]["UserID"].ToString());
+                        MsgID = Convert.ToInt64(events["CurrentPacket"]["Data"]["EventData"]["MsgSeq"].ToString());
+                        string msg = Save.MsgList.Find(x => x.MsgId == MsgID)?.text;
+                        if (string.IsNullOrWhiteSpace(msg))
+                        {
+                            logMsg = $"群 {GroupID} 成员 {QQID} 撤回了一条消息，消息ID：{MsgID}，消息内容捕获失败";
+                            break;
+                        }
+                        logMsg = $"群 {GroupID} 成员 {QQID} 撤回了一条消息，消息ID：{MsgID}，内容：{msg}";
+                        break;
                 }
                 sw.Stop();
-                string updatemsg = $"√ {sw.ElapsedMilliseconds / (double)1000:f2} ms";
+                string updatemsg = $"√ {sw.ElapsedMilliseconds / (double)1000:f2} s";
                 if (pluginid > 0)
                 {
                     updatemsg += $"(由 {pluginManagment.Plugins[pluginid - 1].appinfo.Name} 结束消息处理)";
