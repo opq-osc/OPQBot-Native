@@ -54,12 +54,16 @@ namespace Launcher.Forms
             ini.Save();
             Save.curentQQ = Convert.ToInt64(textBox_QQ.Text);
             Save.url = textBox_URL.Text;
-            Client socket = new Client(Save.url);
-            socket.Error += Client_Error;
-            socket.Connect();
-            socket.On("connect", (fn) =>
+            SocketIO client = new SocketIO(Save.url);
+            client.Options.Reconnection = true;
+            //client.Options.AllowedRetryFirstConnection = true;
+
+            client.OnError += Client_Error;
+            client.ConnectAsync();
+            client.OnConnected+= async (a, b) =>
             {
-                socket.Emit("GetWebConn",Save.curentQQ.ToString());
+                Save.TryCount = 0;
+                await client.EmitAsync("GetWebConn",Save.curentQQ.ToString());
                 if (Save.LoginStatus)
                 {
                     LogHelper.WriteLog("重新连接到服务器");
@@ -68,22 +72,25 @@ namespace Launcher.Forms
                 this.Invoke(new MethodInvoker(() =>
                 {
                     MainForm mainForm = new MainForm();
-                    mainForm.socket = socket;
+                    mainForm.socket = client;
                     mainForm.Show();
                     mainForm.Visible= mainForm.ShowFlag;
                     mainForm.TopMost = mainForm.TopFlag;
                     this.Hide();
                     button_Link.Enabled = true;
                 }));
-                socket.Error -= Client_Error;
-            });
+                client.OnError -= Client_Error;
+            };
+            client.OnReconnecting += (a, b) =>
+            {
+                Save.TryCount++;
+                LogHelper.WriteLog($"与服务器连接断开，第 {Save.TryCount} 次尝试重连");
+            };
         }
 
-        private void Client_Error(object sender, ErrorEventArgs e)
+        private void Client_Error(object sender, string e)
         {
             MessageBox.Show("连接失败，请检查连接地址是否填写正确");
-            Client client = sender as Client;
-            client.Dispose();
             button_Link.Invoke(new MethodInvoker(()=> { button_Link.Enabled = true; }));
         }
     }

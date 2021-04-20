@@ -15,7 +15,6 @@ using Launcher.Sdk.Cqp.Expand;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SocketIOClient;
-using SocketIOClient.Messages;
 
 namespace Launcher.Forms
 {
@@ -33,17 +32,13 @@ namespace Launcher.Forms
         /// <summary>
         /// 公有 与服务器连接 SocketIO对象
         /// </summary>
-        public Client socket;
+        public SocketIO socket;
         #endregion
         #region --静态私有成员--
         /// <summary>
         /// 用于本类中对日志窗口的操作的 窗口对象
         /// </summary>
         static LogForm logForm = new LogForm();
-        /// <summary>
-        /// 网络重连次数
-        /// </summary>
-        static int TryCount = 0;
         /// <summary>
         /// 标志窗口是否载入完成的变量
         /// </summary>
@@ -290,45 +285,46 @@ namespace Launcher.Forms
             //收到群消息的回调事件
             socket.On("OnGroupMsgs", (fn) =>
             {
-                TryCount = 0;
-                GroupMessageHandler(fn);
+                Save.TryCount = 0;
+                GroupMessageHandler(fn.GetValue<object>().ToString());
             });
             //收到好友消息的回调事件
             socket.On("OnFriendMsgs", (fn) =>
             {
-                TryCount = 0;
-                FriendMessageHandler(fn);
+                Save.TryCount = 0;
+                FriendMessageHandler(fn.GetValue<object>().ToString());
             });
             //统一事件管理如好友进群事件 好友请求事件 退群等事件集合
             socket.On("OnEvents", (fn) =>
             {
-                OnEventsHandler(fn);
+                OnEventsHandler(fn.GetValue<object>().ToString());
             });
         }
         /// <summary>
         /// 私聊消息处理事件
         /// </summary>
-        private static void FriendMessageHandler(IMessage fn)
+        private static void FriendMessageHandler(string fn)
         {
             Task task = new Task(() =>
             {
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
-                ReceiveMessage PrivateMessage = JsonConvert.DeserializeObject<ReceiveMessage>(((JSONMessage)fn).MessageText);
+                ReceiveMessage PrivateMessage = JsonConvert.DeserializeObject<ReceiveMessage>(fn);
                 string message = ProgressMessage.Start(PrivateMessage);
                 var b = Encoding.UTF8.GetBytes(message);
                 message = GB18030.GetString(Encoding.Convert(Encoding.UTF8, GB18030, b));
+                int msgID = PrivateMessage.CurrentPacket.Data.MsgSeq;
 
                 ReceiveMessage.Data data = PrivateMessage.CurrentPacket.Data;
                 if (PrivateMessage.CurrentPacket.Data.FromUin == Save.curentQQ)
                 {
-                    Dll.AddMsgToSave(new Deserizition.Message(Save.MsgList.Count + 1, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message));
+                    Dll.AddMsgToSave(new Deserizition.Message(msgID, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message));
                     return;
                 }
                 int logid = LogHelper.WriteLog(LogLevel.InfoReceive, "OPQBot框架", "[↓]收到好友消息", $"QQ:{data.FromUin} {message}", "处理中...");
-                var c = new Deserizition.Message(Save.MsgList.Count + 1, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message);
+                var c = new Deserizition.Message(msgID, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message);
                 Dll.AddMsgToSave(c);
-                int pluginid = pluginManagment.CallFunction(FunctionEnums.Functions.PrivateMsg, 11, Save.MsgList.Count + 1, data.FromUin, Marshal.StringToHGlobalAnsi(message), 0);
+                int pluginid = pluginManagment.CallFunction(FunctionEnums.Functions.PrivateMsg, 11, msgID, data.FromUin, Marshal.StringToHGlobalAnsi(message), 0);
                 stopwatch.Stop();
                 string updatemsg = $"√ {stopwatch.ElapsedMilliseconds / (double)1000:f2} ms";
                 if (pluginid > 0)
@@ -341,11 +337,11 @@ namespace Launcher.Forms
         /// <summary>
         /// 群消息处理事件
         /// </summary>
-        private static void GroupMessageHandler(IMessage fn)
+        private static void GroupMessageHandler(string fn)
         {
             Task task = new Task(() =>
             {
-                string msg = ((JSONMessage)fn).MessageText;
+                string msg = fn;
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
                 ReceiveMessage groupMessage = JsonConvert.DeserializeObject<ReceiveMessage>(msg);
@@ -372,19 +368,20 @@ namespace Launcher.Forms
                 message = GB18030.GetString(Encoding.Convert(Encoding.UTF8, GB18030, b));
 
                 //表示自己发送出去的消息, 写入消息列表
+                int msgID = groupMessage.CurrentPacket.Data.MsgSeq;
                 if (groupMessage.CurrentPacket.Data.FromUserId == Save.curentQQ)
                 {
-                    Dll.AddMsgToSave(new Deserizition.Message(Save.MsgList.Count + 1, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message));
+                    Dll.AddMsgToSave(new Deserizition.Message(msgID, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message));
                     return;
                 }
                 int logid = LogHelper.WriteLog(LogLevel.InfoReceive, "OPQBot框架", "[↓]收到消息", $"群:{data.FromGroupId}({data.FromGroupName}) QQ:{data.FromUserId}({data.FromNickName}) {message}", "处理中...");
-                var c = new Deserizition.Message(Save.MsgList.Count + 1, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message);
+                var c = new Deserizition.Message(msgID, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message);
                 Dll.AddMsgToSave(c);//保存消息到消息列表
                 byte[] messageBytes = GB18030.GetBytes(message + "\0");
                 var messageIntptr = Marshal.AllocHGlobal(messageBytes.Length);
                 Marshal.Copy(messageBytes, 0, messageIntptr, messageBytes.Length);
                 //调用插件功能
-                int pluginid = pluginManagment.CallFunction(FunctionEnums.Functions.GroupMsg, 2, Save.MsgList.Count + 1, data.FromGroupId, data.FromUserId,
+                int pluginid = pluginManagment.CallFunction(FunctionEnums.Functions.GroupMsg, 2, msgID, data.FromGroupId, data.FromUserId,
                       "", messageIntptr, 0);
                 Marshal.FreeHGlobal(messageIntptr);
                 GC.Collect();
@@ -400,11 +397,11 @@ namespace Launcher.Forms
         /// <summary>
         /// 消息事件之外的事件处理
         /// </summary>
-        private static void OnEventsHandler(IMessage fn)
+        private static void OnEventsHandler(string fn)
         {
             Task task = new Task(() =>
             {
-                JObject events = JObject.Parse(((JSONMessage)fn).MessageText);
+                JObject events = JObject.Parse(fn);
                 Requests request = new Requests();
                 Stopwatch sw = new Stopwatch();
                 int pluginid = 0;
@@ -443,7 +440,7 @@ namespace Launcher.Forms
                         break;
                     case "ON_EVENT_GROUP_ADMINSYSNOTIFY"://加群请求事件 _eventRequest_AddGroup id=12
                         request.type = "GroupRequest";
-                        request.json = ((JSONMessage)fn).MessageText;
+                        request.json = fn;
                         Dll.AddRequestToSave(request);
 
                         long GroupRequest_GroupId, GroupRequest_InviteUin, GroupRequest_Who;
@@ -462,7 +459,7 @@ namespace Launcher.Forms
                         break;
                     case "ON_EVENT_FRIEND_ADD"://好友请求事件 _eventRequest_AddFriend id=11
                         request.type = "FriendRequest";
-                        request.json = ((JSONMessage)fn).MessageText;
+                        request.json = fn;
                         Dll.AddRequestToSave(request);
 
                         string FriendRequest_Content;
@@ -491,8 +488,8 @@ namespace Launcher.Forms
                         logMsg = $"群 {GroupShut_groupid} UserID {GroupShut_qqid} 禁言时间 {GroupShut_shuttime}秒";
                         break;
                     case "ON_EVENT_QQ_NETWORK_CHANGE":
-                        TryCount++;
-                        logMsg = $"与服务器连接断开，第 {TryCount} 次尝试重连";
+                        Save.TryCount++;
+                        logMsg = $"与服务器连接断开，第 {Save.TryCount} 次尝试重连";
                         break;
                 }
                 sw.Stop();

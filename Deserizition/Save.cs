@@ -65,6 +65,10 @@ namespace Deserizition
         public static int LogerMaxCount { get; set; } = 500;
         public static int BoardCastPort { get; set; } = 28634;
         public static bool LoginStatus { get; set; } = false;
+        /// <summary>
+        /// 网络重连次数
+        /// </summary>
+        public static int TryCount { get; set; } = 0;
     }
     public enum PipeType
     {
