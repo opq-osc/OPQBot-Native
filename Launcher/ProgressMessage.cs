@@ -29,6 +29,9 @@ namespace Launcher
             string msg = message.CurrentPacket.Data.Content;
             switch (message.CurrentPacket.Data.MsgType)
             {
+                case "TempSessionMsg":
+                    result = JObject.Parse(msg)["Content"].ToString();
+                    break;
                 case "AtMsg":
                     {
                         //at消息主要将消息中的at消息转变为CQ码
