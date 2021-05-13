@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Deserizition
+﻿namespace Deserizition
 {
     public class GroupMemberList
     {
         public int Count { get; set; }
-        public int GroupUin { get; set; }
-        public int LastUin { get; set; }
+        public long GroupUin { get; set; }
+        public long LastUin { get; set; }
         public Memberlist[] MemberList { get; set; }
 
         public class Memberlist

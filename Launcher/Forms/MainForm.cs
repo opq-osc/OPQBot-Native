@@ -79,12 +79,19 @@ namespace Launcher.Forms
         private void MainForm_Load(object sender, EventArgs e)
         {
             FormBackup = this;
+            Save.FriendsList = JsonConvert.DeserializeObject<FriendsList>(SendRequest($@"{Save.url}v1/LuaApiCaller?qq={Save.curentQQ}&funcname=GetQQUserList&timeout=10", "{\"StartIndex\":0}"));
+            Thread getGroupInfo_Thread = new Thread(()=>
+            {
+                Save.GroupList = JsonConvert.DeserializeObject<GroupList>(SendRequest($@"{Save.url}v1/LuaApiCaller?qq={Save.curentQQ}&funcname=GetGroupList&timeout=10", "{\"NextToken\":\"\"}"));
+                foreach(var item in Save.GroupList.TroopList)
+                {
+                    item.GroupMemberList = JsonConvert.DeserializeObject<GroupMemberList>(SendRequest($@"{Save.url}v1/LuaApiCaller?qq={Save.curentQQ}&funcname=GetGroupUserList&timeout=10", $"{{\"GroupUin\":{item.GroupId},\"LastUin\":0}}"));
+                }
+            });
+            getGroupInfo_Thread.Start();
+
             //根据登录时的QQ号 获取QQ昵称
-            string name = (JObject.Parse(
-                SendRequest($@"{Save.url}v1/LuaApiCaller?qq={Save.curentQQ}&funcname=GetQQUserList&timeout=10", "{\"StartIndex\":0}")
-                )["Friendlist"] as JArray).Where
-                (x => x["FriendUin"].ToString() == Save.curentQQ.ToString())
-                .FirstOrDefault()["NickName"].ToString();
+            string name = Save.FriendsList.Friendlist.First(x => x.FriendUin== Save.curentQQ).NickName.ToString();
             Save.name = name;
             if (!Directory.Exists("conf"))
             {
@@ -318,15 +325,15 @@ namespace Launcher.Forms
                 ReceiveMessage.Data data = PrivateMessage.CurrentPacket.Data;
                 if (PrivateMessage.CurrentPacket.Data.FromUin == Save.curentQQ)
                 {
-                    Dll.AddMsgToSave(new Deserizition.Message(msgID, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message));
+                    Dll.AddMsgToSave(new Deserizition.Message(msgID, data.MsgRandom, data.MsgSeq, data.FromUin, data.FromGroupId, data.MsgTime, message, data.TempUin));
                     return;
                 }
                 int logid = LogHelper.WriteLog(LogLevel.InfoReceive, "OPQBot框架", "[↓]收到好友消息", $"QQ:{data.FromUin} {message}", "处理中...");
-                var c = new Deserizition.Message(msgID, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message);
+                var c = new Deserizition.Message(msgID, data.MsgRandom, data.MsgSeq, data.FromUin, data.FromGroupId, data.MsgTime, message, data.TempUin);
                 Dll.AddMsgToSave(c);
                 int pluginid = pluginManagment.CallFunction(FunctionEnums.Functions.PrivateMsg, 11, msgID, data.FromUin, Marshal.StringToHGlobalAnsi(message), 0);
                 stopwatch.Stop();
-                string updatemsg = $"√ {stopwatch.ElapsedMilliseconds / (double)1000:f2} ms";
+                string updatemsg = $"√ {stopwatch.ElapsedMilliseconds / (double)1000:f2} s";
                 if (pluginid > 0)
                 {
                     updatemsg += $"(由 {pluginManagment.Plugins[pluginid - 1].appinfo.Name} 结束消息处理)";
@@ -360,7 +367,7 @@ namespace Launcher.Forms
                                                  data.FromUserId, Convert.ToBase64String(stream.ToArray()));
                     stopwatch.Stop();
                     LogHelper.WriteLog(LogLevel.InfoReceive, "OPQBot框架", "文件上传", $"来源群:{data.FromGroupId}({data.FromGroupName}) 来源QQ:{data.FromUserId}({data.FromNickName}) " +
-                        $"文件名:{fileupload["FileName"]} 大小:{Convert.ToDouble(fileupload["FileSize"]) / 1000}KB FileID:{fileupload["FileID"]}", $"√ {stopwatch.ElapsedMilliseconds / (double)1000:f2} ms");
+                        $"文件名:{fileupload["FileName"]} 大小:{Convert.ToDouble(fileupload["FileSize"]) / 1000}KB FileID:{fileupload["FileID"]}", $"√ {stopwatch.ElapsedMilliseconds / (double)1000:f2} s");
                     return;
                 }
                 string message = ProgressMessage.Start(groupMessage);
@@ -371,11 +378,11 @@ namespace Launcher.Forms
                 int msgID = groupMessage.CurrentPacket.Data.MsgSeq;
                 if (groupMessage.CurrentPacket.Data.FromUserId == Save.curentQQ)
                 {
-                    Dll.AddMsgToSave(new Deserizition.Message(msgID, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message));
+                    Dll.AddMsgToSave(new Deserizition.Message(msgID, data.MsgRandom, data.MsgSeq, data.FromUin, data.FromGroupId, data.MsgTime, message, data.TempUin));
                     return;
                 }
                 int logid = LogHelper.WriteLog(LogLevel.InfoReceive, "OPQBot框架", "[↓]收到消息", $"群:{data.FromGroupId}({data.FromGroupName}) QQ:{data.FromUserId}({data.FromNickName}) {message}", "处理中...");
-                var c = new Deserizition.Message(msgID, data.MsgRandom, data.MsgSeq, data.FromGroupId, data.MsgTime, message);
+                var c = new Deserizition.Message(msgID, data.MsgRandom, data.MsgSeq, data.FromUin, data.FromGroupId, data.MsgTime, message, data.TempUin);
                 Dll.AddMsgToSave(c);//保存消息到消息列表
                 byte[] messageBytes = GB18030.GetBytes(message + "\0");
                 var messageIntptr = Marshal.AllocHGlobal(messageBytes.Length);

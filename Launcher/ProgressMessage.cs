@@ -30,7 +30,18 @@ namespace Launcher
             switch (message.CurrentPacket.Data.MsgType)
             {
                 case "TempSessionMsg":
-                    result = JObject.Parse(msg)["Content"].ToString();
+                    if(msg.Contains("图片"))
+                    {
+                        var c = JsonConvert.DeserializeObject<PicMessage>(msg).FriendPic;
+                        foreach(var item in c)
+                        {
+                            result += MakeCQImage(item);
+                        }
+                    }
+                    else
+                    {
+                        result = JObject.Parse(msg)["Content"].ToString();
+                    }
                     break;
                 case "AtMsg":
                     {
@@ -54,10 +65,10 @@ namespace Launcher
                                 //将空文本变成null,方便后续??运算符
                                 try
                                 {
-                                    if(string.IsNullOrEmpty(pro.GetValue(mem).ToString()))
+                                    if (string.IsNullOrEmpty(pro.GetValue(mem).ToString()))
                                         pro.SetValue(mem, null);
                                 }
-                                catch(NullReferenceException e)
+                                catch (NullReferenceException e)
                                 {
                                     pro.SetValue(mem, null);//如果是null则会跳至catch块
                                 }
@@ -81,36 +92,14 @@ namespace Launcher
                         {
                             foreach (var item in picMessage.GroupPic)
                             {
-                                string md5 = GenerateMD5(item.FileMd5).ToUpper();
-                                string path = $"data\\image\\{md5}.cqimg";
-                                if (!File.Exists(path))
-                                {
-                                    IniConfig ini = new IniConfig(path);
-                                    ini.Object.Add(new ISection("image"));
-                                    ini.Object["image"]["md5"] = item.FileMd5;
-                                    ini.Object["image"]["size"] = item.FileSize;
-                                    ini.Object["image"]["url"] = item.Url;
-                                    ini.Save();
-                                }
-                                result += CQApi.CQCode_Image(md5);
+                                result += MakeCQImage(item);
                             }
                         }
                         else//是好友图片消息
                         {
                             foreach (var item in picMessage.FriendPic)
                             {
-                                string md5 = GenerateMD5(item.FileMd5).ToUpper();
-                                string path = $"data\\image\\{md5}.cqimg";
-                                if (!File.Exists(path))
-                                {
-                                    IniConfig ini = new IniConfig(path);
-                                    ini.Object.Add(new ISection("image"));
-                                    ini.Object["image"]["md5"] = item.FileMd5;
-                                    ini.Object["image"]["size"] = item.FileSize;
-                                    ini.Object["image"]["url"] = item.Url;
-                                    ini.Save();
-                                }
-                                result += CQApi.CQCode_Image(md5);
+                                result += MakeCQImage(item);
                             }
                         }
                         break;
@@ -152,6 +141,31 @@ namespace Launcher
             }
             return result;
         }
+        private static string MakeCQImage(PicMessage.Friendpic item)
+        {
+            return MakeCQImage(new PicMessage.Grouppic
+            { 
+                FileMd5 = item.FileMd5, 
+                FileSize = item.FileSize, 
+                Url = item.Url 
+            });
+        }
+        private static string MakeCQImage(PicMessage.Grouppic item)
+        {
+            string md5 = GenerateMD5(item.FileMd5).ToUpper();
+            string path = $"data\\image\\{md5}.cqimg";
+            if (!File.Exists(path))
+            {
+                IniConfig ini = new IniConfig(path);
+                ini.Object.Add(new ISection("image"));
+                ini.Object["image"]["md5"] = item.FileMd5;
+                ini.Object["image"]["size"] = item.FileSize;
+                ini.Object["image"]["url"] = item.Url;
+                ini.Save();
+            }
+            return CQApi.CQCode_Image(md5).ToSendString();
+        }
+
         /// <summary>
         /// MD5字符串加密
         /// </summary>

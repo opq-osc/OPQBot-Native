@@ -9,18 +9,22 @@ namespace Deserizition
         public int MsgId;
         public long MsgRandom;
         public int Seq;
+        public long userID;
         public long groupid;
         public long time;
         public string text;
+        public long tempGroupID;
 
-        public Message(int msgId, long msgRandom, int seq, long groupid, long time, string text)
+        public Message(int msgId, long msgRandom, int seq, long userID, long groupid, long time, string text, long tempGroupID)
         {
-            this.MsgId = msgId;
-            this.MsgRandom = msgRandom;
-            this.Seq = seq;
+            MsgId = msgId;
+            MsgRandom = msgRandom;
+            Seq = seq;
+            this.userID = userID;
             this.groupid = groupid;
             this.time = time;
             this.text = text;
+            this.tempGroupID = tempGroupID;
         }
     }
     public class Requests
@@ -69,11 +73,8 @@ namespace Deserizition
         /// 网络重连次数
         /// </summary>
         public static int TryCount { get; set; } = 0;
-    }
-    public enum PipeType
-    {
-        Server,
-        Client,
-        NoPipe
+        public static FriendsList FriendsList { get; set; } = new FriendsList();
+        public static GroupList GroupList { get; set; } = new GroupList();
+        public static GroupMemberList GroupMemberList { get; set; } = new GroupMemberList();
     }
 }

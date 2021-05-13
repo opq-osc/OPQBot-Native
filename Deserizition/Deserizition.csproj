@@ -101,6 +101,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FriendsList.cs" />
+    <Compile Include="GroupList.cs" />
     <Compile Include="GroupMemberList.cs" />
     <Compile Include="LogHelper.cs" />
     <Compile Include="LogModel.cs" />
