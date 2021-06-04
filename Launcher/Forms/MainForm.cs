@@ -80,9 +80,10 @@ namespace Launcher.Forms
         {
             FormBackup = this;
             Save.FriendsList = JsonConvert.DeserializeObject<FriendsList>(SendRequest($@"{Save.url}v1/LuaApiCaller?qq={Save.curentQQ}&funcname=GetQQUserList&timeout=10", "{\"StartIndex\":0}"));
+            Save.GroupList = JsonConvert.DeserializeObject<GroupList>(SendRequest($@"{Save.url}v1/LuaApiCaller?qq={Save.curentQQ}&funcname=GetGroupList&timeout=10", "{\"NextToken\":\"\"}"));
+
             Thread getGroupInfo_Thread = new Thread(()=>
             {
-                Save.GroupList = JsonConvert.DeserializeObject<GroupList>(SendRequest($@"{Save.url}v1/LuaApiCaller?qq={Save.curentQQ}&funcname=GetGroupList&timeout=10", "{\"NextToken\":\"\"}"));
                 foreach(var item in Save.GroupList.TroopList)
                 {
                     item.GroupMemberList = JsonConvert.DeserializeObject<GroupMemberList>(SendRequest($@"{Save.url}v1/LuaApiCaller?qq={Save.curentQQ}&funcname=GetGroupUserList&timeout=10", $"{{\"GroupUin\":{item.GroupId},\"LastUin\":0}}"));
