@@ -23,6 +23,7 @@ namespace Launcher
     {
         public List<Plugin> Plugins { get; set; } = new List<Plugin>();
         public static Dictionary<IntPtr, AppDomain> AppDomainSave { get; set; } = new Dictionary<IntPtr, AppDomain>();
+        public bool Loading { get; set; } = false;
         public class Plugin : MarshalByRefObject
         {
             public override object InitializeLifetimeService()
@@ -60,6 +61,7 @@ namespace Launcher
         /// </summary>
         public void Load()
         {
+            Loading = true;
             Stopwatch sw = new Stopwatch();
             sw.Start();
             string path = Path.Combine(Environment.CurrentDirectory, "data", "plugins");
@@ -73,6 +75,7 @@ namespace Launcher
                     count++;
             }
             sw.Stop();
+            Loading = false;
             LogHelper.WriteLog(LogLevel.Info, "插件载入", $"一共加载了{count}个插件", $"√ {sw.ElapsedMilliseconds} ms");
             NotifyIconHelper.AddManageMenu();
         }
@@ -217,9 +220,10 @@ namespace Launcher
         /// </summary>
         public void UnLoad()
         {
+            Loading = true;
             LogHelper.WriteLog("开始卸载插件...");
             NotifyIconHelper.ClearAppMenu();
-            foreach(var item in AppDomainSave)
+            foreach (var item in AppDomainSave)
             {
                 var c = Plugins.Find(x => x.iLib == item.Key);
                 UnLoad(c);
@@ -228,6 +232,7 @@ namespace Launcher
             Plugins.Clear();
             AppDomainSave.Clear();
             GC.Collect();
+            Loading = false;
             LogHelper.WriteLog("插件卸载完毕");
         }
         //写在构造函数是不是还好点?
@@ -266,6 +271,11 @@ namespace Launcher
                 new JProperty("ApiName",JsonConvert.SerializeObject(ApiName)),
                 new JProperty("Args",JsonConvert.SerializeObject(args))
             };
+            if (Loading)
+            {
+                LogHelper.WriteLog(LogLevel.Warning, "OPQBot框架", "插件逻辑处理", "插件模块处理中...", "x 不处理");
+                return -1;
+            }
             //遍历插件列表,遇到标记消息阻断则跳出
             foreach (var item in Plugins)
             {
@@ -289,7 +299,7 @@ namespace Launcher
                 catch (Exception e)
                 {
                     LogHelper.WriteLog(LogLevel.Error, "函数执行异常", $"插件 {item.appinfo.Name} {ApiName} 函数发生错误，错误信息:{e.Message} {e.StackTrace}");
-                    Thread thread = new Thread(()=> 
+                    Thread thread = new Thread(() =>
                     {
                         var b = ErrorHelper.ShowErrorDialog($"错误模块：{item.appinfo.Name}\n{ApiName} 函数发生错误，错误信息:\n{e.Message} {e.StackTrace}");
                         switch (b)

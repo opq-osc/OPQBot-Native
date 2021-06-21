@@ -107,6 +107,11 @@ namespace Launcher
                 }
                 KeyValuePair<string, string> pair = (KeyValuePair<string, string>)(sender as MenuItem).Tag;
                 PluginManagment.Plugin c = MainForm.pluginManagment.Plugins.Find(x => x.appinfo.Name == pair.Key);//从已加载的插件寻找这个名称的插件
+                if(c.Enable is false)
+                {
+                    MessageBox.Show("插件未启用, 请打开菜单之前启用此插件", "无法调用菜单", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
                 string menuname = string.Empty;
                 foreach (var item in JArray.Parse(JObject.Parse(c.json)["menu"].ToString()))//遍历此插件的json的menu节点,寻找窗口函数
                 {
