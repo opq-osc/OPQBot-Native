@@ -12,12 +12,14 @@ using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
 using System;
 using System.Collections.Generic;
+using System.Xml;
 
 namespace Launcher
 {
     public static class ProgressMessage
     {
         public static List<GroupMemberList> MemberSave = new List<GroupMemberList>();
+
         /// <summary>
         /// 将消息中的东西替换为CQ码
         /// </summary>
@@ -30,10 +32,10 @@ namespace Launcher
             switch (message.CurrentPacket.Data.MsgType)
             {
                 case "TempSessionMsg":
-                    if(msg.Contains("图片"))
+                    if (msg.Contains("图片"))
                     {
                         var c = JsonConvert.DeserializeObject<PicMessage>(msg).FriendPic;
-                        foreach(var item in c)
+                        foreach (var item in c)
                         {
                             result += MakeCQImage(item);
                         }
@@ -42,6 +44,7 @@ namespace Launcher
                     {
                         result = JObject.Parse(msg)["Content"].ToString();
                     }
+
                     break;
                 case "AtMsg":
                     {
@@ -52,11 +55,13 @@ namespace Launcher
                         result = textMessage.Content;
                         //从缓存寻找这个群
                         GroupMemberList ls = MemberSave.Find(x => x.GroupUin == message.CurrentPacket.Data.FromGroupId);
-                        if (ls == null)//未在缓存找到,将这个群加入缓存
+                        if (ls == null) //未在缓存找到,将这个群加入缓存
                         {
-                            ls = JsonConvert.DeserializeObject<GroupMemberList>(WebAPI.GetGroupMemberList(message.CurrentPacket.Data.FromGroupId));
+                            ls = JsonConvert.DeserializeObject<GroupMemberList>(
+                                WebAPI.GetGroupMemberList(message.CurrentPacket.Data.FromGroupId));
                             MemberSave.Add(ls);
                         }
+
                         foreach (var item in textMessage.UserID)
                         {
                             GroupMemberList.Memberlist mem = ls.MemberList.Where(x => x.MemberUin == item).First();
@@ -70,12 +75,14 @@ namespace Launcher
                                 }
                                 catch (NullReferenceException e)
                                 {
-                                    pro.SetValue(mem, null);//如果是null则会跳至catch块
+                                    pro.SetValue(mem, null); //如果是null则会跳至catch块
                                 }
                             }
+
                             string originStr = "@" + (mem.AutoRemark ?? mem.GroupCard ?? mem.NickName);
                             result = result.Replace(originStr, CQApi.CQCode_At(item).ToSendString());
                         }
+
                         break;
                     }
                 case "TextMsg":
@@ -84,18 +91,19 @@ namespace Launcher
                 case "PicMsg":
                     {
                         //图片消息是将图片消息的信息配置进image文件夹下的以MD5为名称的cqimg文件内
-                        PicMessage picMessage = JsonConvert.DeserializeObject<PicMessage>(message.CurrentPacket.Data.Content);
+                        PicMessage picMessage =
+                            JsonConvert.DeserializeObject<PicMessage>(message.CurrentPacket.Data.Content);
                         if (!Directory.Exists("data\\image"))
                             Directory.CreateDirectory("data\\image");
                         result = picMessage.Content;
-                        if (picMessage.GroupPic != null)//是群图片消息
+                        if (picMessage.GroupPic != null) //是群图片消息
                         {
                             foreach (var item in picMessage.GroupPic)
                             {
                                 result += MakeCQImage(item);
                             }
                         }
-                        else//是好友图片消息
+                        else //是好友图片消息
                         {
                             foreach (var item in picMessage.FriendPic)
                             {
@@ -119,11 +127,71 @@ namespace Launcher
                             ini.Object["record"]["url"] = url;
                             ini.Save();
                         }
+
                         result = CQApi.CQCode_Record(MD5 + ".silk").ToString();
                         break;
                     }
+                case "RedBagMsg":
+                    {
+                        string title = JObject.Parse(msg)["Content"]?.ToString();
+                        result = $"[CQ:hb,title={title}]";
+                        break;
+                    }
+                case "XmlMsg":
+                    {
+                        result = JObject.Parse(msg)["Content"].ToString();
+                        var xml = new XmlDocument();
+                        int index = result.IndexOf("</msg>");
+                        result = result.Substring(0, index + "</msg>".Length);
+                        xml.LoadXml(result);
+                        var root = xml.FirstChild.NextSibling;
+                        foreach (XmlAttribute item in root.Attributes)
+                        {
+                            if (item.Name == "actionData" && item.Value.Contains("group:"))
+                            {
+                                result = $"[CQ:contact,id={item.Value.Replace("group:", "")},type=group]";
+                                break;
+                            }
+                            else if (item.Name == "actionData" && item.Value.Contains("AppCmd://OpenContactInfo/?uin"))
+                            {
+                                result = $"[CQ:contact,id={item.Value.Replace("AppCmd://OpenContactInfo/?uin=", "")},type=qq]";
+                                break;
+                            }
+                            else if(item.Name=="url" && item.Value.Contains("y.music.163.com"))
+                            {
+                                int musicid = Convert.ToInt32(Regex.Replace(item.Value, "https:\\/\\/y.music.163.com\\/m/song\\/([0-9]*)\\/\\?userid=([0-9]*)", "$1"));
+                                int userid = Convert.ToInt32(Regex.Replace(item.Value, "https:\\/\\/y.music.163.com\\/m/song\\/([0-9]*)\\/\\?userid=([0-9]*)", "$2"));
+                                result = $"[CQ:music,type=163,id={musicid},userid={userid}]";
+                                break;
+                            }
+                        }
+                        if (!result.StartsWith("[CQ:"))
+                        {
+                            result = $"[CQ:rich,content={result}";
+                        }
+                        break;
+                    }
+                case "JsonMsg":
+                    {
+                        result = JObject.Parse(msg)["Content"].ToString();
+                        result = result.Substring(result.IndexOf("{\"app\":\""));
+                        var json = JObject.Parse(result);
+                        if (json["meta"]["music"] != null)
+                        {
+                            var musicroot = json["meta"]["music"];
+                            int musicid = Convert.ToInt32(Regex.Replace(musicroot["jumpUrl"].ToString(), "https:\\/\\/y.music.163.com\\/m/song\\/([0-9]*)\\/\\?userid=([0-9]*)", "$1"));
+                            int userid = Convert.ToInt32(Regex.Replace(musicroot["jumpUrl"].ToString(), "https:\\/\\/y.music.163.com\\/m/song\\/([0-9]*)\\/\\?userid=([0-9]*)", "$2"));
+                            result = $"[CQ:music,type=163,id={musicid},userid={userid},title={musicroot["title"]},desc={musicroot["desc"]}]";
+                        }
+                        else
+                        {
+                            result = $"[CQ:rich,title={json["prompt"]}]";
+                        }
+                        break;
+                    }
             }
-            result = Regex.Replace(result, "\\[表情(\\d*)\\]", "[CQ:face,id=$1]");//处理QQ表情信息
+
+            result = Regex.Replace(result, "\\[表情(\\d*)\\]", "[CQ:face,id=$1]"); //处理QQ表情信息
             //处理emoji消息
             foreach (var a in result)
             {
@@ -133,23 +201,28 @@ namespace Launcher
                     //取这个emoji
                     string str = a.ToString() + result[result.IndexOf(a) + 1].ToString();
                     UTF32Encoding enc = new UTF32Encoding(true, false);
-                    byte[] bytes = enc.GetBytes(str);//转换字节数组
+                    byte[] bytes = enc.GetBytes(str); //转换字节数组
                     //使用BitConvert将字节数组转换为16进制，之后转换为10进制即可
-                    result = result.Replace(str, CQApi.CQCode_Emoji(Convert.ToInt32(BitConverter.ToString(bytes).Replace("-", ""), 16)).ToString());
+                    result = result.Replace(str,
+                        CQApi.CQCode_Emoji(Convert.ToInt32(BitConverter.ToString(bytes).Replace("-", ""), 16))
+                            .ToString());
                     break;
                 }
             }
+
             return result;
         }
+
         private static string MakeCQImage(PicMessage.Friendpic item)
         {
             return MakeCQImage(new PicMessage.Grouppic
-            { 
-                FileMd5 = item.FileMd5, 
-                FileSize = item.FileSize, 
-                Url = item.Url 
+            {
+                FileMd5 = item.FileMd5,
+                FileSize = item.FileSize,
+                Url = item.Url
             });
         }
+
         private static string MakeCQImage(PicMessage.Grouppic item)
         {
             string md5 = GenerateMD5(item.FileMd5).ToUpper();
@@ -163,6 +236,7 @@ namespace Launcher
                 ini.Object["image"]["url"] = item.Url;
                 ini.Save();
             }
+
             return CQApi.CQCode_Image(md5).ToSendString();
         }
 
@@ -183,6 +257,7 @@ namespace Launcher
                 {
                     sb.Append(newBuffer[i].ToString("x2"));
                 }
+
                 return sb.ToString();
             }
         }
