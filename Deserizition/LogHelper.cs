@@ -120,6 +120,11 @@ namespace Deserizition
         }
         public static int WriteLog(LogModel model)
         {
+            if(!string.IsNullOrWhiteSpace(model.detail) && string.IsNullOrWhiteSpace(model.name))
+            {
+                model.name = "异常捕获";
+                model.detail = model.name;
+            }
             using (var db = GetInstance())
             {
                 var result = db.Ado.UseTran(() =>

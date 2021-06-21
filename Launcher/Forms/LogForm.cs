@@ -111,6 +111,11 @@ namespace Launcher.Forms
         {
             if (model == null || model.priority<(int)LogPriority)
                 return;
+            if (string.IsNullOrWhiteSpace(model.detail) && !string.IsNullOrWhiteSpace(model.name))
+            {
+                model.detail = model.name;
+                model.name = "异常捕获";
+            }
             LogLists.Add(model);
             AddItem2ListView(model);
             if (LogLists.Count >= Save.LogerMaxCount)
@@ -118,17 +123,21 @@ namespace Launcher.Forms
                 LogLists.RemoveAt(0);
                 listView_LogMain.Invoke(new MethodInvoker(() => { listView_LogMain.Items.RemoveAt(0); }));
             }
-            switch (Value2Enum(model.priority))
+            try
             {
-                case LogLevel.Warning:
-                    NotifyIconHelper._NotifyIcon.ShowBalloonTip(2000, model.source, model.detail, ToolTipIcon.Warning);
-                    break;
-                case LogLevel.Error:
-                    NotifyIconHelper._NotifyIcon.ShowBalloonTip(2000, model.source, model.detail, ToolTipIcon.Error);
-                    break;
-                default:
-                    break;
+                switch (Value2Enum(model.priority))
+                {
+                    case LogLevel.Warning:
+                        NotifyIconHelper._NotifyIcon.ShowBalloonTip(2000, model.source, model.detail, ToolTipIcon.Warning);
+                        break;
+                    case LogLevel.Error:
+                        NotifyIconHelper._NotifyIcon.ShowBalloonTip(2000, model.source, model.detail, ToolTipIcon.Error);
+                        break;
+                    default:
+                        break;
+                }
             }
+            catch { }            
         }
 
         private void UpdateItemStatus(int id, string msg)
