@@ -324,7 +324,7 @@ namespace Launcher.Forms
                 int msgID = PrivateMessage.CurrentPacket.Data.MsgSeq;
 
                 ReceiveMessage.Data data = PrivateMessage.CurrentPacket.Data;
-                if (PrivateMessage.CurrentPacket.Data.FromUin == Save.curentQQ)
+                if (PrivateMessage.CurrentPacket.Data.FromUin == Save.curentQQ && !Save.ReceiveSelfMsg)
                 {
                     Dll.AddMsgToSave(new Deserizition.Message(msgID, data.MsgRandom, data.MsgSeq, data.FromUin, data.FromGroupId, data.MsgTime, message, data.TempUin));
                     return;
@@ -377,7 +377,7 @@ namespace Launcher.Forms
 
                 //表示自己发送出去的消息, 写入消息列表
                 int msgID = groupMessage.CurrentPacket.Data.MsgSeq;
-                if (groupMessage.CurrentPacket.Data.FromUserId == Save.curentQQ)
+                if (groupMessage.CurrentPacket.Data.FromUserId == Save.curentQQ && !Save.ReceiveSelfMsg)
                 {
                     Dll.AddMsgToSave(new Deserizition.Message(msgID, data.MsgRandom, data.MsgSeq, data.FromUin, data.FromGroupId, data.MsgTime, message, data.TempUin));
                     return;
