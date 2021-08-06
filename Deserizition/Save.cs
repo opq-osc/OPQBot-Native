@@ -76,6 +76,6 @@ namespace Deserizition
         public static FriendsList FriendsList { get; set; } = new FriendsList();
         public static GroupList GroupList { get; set; } = new GroupList();
         public static GroupMemberList GroupMemberList { get; set; } = new GroupMemberList();
-        public static bool ReceiveSelfMsg { get; set; } = true;
+        public static bool ReceiveSelfMsg { get; set; } = false;
     }
 }
