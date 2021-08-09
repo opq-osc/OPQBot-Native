@@ -32,6 +32,7 @@ namespace Launcher.Forms
             {
                 Save.curentQQ = ini.Object["Config"]["QQ"].GetValueOrDefault((long)0);
                 Save.url = ini.Object["Config"]["url"].GetValueOrDefault("http://127.0.0.1:8888/");
+                Save.ReceiveSelfMsg = (bool)(ini.Object["Config"]["ReceiveSelfMsg"]?.ToBoolean());
             }
             catch
             {
@@ -40,6 +41,7 @@ namespace Launcher.Forms
                 ini.Object["Config"].Add("QQ", 0);
                 ini.Object["Config"].Add("url", "http://127.0.0.1:8888/");
                 ini.Object["Config"].Add("AutoLogin", false);
+                ini.Object["Config"].Add("ReceiveSelfMsg", false);
                 Save.curentQQ = 0;
                 Save.url = "";
                 ini.Save();
