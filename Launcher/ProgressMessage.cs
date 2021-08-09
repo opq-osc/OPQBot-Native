@@ -167,7 +167,7 @@ namespace Launcher
                         }
                         if (!result.StartsWith("[CQ:"))
                         {
-                            result = $"[CQ:rich,content={result}";
+                            result = $"[CQ:rich,content={result.Replace("\n","").Replace("\r","")}]";
                         }
                         break;
                     }
