@@ -273,7 +273,9 @@ namespace Launcher
                 new JProperty("ApiName",JsonConvert.SerializeObject(ApiName)),
                 new JProperty("Args",JsonConvert.SerializeObject(args))
             };
-            if (Loading)
+            if ((ApiName != FunctionEnums.Functions.Disable && ApiName != FunctionEnums.Functions.Exit &&
+                ApiName != FunctionEnums.Functions.Enable && ApiName != FunctionEnums.Functions.StartUp)
+                && Loading)
             {
                 LogHelper.WriteLog(LogLevel.Warning, "OPQBot框架", "插件逻辑处理", "插件模块处理中...", "x 不处理");
                 return -1;
