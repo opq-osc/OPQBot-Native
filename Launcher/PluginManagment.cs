@@ -75,7 +75,6 @@ namespace Launcher
                     count++;
             }
             sw.Stop();
-            Loading = false;
             LogHelper.WriteLog(LogLevel.Info, "插件载入", $"一共加载了{count}个插件", $"√ {sw.ElapsedMilliseconds} ms");
             NotifyIconHelper.AddManageMenu();
         }
@@ -222,6 +221,8 @@ namespace Launcher
         {
             Loading = true;
             LogHelper.WriteLog("开始卸载插件...");
+            CallFunction(FunctionEnums.Functions.Exit);
+            CallFunction(FunctionEnums.Functions.Disable);
             NotifyIconHelper.ClearAppMenu();
             foreach (var item in AppDomainSave)
             {
@@ -253,6 +254,7 @@ namespace Launcher
             LogHelper.WriteLog("遍历启动事件……");
             CallFunction(FunctionEnums.Functions.StartUp);
             CallFunction(FunctionEnums.Functions.Enable);
+            Loading = false;
         }
         [DllImport("CQP.dll", EntryPoint = "cq_start")]
         private static extern bool cq_start(IntPtr path, int authcode);
@@ -329,6 +331,7 @@ namespace Launcher
             LogHelper.WriteLog("遍历启动事件……");
             CallFunction(FunctionEnums.Functions.StartUp);
             CallFunction(FunctionEnums.Functions.Enable);
+            this.Loading = false;
         }
     }
 }
