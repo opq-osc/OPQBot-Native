@@ -42,18 +42,20 @@ namespace Launcher
             /// 插件的json部分,包含名称、描述、函数入口以及窗口名称部分
             /// </summary>
             public string json;
+            public string path;
             public Dll dll;
             /// <summary>
             /// 标记插件是否启用
             /// </summary>
             public bool Enable;
-            public Plugin(IntPtr iLib, AppInfo appinfo, string json, Dll dll, bool enable, string namedpipe)
+            public Plugin(IntPtr iLib, AppInfo appinfo, string json, Dll dll, bool enable, string path)
             {
                 this.iLib = iLib;
                 this.appinfo = appinfo;
                 this.json = json;
                 this.dll = dll;
                 this.Enable = enable;
+                this.path = path;
             }
         }
         /// <summary>
@@ -135,14 +137,15 @@ namespace Launcher
                 , false
                 , BindingFlags.CreateInstance
                 , null
-                , new object[] { iLib, appInfo, json.ToString(), dll, enabled, appInfotext.Value }
+                , new object[] { iLib, appInfo, json.ToString(), dll, enabled, filepath }
                 , null, null);
             Plugins.Add(plugin);
 
-            LogHelper.WriteLog(LogLevel.InfoSuccess, "插件载入", $"插件 {appInfo.Name} 加载成功");
             cq_start(Marshal.StringToHGlobalAnsi(destpath), authcode);
             //将它的窗口写入托盘右键菜单
             NotifyIconHelper.LoadMenu(json);
+            LogHelper.WriteLog(LogLevel.InfoSuccess, "插件载入", $"插件 {appInfo.Name} 加载成功");
+
             return true;
         }
 
@@ -214,6 +217,15 @@ namespace Launcher
                 LogHelper.WriteLog(LogLevel.Error, "插件卸载", e.Message, e.StackTrace);
             }
         }
+
+        public void ReLoad(Plugin plugin)
+        {
+            UnLoad(plugin);
+            Load(plugin.path);
+            plugin.dll.CallFunction(FunctionEnums.Functions.StartUp);
+            plugin.dll.CallFunction(FunctionEnums.Functions.Enable);
+        }
+
         /// <summary>
         /// 插件全部卸载
         /// </summary>

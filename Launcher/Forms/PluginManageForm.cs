@@ -53,16 +53,7 @@ namespace Launcher.Forms
         {
             //版本号
             label_MainVersion.Text = $"{Application.ProductVersion}（开发版本）";
-            plugins = MainForm.pluginManagment.Plugins;
-            foreach (var item in plugins)
-            {
-                ListViewItem listViewItem = new ListViewItem();
-                listViewItem.ForeColor = item.Enable ? Color.Black : Color.Gray;
-                listViewItem.SubItems[0].Text = (item.Enable ? "" : "[未启用] ") + item.appinfo.Name;
-                listViewItem.SubItems.Add(item.appinfo.Version.ToString());
-                listViewItem.SubItems.Add(item.appinfo.Author);
-                listView_PluginList.Items.Add(listViewItem);
-            }
+            RefreshList();
         }
 
         private void button_Close_Click(object sender, EventArgs e)
@@ -184,6 +175,51 @@ namespace Launcher.Forms
                 LogHelper.WriteLog(LogLevel.Warning, "插件测试"
                                 , $"{pluginName} 插件已处于测试模式，将忽略所有框架消息");
                 pluginTester.Show();
+            }
+        }
+
+        private void button_ReloadPlugin_Click(object sender, EventArgs e)
+        {
+            var plugin = MainForm.pluginManagment.Plugins[listView_PluginList.SelectedItems[0].Index];
+            MainForm.pluginManagment.ReLoad(plugin);
+        }
+
+        private void button_AddPlugin_Click(object sender, EventArgs e)
+        {
+            openFileDialog.InitialDirectory = Path.Combine(Application.StartupPath, "data", "plugins");
+            openFileDialog.ShowDialog();
+            string filename = openFileDialog.FileName;
+            if (string.IsNullOrEmpty(filename))
+            {
+                return;
+            }
+            if(File.Exists(filename.Replace(".dll", ".json")) == false)
+            {
+                MessageBox.Show("json文件缺失");
+                return;
+            }
+            var fileInfo = new FileInfo(openFileDialog.FileName);
+            string targetPath = Path.Combine(openFileDialog.InitialDirectory, fileInfo.Name);
+            if(!File.Exists(targetPath))
+            {
+                File.Copy(filename, targetPath);
+                File.Copy(filename.Replace(".dll", ".json"), targetPath.Replace(".dll", ".json"));
+            }
+            MainForm.pluginManagment.Load(targetPath);
+            RefreshList();
+        }
+        public void RefreshList()
+        {
+            listView_PluginList.Items.Clear();
+            plugins = MainForm.pluginManagment.Plugins;
+            foreach (var item in plugins)
+            {
+                ListViewItem listViewItem = new ListViewItem();
+                listViewItem.ForeColor = item.Enable ? Color.Black : Color.Gray;
+                listViewItem.SubItems[0].Text = (item.Enable ? "" : "[未启用] ") + item.appinfo.Name;
+                listViewItem.SubItems.Add(item.appinfo.Version.ToString());
+                listViewItem.SubItems.Add(item.appinfo.Author);
+                listView_PluginList.Items.Add(listViewItem);
             }
         }
     }
