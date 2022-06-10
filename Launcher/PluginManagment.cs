@@ -214,14 +214,21 @@ namespace Launcher
             }
             catch (Exception e)
             {
-                LogHelper.WriteLog(LogLevel.Error, "插件卸载", e.Message, e.StackTrace);
+                LogHelper.WriteLog(LogLevel.Error, "插件卸载", e.Message + e.StackTrace);
             }
         }
 
         public void ReLoad(Plugin plugin)
         {
+            Loading = true;
             UnLoad(plugin);
+            var appdomain = AppDomainSave.First(x => x.Key == plugin.iLib);
+            AppDomain.Unload(appdomain.Value);
+            Plugins.Remove(plugin);
+            AppDomainSave.Remove(plugin.iLib);
+            GC.Collect();            
             Load(plugin.path);
+            Loading = false;
             plugin.dll.CallFunction(FunctionEnums.Functions.StartUp);
             plugin.dll.CallFunction(FunctionEnums.Functions.Enable);
         }
