@@ -37,7 +37,7 @@
             this.button_Close = new System.Windows.Forms.Button();
             this.linkLabel_MoreApps = new System.Windows.Forms.LinkLabel();
             this.button_AppDir = new System.Windows.Forms.Button();
-            this.button_EventList = new System.Windows.Forms.Button();
+            this.button_AddPlugin = new System.Windows.Forms.Button();
             this.button_Reload = new System.Windows.Forms.Button();
             this.groupBox_Desc = new System.Windows.Forms.GroupBox();
             this.panel3 = new System.Windows.Forms.Panel();
@@ -47,7 +47,7 @@
             this.label_AuthorTitle = new System.Windows.Forms.Label();
             this.label_Author = new System.Windows.Forms.Label();
             this.listBox_Auth = new System.Windows.Forms.ListBox();
-            this.button_Unload = new System.Windows.Forms.Button();
+            this.button_ReloadPlugin = new System.Windows.Forms.Button();
             this.button_Dev = new System.Windows.Forms.Button();
             this.button_Menu = new System.Windows.Forms.Button();
             this.button_Disable = new System.Windows.Forms.Button();
@@ -57,6 +57,7 @@
             this.label_Description = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.panel1.SuspendLayout();
             this.groupBox_Desc.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -107,7 +108,7 @@
             this.panel1.Controls.Add(this.button_Close);
             this.panel1.Controls.Add(this.linkLabel_MoreApps);
             this.panel1.Controls.Add(this.button_AppDir);
-            this.panel1.Controls.Add(this.button_EventList);
+            this.panel1.Controls.Add(this.button_AddPlugin);
             this.panel1.Controls.Add(this.button_Reload);
             this.panel1.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.panel1.Location = new System.Drawing.Point(0, 380);
@@ -163,15 +164,16 @@
             this.button_AppDir.UseVisualStyleBackColor = true;
             this.button_AppDir.Click += new System.EventHandler(this.button_AppDir_Click);
             // 
-            // button_EventList
+            // button_AddPlugin
             // 
-            this.button_EventList.Location = new System.Drawing.Point(96, 12);
-            this.button_EventList.Margin = new System.Windows.Forms.Padding(2);
-            this.button_EventList.Name = "button_EventList";
-            this.button_EventList.Size = new System.Drawing.Size(77, 34);
-            this.button_EventList.TabIndex = 1;
-            this.button_EventList.Text = "事件列表";
-            this.button_EventList.UseVisualStyleBackColor = true;
+            this.button_AddPlugin.Location = new System.Drawing.Point(96, 12);
+            this.button_AddPlugin.Margin = new System.Windows.Forms.Padding(2);
+            this.button_AddPlugin.Name = "button_AddPlugin";
+            this.button_AddPlugin.Size = new System.Drawing.Size(77, 34);
+            this.button_AddPlugin.TabIndex = 1;
+            this.button_AddPlugin.Text = "添加插件";
+            this.button_AddPlugin.UseVisualStyleBackColor = true;
+            this.button_AddPlugin.Click += new System.EventHandler(this.button_AddPlugin_Click);
             // 
             // button_Reload
             // 
@@ -189,7 +191,7 @@
             this.groupBox_Desc.Controls.Add(this.panel3);
             this.groupBox_Desc.Controls.Add(this.panel2);
             this.groupBox_Desc.Controls.Add(this.listBox_Auth);
-            this.groupBox_Desc.Controls.Add(this.button_Unload);
+            this.groupBox_Desc.Controls.Add(this.button_ReloadPlugin);
             this.groupBox_Desc.Controls.Add(this.button_Dev);
             this.groupBox_Desc.Controls.Add(this.button_Menu);
             this.groupBox_Desc.Controls.Add(this.button_Disable);
@@ -285,15 +287,16 @@
             this.listBox_Auth.Size = new System.Drawing.Size(280, 95);
             this.listBox_Auth.TabIndex = 6;
             // 
-            // button_Unload
+            // button_ReloadPlugin
             // 
-            this.button_Unload.Location = new System.Drawing.Point(219, 327);
-            this.button_Unload.Margin = new System.Windows.Forms.Padding(2);
-            this.button_Unload.Name = "button_Unload";
-            this.button_Unload.Size = new System.Drawing.Size(58, 32);
-            this.button_Unload.TabIndex = 10;
-            this.button_Unload.Text = "卸载";
-            this.button_Unload.UseVisualStyleBackColor = true;
+            this.button_ReloadPlugin.Location = new System.Drawing.Point(219, 327);
+            this.button_ReloadPlugin.Margin = new System.Windows.Forms.Padding(2);
+            this.button_ReloadPlugin.Name = "button_ReloadPlugin";
+            this.button_ReloadPlugin.Size = new System.Drawing.Size(58, 32);
+            this.button_ReloadPlugin.TabIndex = 10;
+            this.button_ReloadPlugin.Text = "重载";
+            this.button_ReloadPlugin.UseVisualStyleBackColor = true;
+            this.button_ReloadPlugin.Click += new System.EventHandler(this.button_ReloadPlugin_Click);
             // 
             // button_Dev
             // 
@@ -386,6 +389,11 @@
             this.label1.TabIndex = 3;
             this.label1.Text = "从左侧选择一个应用";
             // 
+            // openFileDialog
+            // 
+            this.openFileDialog.Filter = "插件文件|*.dll";
+            this.openFileDialog.Title = "选择插件dll";
+            // 
             // PluginManageForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -429,10 +437,10 @@
         private System.Windows.Forms.Button button_Close;
         private System.Windows.Forms.LinkLabel linkLabel_MoreApps;
         private System.Windows.Forms.Button button_AppDir;
-        private System.Windows.Forms.Button button_EventList;
+        private System.Windows.Forms.Button button_AddPlugin;
         private System.Windows.Forms.Button button_Reload;
         private System.Windows.Forms.GroupBox groupBox_Desc;
-        private System.Windows.Forms.Button button_Unload;
+        private System.Windows.Forms.Button button_ReloadPlugin;
         private System.Windows.Forms.Button button_Dev;
         private System.Windows.Forms.Button button_Menu;
         private System.Windows.Forms.Button button_Disable;
@@ -449,5 +457,6 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.OpenFileDialog openFileDialog;
     }
 }
