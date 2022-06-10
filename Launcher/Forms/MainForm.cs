@@ -92,7 +92,7 @@ namespace Launcher.Forms
             getGroupInfo_Thread.Start();
 
             //根据登录时的QQ号 获取QQ昵称
-            string name = Save.FriendsList.Friendlist.First(x => x.FriendUin== Save.curentQQ).NickName.ToString();
+            string name = Save.FriendsList.Friendlist.FirstOrDefault(x => x.FriendUin== Save.curentQQ)?.NickName.ToString();
             Save.name = name;
             if (!Directory.Exists("conf"))
             {
