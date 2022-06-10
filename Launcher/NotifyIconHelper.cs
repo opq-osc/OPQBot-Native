@@ -58,7 +58,7 @@ namespace Launcher
                 menuItem.MenuItems.Add(childmenu);//加入二级子菜单
                 childmenu.Click += MenuItem_Click;
             }
-            menu.MenuItems.Add(menuItem);//加入一级子菜单
+            menu.MenuItems.Add(0, menuItem);//加入一级子菜单
         }
 
         private delegate int Type_Menu();//窗口事件均为无参数
