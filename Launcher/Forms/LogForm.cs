@@ -142,12 +142,17 @@ namespace Launcher.Forms
 
         private void UpdateItemStatus(int id, string msg)
         {
-            LogModel item = LogLists.Find(x => x.id == id);
-            item.status = msg;
-            listView_LogMain.Invoke(new MethodInvoker(() =>
+            try
             {
-                listView_LogMain.Items[LogLists.IndexOf(item)].SubItems[4].Text = msg;
-            }));
+                LogModel item = LogLists.Find(x => x.id == id);
+                item.status = msg;
+                listView_LogMain.Invoke(new MethodInvoker(() =>
+                {
+                    listView_LogMain.Items[LogLists.IndexOf(item)].SubItems[4].Text = msg;
+                }));
+
+            }
+            catch { }
         }
 
         /// <summary>
