@@ -219,18 +219,21 @@ namespace Launcher
         }
 
         public void ReLoad(Plugin plugin)
-        {
+        {            
             Loading = true;
+            var ilib = plugin.iLib;
+            var name = plugin.appinfo.Name;
+            var path = plugin.path;
             UnLoad(plugin);
-            var appdomain = AppDomainSave.First(x => x.Key == plugin.iLib);
+            var appdomain = AppDomainSave.First(x => x.Key == ilib);
+            AppDomainSave.Remove(ilib);
             AppDomain.Unload(appdomain.Value);
-            Plugins.Remove(plugin);
-            AppDomainSave.Remove(plugin.iLib);
             GC.Collect();            
-            Load(plugin.path);
+            Load(path);
             Loading = false;
-            plugin.dll.CallFunction(FunctionEnums.Functions.StartUp);
-            plugin.dll.CallFunction(FunctionEnums.Functions.Enable);
+            var pluginReload = Plugins.Find(x => x.appinfo.Name == name);
+            pluginReload.dll.CallFunction(FunctionEnums.Functions.StartUp);
+            pluginReload.dll.CallFunction(FunctionEnums.Functions.Enable);
         }
 
         /// <summary>

@@ -180,8 +180,11 @@ namespace Launcher.Forms
 
         private void button_ReloadPlugin_Click(object sender, EventArgs e)
         {
+            Cursor = Cursors.WaitCursor;
             var plugin = MainForm.pluginManagment.Plugins[listView_PluginList.SelectedItems[0].Index];
             MainForm.pluginManagment.ReLoad(plugin);
+            Cursor = Cursors.Default;
+            MessageBox.Show("重载成功");
         }
 
         private void button_AddPlugin_Click(object sender, EventArgs e)
