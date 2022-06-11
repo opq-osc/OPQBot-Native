@@ -14,13 +14,13 @@ namespace Launcher
         [HandleProcessCorruptedStateExceptions]
         static void Main(params string[] args)
         {
-            Process[] process = Process.GetProcessesByName("Launcher");
+            Process[] process = Process.GetProcessesByName("OPQBot-Native");
             if (args.Length != 0 && args[0] == "-r")
             {
                 int initialNum = process.Length;
                 if (initialNum != 1)
                 {
-                    while (Process.GetProcessesByName("Launcher").Length != initialNum - 1)
+                    while (Process.GetProcessesByName("OPQBot-Native").Length != initialNum - 1)
                     {
                         Thread.Sleep(1000);
                     }
