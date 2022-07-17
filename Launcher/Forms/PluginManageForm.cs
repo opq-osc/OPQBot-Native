@@ -183,6 +183,13 @@ namespace Launcher.Forms
             Cursor = Cursors.WaitCursor;
             var plugin = MainForm.pluginManagment.Plugins[listView_PluginList.SelectedItems[0].Index];
             MainForm.pluginManagment.ReLoad(plugin);
+            MenuItem menu = NotifyIconHelper._NotifyIcon.ContextMenu.MenuItems.Find("PluginMenu", false).First();
+            menu.MenuItems.Clear();
+            // NotifyIconHelper.Init();
+            MainForm.pluginManagment.Plugins.ForEach(x =>
+            {
+                NotifyIconHelper.LoadMenu(JObject.Parse(x.json));
+            });
             Cursor = Cursors.Default;
             MessageBox.Show("重载成功");
         }
